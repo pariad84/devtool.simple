@@ -189,135 +189,13 @@
         return this.data[opt.name];
     }
 
+    fn.style = function(css) {
+        var style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+    };
+
     global.fn = fn;
-})(window);
-
-
-(function(global) {
-    var style = document.createElement('style');
-    style.textContent = `
-        .__devtool-open-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: #2b2f38;
-            color: #e8eaed;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-            z-index: 2147483000;
-        }
-        .__devtool-open-btn:hover {
-            background: #3a3f4b;
-        }
-        .__popup {
-            display: flex;
-            flex-direction: column;
-            min-width: 320px;
-            max-width: 80vw;
-            max-height: 80vh;
-            background: #1e2128;
-            color: #e8eaed;
-            border: 1px solid #3a3f4b;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-            font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            z-index: 2147483000;
-        }
-        .__popup-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 8px 12px;
-            border-bottom: 1px solid #3a3f4b;
-            cursor: move;
-        }
-        .__popup-title {
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .__popup-actions {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .__popup-btn {
-            width: 26px;
-            height: 26px;
-            border: none;
-            border-radius: 4px;
-            background: transparent;
-            color: #e8eaed;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .__popup-btn:hover {
-            background: #3a3f4b;
-        }
-        .__popup-content {
-            padding: 12px;
-            overflow: auto;
-        }
-        .__menu {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .__menu-item {
-            padding: 8px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .__menu-item:hover {
-            background: #2b2f38;
-        }
-        .__form, .__list {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .__form-row td {
-            padding: 6px 0;
-            vertical-align: middle;
-        }
-        .__form-label {
-            width: 30%;
-            color: #9aa0a6;
-            padding-right: 8px;
-        }
-        .__form-input {
-            box-sizing: border-box;
-            padding: 5px 8px;
-            background: #14161b;
-            border: 1px solid #3a3f4b;
-            border-radius: 4px;
-            color: #e8eaed;
-            font: inherit;
-        }
-        .__list-head-row th {
-            text-align: left;
-            padding: 6px 8px;
-            color: #9aa0a6;
-            border-bottom: 1px solid #3a3f4b;
-        }
-        .__list-cell {
-            padding: 6px 8px;
-            border-bottom: 1px solid #2b2f38;
-        }
-        .__list-row--clickable {
-            cursor: pointer;
-        }
-        .__list-row--clickable:hover {
-            background: #2b2f38;
-        }
-    `;
-    document.head.appendChild(style);
 })(window);
 
 
@@ -375,6 +253,23 @@
             });
         }
     });
+
+    // .__popup-btn: popup-create/save/refresh/close-btn이 공유하는 기본 버튼 스타일
+    fn.style(`
+        .__popup-btn {
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: #e8eaed;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .__popup-btn:hover {
+            background: #3a3f4b;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'popup-save-btn',
@@ -491,6 +386,14 @@
         }
     });
 
+    fn.style(`
+        .__popup-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+    `);
+
     fn.component.layout.set({
         name: 'popup',
         value: function(opt = {}) {
@@ -566,6 +469,42 @@
             return popup;
         }
     });
+
+    fn.style(`
+        .__popup {
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+            max-width: 80vw;
+            max-height: 80vh;
+            background: #1e2128;
+            color: #e8eaed;
+            border: 1px solid #3a3f4b;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            z-index: 2147483000;
+        }
+        .__popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #3a3f4b;
+            cursor: move;
+        }
+        .__popup-title {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .__popup-content {
+            padding: 12px;
+            overflow: auto;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'form',
@@ -655,6 +594,31 @@
             return el;
         }
     });
+
+    fn.style(`
+        .__form {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .__form-row td {
+            padding: 6px 0;
+            vertical-align: middle;
+        }
+        .__form-label {
+            width: 30%;
+            color: #9aa0a6;
+            padding-right: 8px;
+        }
+        .__form-input {
+            box-sizing: border-box;
+            padding: 5px 8px;
+            background: #14161b;
+            border: 1px solid #3a3f4b;
+            border-radius: 4px;
+            color: #e8eaed;
+            font: inherit;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'list',
@@ -764,6 +728,29 @@
         }
     });
 
+    fn.style(`
+        .__list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .__list-head-row th {
+            text-align: left;
+            padding: 6px 8px;
+            color: #9aa0a6;
+            border-bottom: 1px solid #3a3f4b;
+        }
+        .__list-cell {
+            padding: 6px 8px;
+            border-bottom: 1px solid #2b2f38;
+        }
+        .__list-row--clickable {
+            cursor: pointer;
+        }
+        .__list-row--clickable:hover {
+            background: #2b2f38;
+        }
+    `);
+
     fn.component.layout.set({
         name: 'menu',
         value: function(opt = {}) {
@@ -820,7 +807,44 @@
             return el;
         }
     });
+
+    fn.style(`
+        .__menu {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .__menu-item {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .__menu-item:hover {
+            background: #2b2f38;
+        }
+    `);
 })(window);
+
+fn.style(`
+    .__devtool-open-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: #2b2f38;
+        color: #e8eaed;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        z-index: 2147483000;
+    }
+    .__devtool-open-btn:hover {
+        background: #3a3f4b;
+    }
+`);
 
 document.addEventListener('keydown', function(e) {
     if(e.ctrlKey && e.key == "`"){
