@@ -407,7 +407,19 @@
                 },
                 text: '↻',
                 event: {
-                    click: opt.onClick
+                    click: function(e) {
+                        var popup = e.target.closest('.__popup');
+                        Array.from(popup.content.children).forEach(function(child) {
+                            if (child._componentName) {
+                                fn.component.remove(child);
+                            } else {
+                                child.remove();
+                            }
+                        });
+                        if (popup._complete) {
+                            popup._complete({ el: popup });
+                        }
+                    }
                 },
             });
         }
@@ -538,6 +550,7 @@
             popup.header = header;
             popup.content = content;
             popup.title = title;
+            popup._complete = opt.complete;
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
@@ -677,7 +690,7 @@
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = typeof data.action === 'function';
+                var clickable = !!opt.resourceKey;
                 var row = fn.element.create({
                     tagName: 'tr',
                     attribute: {
@@ -685,9 +698,26 @@
                     },
                     event: {
                         click: function() {
-                            if (clickable) {
-                                data.action(data);
+                            if (!clickable) {
+                                return;
                             }
+                            fn.component.create({
+                                name: 'popup',
+                                title: (opt.title || '') + ' 수정',
+                                parent: document.body,
+                                action: {
+                                    save: true,
+                                },
+                                complete: function(formRes) {
+                                    fn.component.create({
+                                        name: 'form',
+                                        columns: opt.columns,
+                                        data: data,
+                                        resourceKey: opt.resourceKey,
+                                        parent: formRes.el.content,
+                                    });
+                                },
+                            });
                         },
                     },
                     data: data,
@@ -758,32 +788,14 @@
                                             res.el._columns = opt.data.fields;
                                             var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
-                                                var record = Object.assign({ id: row.id }, row.data);
-                                                record.action = function() {
-                                                    fn.component.create({
-                                                        name: 'popup',
-                                                        title: opt.data.name + ' 수정',
-                                                        parent: document.body,
-                                                        action: {
-                                                            save: true,
-                                                        },
-                                                        complete: function(formRes) {
-                                                            fn.component.create({
-                                                                name: 'form',
-                                                                columns: opt.data.fields,
-                                                                data: record,
-                                                                resourceKey: opt.data.resourceKey,
-                                                                parent: formRes.el.content,
-                                                            });
-                                                        },
-                                                    });
-                                                };
-                                                return record;
+                                                return Object.assign({ id: row.id }, row.data);
                                             });
                                             fn.component.create({
                                                 name: 'list',
+                                                title: opt.data.name,
                                                 columns: opt.data.fields,
                                                 datas: listDatas,
+                                                resourceKey: opt.data.resourceKey,
                                                 parent: res.el.content,
                                             });
                                         },
@@ -812,12 +824,6 @@ document.addEventListener('keydown', function(e) {
             text: '⚙',
             event: {
                 click: function() {
-                    var popup = fn.component.create({
-                        name: 'popup',
-                        title: 'DevTool',
-                        parent: document.body,
-                    });
-
                     var datas = [
                         {
                             id: 1,
@@ -842,10 +848,17 @@ document.addEventListener('keydown', function(e) {
                     ];
 
                     fn.component.create({
-                        name: 'menu',
-                        caller: popup,
-                        datas: datas,
-                        parent: popup.content,
+                        name: 'popup',
+                        title: 'DevTool',
+                        parent: document.body,
+                        complete: function(res) {
+                            fn.component.create({
+                                name: 'menu',
+                                caller: res.el,
+                                datas: datas,
+                                parent: res.el.content,
+                            });
+                        },
                     });
                 },
             },
