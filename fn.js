@@ -709,7 +709,33 @@
                                         complete: function(res) {
                                             var rows = fn.data.select({ resourceKey: opt.data.resource_key });
                                             var listDatas = rows.map(function(row) {
-                                                return Object.assign({ id: row.id }, row.data);
+                                                var record = Object.assign({ id: row.id }, row.data);
+                                                record.action = function() {
+                                                    var form;
+                                                    fn.component.create({
+                                                        name: 'popup',
+                                                        title: opt.data.name + ' 수정',
+                                                        parent: document.body,
+                                                        action: {
+                                                            save: function() {
+                                                                fn.data.update({
+                                                                    resourceKey: opt.data.resource_key,
+                                                                    id: record.id,
+                                                                    data: form.getData(),
+                                                                });
+                                                            },
+                                                        },
+                                                        complete: function(formRes) {
+                                                            form = fn.component.create({
+                                                                name: 'form',
+                                                                columns: opt.data.fields,
+                                                                data: record,
+                                                                parent: formRes.el.content,
+                                                            });
+                                                        },
+                                                    });
+                                                };
+                                                return record;
                                             });
                                             fn.component.create({
                                                 name: 'list',
