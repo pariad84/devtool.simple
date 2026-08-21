@@ -62,6 +62,11 @@
         return row;
     };
 
+    fn.data.remove = function (opt = {}) {
+        var rows = readTable(opt.resourceKey);
+        writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+    };
+
     fn.localStorage.get = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
             return localStorage.getItem(opt.key);
@@ -315,6 +320,39 @@
     });
 
     fn.component.layout.set({
+        name: 'popup-delete-btn',
+        value: function(opt = {}) {
+            return fn.element.create({
+                tagName: 'button',
+                attribute: {
+                    type: 'button',
+                    title: '삭제',
+                },
+                style: popupBtnStyle,
+                hoverStyle: popupBtnHoverStyle,
+                text: '🗑️',
+                event: {
+                    click: function(e) {
+                        var popup = e.target.closest('.__popup');
+                        var form = popup.querySelector('.__form');
+                        if (form._data.id === undefined) {
+                            return;
+                        }
+                        fn.data.remove({
+                            resourceKey: form._resourceKey,
+                            id: form._data.id,
+                        });
+                        if (popup._caller) {
+                            refreshPopup(popup._caller);
+                        }
+                        fn.component.remove(popup);
+                    }
+                },
+            });
+        }
+    });
+
+    fn.component.layout.set({
         name: 'popup-refresh-btn',
         value: function(opt = {}) {
             return fn.element.create({
@@ -378,6 +416,10 @@
             if (opt.action && opt.action.save) {
                 fn.component.create({
                     name: 'popup-save-btn',
+                    parent: el,
+                });
+                fn.component.create({
+                    name: 'popup-delete-btn',
                     parent: el,
                 });
             }
