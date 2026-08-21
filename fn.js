@@ -9,15 +9,15 @@
     fn.component.layout = {};
     fn.component.layout.data = {};
 
-    fn.ajax = async function (o = {}) {
-        var method = (o.method || 'POST').toUpperCase();
+    fn.ajax = async function (opt = {}) {
+        var method = (opt.method || 'POST').toUpperCase();
         var options = { method: method };
         if (method !== 'GET' && method !== 'HEAD') {
-            options.headers = { 'Content-Type': o.contentType || 'application/json; charset=UTF-8' };
-            options.body = JSON.stringify(o.data || {});
+            options.headers = { 'Content-Type': opt.contentType || 'application/json; charset=UTF-8' };
+            options.body = JSON.stringify(opt.data || {});
         }
 
-        var response = await fetch(o.url, options);
+        var response = await fetch(opt.url, options);
         var result = await response.json();
         if (!response.ok) {
             throw new Error(result.error || response.statusText);
@@ -26,77 +26,77 @@
     };
 
     // /api/:resourceKey 제네릭 엔트리 CRUD용 클라이언트
-    fn.data.select = function (o = {}) {
-        return fn.ajax({ url: '/api/' + o.resourceKey, method: 'GET' });
+    fn.data.select = function (opt = {}) {
+        return fn.ajax({ url: '/api/' + opt.resourceKey, method: 'GET' });
     };
 
-    fn.data.insert = function (o = {}) {
-        return fn.ajax({ url: '/api/' + o.resourceKey, method: 'POST', data: o.data });
+    fn.data.insert = function (opt = {}) {
+        return fn.ajax({ url: '/api/' + opt.resourceKey, method: 'POST', data: opt.data });
     };
 
-    fn.data.update = function (o = {}) {
-        return fn.ajax({ url: '/api/' + o.resourceKey + '/' + o.id, method: 'PUT', data: o.data });
+    fn.data.update = function (opt = {}) {
+        return fn.ajax({ url: '/api/' + opt.resourceKey + '/' + opt.id, method: 'PUT', data: opt.data });
     };
 
-    fn.localStorage.get = function(o = {}) {
+    fn.localStorage.get = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
-            return localStorage.getItem(o.key);
+            return localStorage.getItem(opt.key);
         }
         return null;
     };
 
-    fn.localStorage.set = function(o = {}) {
+    fn.localStorage.set = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
-            localStorage.setItem(o.key, o.value);
+            localStorage.setItem(opt.key, opt.value);
         }
     };
 
-    fn.element.create = function(o = {}) {
-        var el = document.createElement(o.tagName);
-        if (o.attribute) {
-            for (const [key, value] of Object.entries(o.attribute)) {
+    fn.element.create = function(opt = {}) {
+        var el = document.createElement(opt.tagName);
+        if (opt.attribute) {
+            for (const [key, value] of Object.entries(opt.attribute)) {
                 el.setAttribute(key, value);
             }
         }
 
-        if (o.style) {
-            for (const [key, value] of Object.entries(o.style)) {
+        if (opt.style) {
+            for (const [key, value] of Object.entries(opt.style)) {
                 el.style[key] = value;
             }
         }
-        if (o.parent) {
-            o.parent.appendChild(el);
+        if (opt.parent) {
+            opt.parent.appendChild(el);
         }
-        if (o.html) {
-            el.innerHTML = o.html;
+        if (opt.html) {
+            el.innerHTML = opt.html;
         }
-        if (o.text) {
-            el.textContent = o.text;
+        if (opt.text) {
+            el.textContent = opt.text;
         }
-        if (o.event) {
-            for (const [eventType, eventHandler] of Object.entries(o.event)) {
+        if (opt.event) {
+            for (const [eventType, eventHandler] of Object.entries(opt.event)) {
                 el.addEventListener(eventType, eventHandler);
             }
         }
-        if (o.complete) {
-            o.complete({el: el});
+        if (opt.complete) {
+            opt.complete({el: el});
         }
-        el._o = o;
-        if (o.datas) {
-            el._datas = o.datas || [];
+        el._opt = opt;
+        if (opt.datas) {
+            el._datas = opt.datas || [];
         }
-        if (o.data) {
-            el._data = o.data || {};
+        if (opt.data) {
+            el._data = opt.data || {};
         }
-        if (o.caller) {
-            el._caller = o.caller;
+        if (opt.caller) {
+            el._caller = opt.caller;
         }
         return el;
     };
 
-    fn.element.draggable = function(o = {}) {
-        var el = o.el;
-        var handle = o.handle || el;
+    fn.element.draggable = function(opt = {}) {
+        var el = opt.el;
+        var handle = opt.handle || el;
         var startX, startY, startLeft, startTop;
 
         function onPointerMove(e) {
@@ -125,28 +125,28 @@
         });
     };
 
-    fn.component.create = function(o = {}) {
-        var layout = this.layout.get(o);
-        var el = layout(o);
+    fn.component.create = function(opt = {}) {
+        var layout = this.layout.get(opt);
+        var el = layout(opt);
 
         // 레이아웃별로 컴포넌트를 fn.component.data에 저장
-        if (!this.data[o.name]) {
-            this.data[o.name] = [];
+        if (!this.data[opt.name]) {
+            this.data[opt.name] = [];
         }
-        this.data[o.name].push(el);
+        this.data[opt.name].push(el);
 
-        if (o.parent) {
-            o.parent.appendChild(el);
+        if (opt.parent) {
+            opt.parent.appendChild(el);
         }
         return el;
     };
 
-    fn.component.layout.set = function(o = {}) {
-        this.data[o.name] = o.value;
+    fn.component.layout.set = function(opt = {}) {
+        this.data[opt.name] = opt.value;
     };
 
-    fn.component.layout.get = function(o = {}) {
-        return this.data[o.name];
+    fn.component.layout.get = function(opt = {}) {
+        return this.data[opt.name];
     }
 
     global.fn = fn;
@@ -158,7 +158,7 @@
 
     fn.component.layout.set({
         name: 'popup-theme-btn',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
@@ -178,7 +178,7 @@
 
     fn.component.layout.set({
         name: 'popup-edit-btn',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
@@ -188,7 +188,7 @@
                 },
                 text: '✏️',
                 event: {
-                    click: o.onClick
+                    click: opt.onClick
                 },
             });
         }
@@ -196,7 +196,7 @@
 
     fn.component.layout.set({
         name: 'popup-save-btn',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
@@ -206,7 +206,7 @@
                 },
                 text: '💾',
                 event: {
-                    click: o.onClick
+                    click: opt.onClick
                 },
             });
         }
@@ -214,7 +214,7 @@
 
     fn.component.layout.set({
         name: 'popup-refresh-btn',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
@@ -224,7 +224,7 @@
                 },
                 text: '↻',
                 event: {
-                    click: o.onClick
+                    click: opt.onClick
                 },
             });
         }
@@ -232,7 +232,7 @@
 
     fn.component.layout.set({
         name: 'popup-close-btn',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
@@ -242,7 +242,7 @@
                 },
                 text: '✕',
                 event: {
-                    click: o.onClick
+                    click: opt.onClick
                 },
             });
         }
@@ -250,7 +250,7 @@
 
     fn.component.layout.set({
         name: 'popup-actions',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             var el = fn.element.create({
                 tagName: 'div',
                 attribute: {
@@ -258,19 +258,19 @@
                 },
             });
 
-            if (o.action && o.action.edit) {
+            if (opt.action && opt.action.edit) {
                 fn.component.create({
                     name: 'popup-edit-btn',
                     parent: el,
-                    onClick: o.action.edit,
+                    onClick: opt.action.edit,
                 });
             }
 
-            if (o.action && o.action.save) {
+            if (opt.action && opt.action.save) {
                 fn.component.create({
                     name: 'popup-save-btn',
                     parent: el,
-                    onClick: o.action.save,
+                    onClick: opt.action.save,
                 });
             }
 
@@ -283,8 +283,8 @@
                 name: 'popup-close-btn',
                 parent: el,
                 onClick: function() {
-                    if (o.onClose) {
-                        o.onClose();
+                    if (opt.onClose) {
+                        opt.onClose();
                     }
                 },
             });
@@ -295,15 +295,15 @@
 
     fn.component.layout.set({
         name: 'popup',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             // 팝업 위치 계산
             var top = 50;
             var left = 50;
             var offset = 30;
 
-            if (o.caller) {
-                var callerTop = parseInt(o.caller.style.top) || 50;
-                var callerLeft = parseInt(o.caller.style.left) || 50;
+            if (opt.caller) {
+                var callerTop = parseInt(opt.caller.style.top) || 50;
+                var callerLeft = parseInt(opt.caller.style.left) || 50;
                 top = callerTop + offset;
                 left = callerLeft + offset;
             }
@@ -336,13 +336,13 @@
                 attribute: {
                     class: '__popup-title',
                 },
-                text: o.title || 'Popup',
+                text: opt.title || 'Popup',
             });
 
             var actions = fn.component.create({
                 name: 'popup-actions',
                 parent: header,
-                action: o.action,
+                action: opt.action,
                 onClose: function() {
                     closePopup(popup);
                 },
@@ -368,8 +368,8 @@
             popup.header = header;
             popup.content = content;
             popup.title = title;
-            if (o.complete) {
-                o.complete({ el: popup });
+            if (opt.complete) {
+                opt.complete({ el: popup });
             }
             return popup;
         }
@@ -377,18 +377,18 @@
 
     fn.component.layout.set({
         name: 'form',
-        value: function(o = {columns: [], data: {}}) {
+        value: function(opt = {columns: [], data: {}}) {
             var el = fn.element.create({
                 tagName: 'table',
                 attribute: {
                     class: '__form',
                 },
-                data: o.data,
+                data: opt.data,
             });
 
             el._inputs = {};
 
-            o.columns.forEach(function(column) {
+            opt.columns.forEach(function(column) {
                 if (!column.form) {
                     return;
                 }
@@ -431,8 +431,8 @@
                     parent: valueCell,
                 });
 
-                if (o.data[column.name] !== undefined) {
-                    input.value = o.data[column.name];
+                if (opt.data[column.name] !== undefined) {
+                    input.value = opt.data[column.name];
                 }
 
                 el._inputs[column.name] = input;
@@ -440,7 +440,7 @@
 
             el.getData = function() {
                 var result = {};
-                o.columns.forEach(function(column) {
+                opt.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -451,7 +451,7 @@
             };
 
             el.setData = function(newData) {
-                o.columns.forEach(function(column) {
+                opt.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -468,7 +468,7 @@
 
     fn.component.layout.set({
         name: 'list',
-        value: function(o = {columns: [], datas: []}) {
+        value: function(opt = {columns: [], datas: []}) {
             var el = fn.element.create({
                 tagName: 'table',
                 attribute: {
@@ -476,7 +476,7 @@
                 },
             });
 
-            if (o.columns.some(function(column) { return !!column.list; })) {
+            if (opt.columns.some(function(column) { return !!column.list; })) {
                 var thead = fn.element.create({
                     tagName: 'thead',
                     parent: el,
@@ -488,7 +488,7 @@
                     },
                     parent: thead,
                 });
-                o.columns.forEach(function(column) {
+                opt.columns.forEach(function(column) {
                     if (!column.list) {
                         return;
                     }
@@ -511,7 +511,7 @@
                 parent: el,
             });
 
-            o.datas.forEach(function(data) {
+            opt.datas.forEach(function(data) {
                 var clickable = typeof data.action === 'function';
                 var row = fn.element.create({
                     tagName: 'tr',
@@ -529,8 +529,8 @@
                     parent: tbody,
                 });
 
-                if (o.columns.length) {
-                    o.columns.forEach(function(column) {
+                if (opt.columns.length) {
+                    opt.columns.forEach(function(column) {
                         if (!column.list) {
                             return;
                         }
@@ -561,15 +561,15 @@
 
     fn.component.layout.set({
         name: 'menu',
-        value: function(o = {}) {
+        value: function(opt = {}) {
             var el = fn.element.create({
                 tagName: 'div',
                 attribute: {
                     class: '__menu',
                 },
             });
-            if (o.datas && Array.isArray(o.datas)) {
-                o.datas.forEach(function(data) {
+            if (opt.datas && Array.isArray(opt.datas)) {
+                opt.datas.forEach(function(data) {
                     fn.element.create({
                         parent: el,
                         tagName: 'div',
