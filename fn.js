@@ -556,9 +556,6 @@
 
                 var valueCell = fn.element.create({
                     tagName: 'td',
-                    attribute: {
-                        class: '__form-value',
-                    },
                     parent: row,
                 });
 
@@ -638,9 +635,6 @@
                     }
                     fn.element.create({
                         tagName: 'th',
-                        attribute: {
-                            class: '__list-head-cell',
-                        },
                         text: column.label || column.name,
                         style: {
                             width: column.list.width || 'auto',
