@@ -27,15 +27,15 @@
 
     // /api/:resourceKey 제네릭 엔트리 CRUD용 클라이언트
     fn.data.select = function (opt = {}) {
-        return fn.ajax({ url: '/api/' + opt.resourceKey, method: 'GET' });
+        
     };
 
     fn.data.insert = function (opt = {}) {
-        return fn.ajax({ url: '/api/' + opt.resourceKey, method: 'POST', data: opt.data });
+        
     };
 
     fn.data.update = function (opt = {}) {
-        return fn.ajax({ url: '/api/' + opt.resourceKey + '/' + opt.id, method: 'PUT', data: opt.data });
+        
     };
 
     fn.localStorage.get = function(opt = {}) {
@@ -724,7 +724,7 @@ document.addEventListener('keydown', function(e) {
                             fields: [
                                 { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
                                 { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
-                                { name: 'content', label: '내용', list: { width: 'auto' }, form: { inputType: 'text' } },
+                                { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
                             ],
                         },
                         {
@@ -733,8 +733,8 @@ document.addEventListener('keydown', function(e) {
                             resource_key: 'bookmark',
                             fields: [
                                 { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
-                                { name: 'url', label: 'URL', list: { width: 'auto' }, form: { inputType: 'text' } },
                                 { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
+                                { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
                             ],
                         },
                     ];
