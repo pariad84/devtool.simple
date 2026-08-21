@@ -474,6 +474,9 @@
                 name: 'popup-actions',
                 parent: header,
                 action: opt.action,
+                onClose: function() {
+                    popup.remove();
+                },
             });
 
             var content = fn.element.create({
