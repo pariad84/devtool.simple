@@ -354,7 +354,14 @@
                 },
                 text: '💾',
                 event: {
-                    click: opt.onClick
+                    click: function(e) {
+                        var form = e.target.closest('.__popup').querySelector('.__form');
+                        fn.data.update({
+                            resourceKey: form._resourceKey,
+                            id: form._data.id,
+                            data: form.getData(),
+                        });
+                    }
                 },
             });
         }
@@ -420,7 +427,6 @@
                 fn.component.create({
                     name: 'popup-save-btn',
                     parent: el,
-                    onClick: opt.action.save,
                 });
             }
 
@@ -523,6 +529,7 @@
                 data: opt.data,
             });
 
+            el._resourceKey = opt.resourceKey;
             el._inputs = {};
 
             opt.columns.forEach(function(column) {
@@ -727,25 +734,19 @@
                                             var listDatas = rows.map(function(row) {
                                                 var record = Object.assign({ id: row.id }, row.data);
                                                 record.action = function() {
-                                                    var form;
                                                     fn.component.create({
                                                         name: 'popup',
                                                         title: opt.data.name + ' 수정',
                                                         parent: document.body,
                                                         action: {
-                                                            save: function() {
-                                                                fn.data.update({
-                                                                    resourceKey: opt.data.resource_key,
-                                                                    id: record.id,
-                                                                    data: form.getData(),
-                                                                });
-                                                            },
+                                                            save: true,
                                                         },
                                                         complete: function(formRes) {
-                                                            form = fn.component.create({
+                                                            fn.component.create({
                                                                 name: 'form',
                                                                 columns: opt.data.fields,
                                                                 data: record,
+                                                                resourceKey: opt.data.resource_key,
                                                                 parent: formRes.el.content,
                                                             });
                                                         },
