@@ -157,26 +157,6 @@
     var fn = global.fn;
 
     fn.component.layout.set({
-        name: 'popup-theme-btn',
-        value: function(opt = {}) {
-            return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: '테마 전환',
-                    class: '__popup-btn __popup-theme',
-                },
-                text: isDarkTheme() ? '☀️' : '🌙',
-                event: {
-                    click: function() {
-                        toggleTheme(this);
-                    }
-                },
-            });
-        }
-    });
-
-    fn.component.layout.set({
         name: 'popup-edit-btn',
         value: function(opt = {}) {
             return fn.element.create({
@@ -318,7 +298,6 @@
                     position: 'fixed',
                     top: top + 'px',
                     left: left + 'px',
-                    zIndex: ++popupZIndex,
                 },
             });
 
@@ -360,10 +339,6 @@
                 el: popup,
                 handle: header,
             });
-
-            popup.addEventListener('pointerdown', function() {
-                bringToFront(popup);
-            }, true);
 
             popup.header = header;
             popup.content = content;
@@ -578,7 +553,22 @@
                         },
                         text: data.name,
                         event: {
-                            click: data.action
+                            click: function(opt){
+                                return function(e){
+                                    fn.component.create({
+                                        name: 'popup',
+                                        title: opt.data.name,
+                                        parent: document.body,
+                                        caller: opt.caller,
+                                        complete: function(opt) {
+                                            fn.component.create({
+                                                name: 'popup-theme-btn',
+                                                parent: opt.el.content,
+                                            });
+                                        },
+                                    });
+                                }
+                            }({caller : el, data : data}),
                         },
                         data: data,
                     });
@@ -605,6 +595,36 @@ document.addEventListener('keydown', function(e) {
                         name: 'popup',
                         title: 'DevTool',
                         parent: document.body,
+                    });
+
+                    var datas = [
+                        {
+                            id: 1,
+                            name: '메모',
+                            resource_key: 'memo',
+                            fields: [
+                                { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
+                                { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
+                                { name: 'content', label: '내용', list: { width: 'auto' }, form: { inputType: 'text' } },
+                            ],
+                        },
+                        {
+                            id: 2,
+                            name: '북마크',
+                            resource_key: 'bookmark',
+                            fields: [
+                                { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
+                                { name: 'url', label: 'URL', list: { width: 'auto' }, form: { inputType: 'text' } },
+                                { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
+                            ],
+                        },
+                    ];
+
+                    fn.component.create({
+                        name: 'menu',
+                        caller: popup,
+                        datas: datas,
+                        parent: popup.content,
                     });
                 },
             },
