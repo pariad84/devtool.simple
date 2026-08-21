@@ -706,6 +706,18 @@
                                         title: opt.data.name,
                                         parent: document.body,
                                         caller: opt.caller,
+                                        complete: function(res) {
+                                            var rows = fn.data.select({ resourceKey: opt.data.resource_key });
+                                            var listDatas = rows.map(function(row) {
+                                                return Object.assign({ id: row.id }, row.data);
+                                            });
+                                            fn.component.create({
+                                                name: 'list',
+                                                columns: opt.data.fields,
+                                                datas: listDatas,
+                                                parent: res.el.content,
+                                            });
+                                        },
                                     });
                                 }
                             }({caller : el, data : data}),
