@@ -324,6 +324,20 @@
 (function(global) {
     var fn = global.fn;
 
+    // 팝업의 content 영역을 비우고 자기 complete 콜백으로 다시 그림
+    function refreshPopup(popup) {
+        Array.from(popup.content.children).forEach(function(child) {
+            if (child._componentName) {
+                fn.component.remove(child);
+            } else {
+                child.remove();
+            }
+        });
+        if (popup._complete) {
+            popup._complete({ el: popup });
+        }
+    }
+
     fn.component.layout.set({
         name: 'popup-create-btn',
         value: function(opt = {}) {
@@ -375,7 +389,8 @@
                 text: '💾',
                 event: {
                     click: function(e) {
-                        var form = e.target.closest('.__popup').querySelector('.__form');
+                        var popup = e.target.closest('.__popup');
+                        var form = popup.querySelector('.__form');
                         var data = form.getData();
                         if (form._data.id !== undefined) {
                             fn.data.update({
@@ -388,6 +403,9 @@
                                 resourceKey: form._resourceKey,
                                 data: data,
                             });
+                        }
+                        if (popup._caller) {
+                            refreshPopup(popup._caller);
                         }
                     }
                 },
@@ -408,17 +426,7 @@
                 text: '↻',
                 event: {
                     click: function(e) {
-                        var popup = e.target.closest('.__popup');
-                        Array.from(popup.content.children).forEach(function(child) {
-                            if (child._componentName) {
-                                fn.component.remove(child);
-                            } else {
-                                child.remove();
-                            }
-                        });
-                        if (popup._complete) {
-                            popup._complete({ el: popup });
-                        }
+                        refreshPopup(e.target.closest('.__popup'));
                     }
                 },
             });
@@ -551,6 +559,7 @@
             popup.content = content;
             popup.title = title;
             popup._complete = opt.complete;
+            popup._caller = opt.caller;
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
@@ -697,7 +706,7 @@
                         class: clickable ? '__list-row __list-row--clickable' : '__list-row',
                     },
                     event: {
-                        click: function() {
+                        click: function(e) {
                             if (!clickable) {
                                 return;
                             }
@@ -705,6 +714,7 @@
                                 name: 'popup',
                                 title: (opt.title || '') + ' 수정',
                                 parent: document.body,
+                                caller: e.target.closest('.__popup'),
                                 action: {
                                     save: true,
                                 },
