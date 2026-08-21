@@ -322,9 +322,6 @@
                 name: 'popup-actions',
                 parent: header,
                 action: opt.action,
-                onClose: function() {
-                    closePopup(popup);
-                },
             });
 
             var content = fn.element.create({
@@ -560,12 +557,6 @@
                                         title: opt.data.name,
                                         parent: document.body,
                                         caller: opt.caller,
-                                        complete: function(opt) {
-                                            fn.component.create({
-                                                name: 'popup-theme-btn',
-                                                parent: opt.el.content,
-                                            });
-                                        },
                                     });
                                 }
                             }({caller : el, data : data}),
