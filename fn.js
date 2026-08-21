@@ -407,7 +407,19 @@
                 },
                 text: '↻',
                 event: {
-                    click: opt.onClick
+                    click: function(e) {
+                        var popup = e.target.closest('.__popup');
+                        Array.from(popup.content.children).forEach(function(child) {
+                            if (child._componentName) {
+                                fn.component.remove(child);
+                            } else {
+                                child.remove();
+                            }
+                        });
+                        if (popup._complete) {
+                            popup._complete({ el: popup });
+                        }
+                    }
                 },
             });
         }
@@ -538,6 +550,7 @@
             popup.header = header;
             popup.content = content;
             popup.title = title;
+            popup._complete = opt.complete;
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
@@ -811,12 +824,6 @@ document.addEventListener('keydown', function(e) {
             text: '⚙',
             event: {
                 click: function() {
-                    var popup = fn.component.create({
-                        name: 'popup',
-                        title: 'DevTool',
-                        parent: document.body,
-                    });
-
                     var datas = [
                         {
                             id: 1,
@@ -841,10 +848,17 @@ document.addEventListener('keydown', function(e) {
                     ];
 
                     fn.component.create({
-                        name: 'menu',
-                        caller: popup,
-                        datas: datas,
-                        parent: popup.content,
+                        name: 'popup',
+                        title: 'DevTool',
+                        parent: document.body,
+                        complete: function(res) {
+                            fn.component.create({
+                                name: 'menu',
+                                caller: res.el,
+                                datas: datas,
+                                parent: res.el.content,
+                            });
+                        },
                     });
                 },
             },
