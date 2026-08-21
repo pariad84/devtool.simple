@@ -325,18 +325,38 @@
     var fn = global.fn;
 
     fn.component.layout.set({
-        name: 'popup-edit-btn',
+        name: 'popup-create-btn',
         value: function(opt = {}) {
             return fn.element.create({
                 tagName: 'button',
                 attribute: {
                     type: 'button',
                     title: '새로 만들기',
-                    class: '__popup-btn __popup-edit',
+                    class: '__popup-btn __popup-create',
                 },
                 text: '✏️',
                 event: {
-                    click: opt.onClick
+                    click: function(e) {
+                        var listPopup = e.target.closest('.__popup');
+                        fn.component.create({
+                            name: 'popup',
+                            title: '새로 만들기',
+                            parent: document.body,
+                            caller: listPopup,
+                            action: {
+                                save: true,
+                            },
+                            complete: function(formRes) {
+                                fn.component.create({
+                                    name: 'form',
+                                    columns: listPopup._columns,
+                                    data: {},
+                                    resourceKey: listPopup._resourceKey,
+                                    parent: formRes.el.content,
+                                });
+                            },
+                        });
+                    }
                 },
             });
         }
@@ -356,11 +376,19 @@
                 event: {
                     click: function(e) {
                         var form = e.target.closest('.__popup').querySelector('.__form');
-                        fn.data.update({
-                            resourceKey: form._resourceKey,
-                            id: form._data.id,
-                            data: form.getData(),
-                        });
+                        var data = form.getData();
+                        if (form._data.id !== undefined) {
+                            fn.data.update({
+                                resourceKey: form._resourceKey,
+                                id: form._data.id,
+                                data: data,
+                            });
+                        } else {
+                            fn.data.insert({
+                                resourceKey: form._resourceKey,
+                                data: data,
+                            });
+                        }
                     }
                 },
             });
@@ -415,11 +443,10 @@
                 },
             });
 
-            if (opt.action && opt.action.edit) {
+            if (opt.action && opt.action.create) {
                 fn.component.create({
-                    name: 'popup-edit-btn',
+                    name: 'popup-create-btn',
                     parent: el,
-                    onClick: opt.action.edit,
                 });
             }
 
@@ -723,7 +750,12 @@
                                         title: opt.data.name,
                                         parent: document.body,
                                         caller: opt.caller,
+                                        action: {
+                                            create: true,
+                                        },
                                         complete: function(res) {
+                                            res.el._resourceKey = opt.data.resourceKey;
+                                            res.el._columns = opt.data.fields;
                                             var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
                                                 var record = Object.assign({ id: row.id }, row.data);
