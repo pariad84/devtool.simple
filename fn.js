@@ -25,17 +25,41 @@
         return result;
     };
 
-    // /api/:resourceKey 제네릭 엔트리 CRUD용 클라이언트
+    // localStorage를 테이블처럼 사용: key = resourceKey(테이블명), value = 레코드 배열(JSON)
+    function readTable(resourceKey) {
+        var raw = fn.localStorage.get({ key: resourceKey });
+        return raw ? JSON.parse(raw) : [];
+    }
+
+    function writeTable(resourceKey, rows) {
+        fn.localStorage.set({ key: resourceKey, value: JSON.stringify(rows) });
+    }
+
     fn.data.select = function (opt = {}) {
-        
+        var rows = readTable(opt.resourceKey);
+        if (opt.id !== undefined) {
+            return rows.find(function (row) { return row.id === opt.id; });
+        }
+        return rows;
     };
 
     fn.data.insert = function (opt = {}) {
-        
+        var rows = readTable(opt.resourceKey);
+        var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
+        var row = { id: nextId, data: opt.data };
+        rows.push(row);
+        writeTable(opt.resourceKey, rows);
+        return row;
     };
 
     fn.data.update = function (opt = {}) {
-        
+        var rows = readTable(opt.resourceKey);
+        var row = rows.find(function (r) { return r.id === opt.id; });
+        if (row) {
+            row.data = opt.data;
+            writeTable(opt.resourceKey, rows);
+        }
+        return row;
     };
 
     fn.localStorage.get = function(opt = {}) {
