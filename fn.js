@@ -677,7 +677,7 @@
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = typeof data.action === 'function';
+                var clickable = !!opt.resourceKey;
                 var row = fn.element.create({
                     tagName: 'tr',
                     attribute: {
@@ -685,9 +685,26 @@
                     },
                     event: {
                         click: function() {
-                            if (clickable) {
-                                data.action(data);
+                            if (!clickable) {
+                                return;
                             }
+                            fn.component.create({
+                                name: 'popup',
+                                title: (opt.title || '') + ' 수정',
+                                parent: document.body,
+                                action: {
+                                    save: true,
+                                },
+                                complete: function(formRes) {
+                                    fn.component.create({
+                                        name: 'form',
+                                        columns: opt.columns,
+                                        data: data,
+                                        resourceKey: opt.resourceKey,
+                                        parent: formRes.el.content,
+                                    });
+                                },
+                            });
                         },
                     },
                     data: data,
@@ -758,32 +775,14 @@
                                             res.el._columns = opt.data.fields;
                                             var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
-                                                var record = Object.assign({ id: row.id }, row.data);
-                                                record.action = function() {
-                                                    fn.component.create({
-                                                        name: 'popup',
-                                                        title: opt.data.name + ' 수정',
-                                                        parent: document.body,
-                                                        action: {
-                                                            save: true,
-                                                        },
-                                                        complete: function(formRes) {
-                                                            fn.component.create({
-                                                                name: 'form',
-                                                                columns: opt.data.fields,
-                                                                data: record,
-                                                                resourceKey: opt.data.resourceKey,
-                                                                parent: formRes.el.content,
-                                                            });
-                                                        },
-                                                    });
-                                                };
-                                                return record;
+                                                return Object.assign({ id: row.id }, row.data);
                                             });
                                             fn.component.create({
                                                 name: 'list',
+                                                title: opt.data.name,
                                                 columns: opt.data.fields,
                                                 datas: listDatas,
+                                                resourceKey: opt.data.resourceKey,
                                                 parent: res.el.content,
                                             });
                                         },
