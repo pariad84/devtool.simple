@@ -196,7 +196,7 @@
 (function(global) {
     var style = document.createElement('style');
     style.textContent = `
-        .__devtool-toggle-btn {
+        .__devtool-open-btn {
             position: fixed;
             right: 20px;
             bottom: 20px;
@@ -211,7 +211,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
             z-index: 2147483000;
         }
-        .__devtool-toggle-btn:hover {
+        .__devtool-open-btn:hover {
             background: #3a3f4b;
         }
         .__popup {
@@ -730,7 +730,7 @@
                                         parent: document.body,
                                         caller: opt.caller,
                                         complete: function(res) {
-                                            var rows = fn.data.select({ resourceKey: opt.data.resource_key });
+                                            var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
                                                 var record = Object.assign({ id: row.id }, row.data);
                                                 record.action = function() {
@@ -746,7 +746,7 @@
                                                                 name: 'form',
                                                                 columns: opt.data.fields,
                                                                 data: record,
-                                                                resourceKey: opt.data.resource_key,
+                                                                resourceKey: opt.data.resourceKey,
                                                                 parent: formRes.el.content,
                                                             });
                                                         },
@@ -781,7 +781,7 @@ document.addEventListener('keydown', function(e) {
             attribute: {
                 type: 'button',
                 title: 'DevTool 열기 (Ctrl+`)',
-                class: '__devtool-toggle-btn',
+                class: '__devtool-open-btn',
             },
             text: '⚙',
             event: {
@@ -796,7 +796,7 @@ document.addEventListener('keydown', function(e) {
                         {
                             id: 1,
                             name: '메모',
-                            resource_key: 'memo',
+                            resourceKey: 'memo',
                             fields: [
                                 { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
                                 { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
@@ -806,7 +806,7 @@ document.addEventListener('keydown', function(e) {
                         {
                             id: 2,
                             name: '북마크',
-                            resource_key: 'bookmark',
+                            resourceKey: 'bookmark',
                             fields: [
                                 { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
                                 { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
