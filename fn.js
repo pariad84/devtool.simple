@@ -189,140 +189,32 @@
         return this.data[opt.name];
     }
 
+    fn.style = function(css) {
+        var style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+    };
+
     global.fn = fn;
 })(window);
 
 
 (function(global) {
-    var style = document.createElement('style');
-    style.textContent = `
-        .__devtool-open-btn {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: #2b2f38;
-            color: #e8eaed;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-            z-index: 2147483000;
-        }
-        .__devtool-open-btn:hover {
-            background: #3a3f4b;
-        }
-        .__popup {
-            display: flex;
-            flex-direction: column;
-            min-width: 320px;
-            max-width: 80vw;
-            max-height: 80vh;
-            background: #1e2128;
-            color: #e8eaed;
-            border: 1px solid #3a3f4b;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-            font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            z-index: 2147483000;
-        }
-        .__popup-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            padding: 8px 12px;
-            border-bottom: 1px solid #3a3f4b;
-            cursor: move;
-        }
-        .__popup-title {
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .__popup-actions {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .__popup-btn {
-            width: 26px;
-            height: 26px;
-            border: none;
-            border-radius: 4px;
-            background: transparent;
-            color: #e8eaed;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .__popup-btn:hover {
-            background: #3a3f4b;
-        }
-        .__popup-content {
-            padding: 12px;
-            overflow: auto;
-        }
-        .__menu {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .__menu-item {
-            padding: 8px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .__menu-item:hover {
-            background: #2b2f38;
-        }
-        .__form, .__list {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .__form-row td {
-            padding: 6px 0;
-            vertical-align: middle;
-        }
-        .__form-label {
-            width: 30%;
-            color: #9aa0a6;
-            padding-right: 8px;
-        }
-        .__form-input {
-            box-sizing: border-box;
-            padding: 5px 8px;
-            background: #14161b;
-            border: 1px solid #3a3f4b;
-            border-radius: 4px;
-            color: #e8eaed;
-            font: inherit;
-        }
-        .__list-head-row th {
-            text-align: left;
-            padding: 6px 8px;
-            color: #9aa0a6;
-            border-bottom: 1px solid #3a3f4b;
-        }
-        .__list-cell {
-            padding: 6px 8px;
-            border-bottom: 1px solid #2b2f38;
-        }
-        .__list-row--clickable {
-            cursor: pointer;
-        }
-        .__list-row--clickable:hover {
-            background: #2b2f38;
-        }
-    `;
-    document.head.appendChild(style);
-})(window);
-
-
-(function(global) {
     var fn = global.fn;
+
+    // 팝업의 content 영역을 비우고 자기 complete 콜백으로 다시 그림
+    function refreshPopup(popup) {
+        Array.from(popup.content.children).forEach(function(child) {
+            if (child._componentName) {
+                fn.component.remove(child);
+            } else {
+                child.remove();
+            }
+        });
+        if (popup._complete) {
+            popup._complete({ el: popup });
+        }
+    }
 
     fn.component.layout.set({
         name: 'popup-create-btn',
@@ -362,6 +254,23 @@
         }
     });
 
+    // .__popup-btn: popup-create/save/refresh/close-btn이 공유하는 기본 버튼 스타일
+    fn.style(`
+        .__popup-btn {
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 4px;
+            background: transparent;
+            color: #e8eaed;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .__popup-btn:hover {
+            background: #3a3f4b;
+        }
+    `);
+
     fn.component.layout.set({
         name: 'popup-save-btn',
         value: function(opt = {}) {
@@ -375,7 +284,8 @@
                 text: '💾',
                 event: {
                     click: function(e) {
-                        var form = e.target.closest('.__popup').querySelector('.__form');
+                        var popup = e.target.closest('.__popup');
+                        var form = popup.querySelector('.__form');
                         var data = form.getData();
                         if (form._data.id !== undefined) {
                             fn.data.update({
@@ -388,6 +298,9 @@
                                 resourceKey: form._resourceKey,
                                 data: data,
                             });
+                        }
+                        if (popup._caller) {
+                            refreshPopup(popup._caller);
                         }
                     }
                 },
@@ -408,17 +321,7 @@
                 text: '↻',
                 event: {
                     click: function(e) {
-                        var popup = e.target.closest('.__popup');
-                        Array.from(popup.content.children).forEach(function(child) {
-                            if (child._componentName) {
-                                fn.component.remove(child);
-                            } else {
-                                child.remove();
-                            }
-                        });
-                        if (popup._complete) {
-                            popup._complete({ el: popup });
-                        }
+                        refreshPopup(e.target.closest('.__popup'));
                     }
                 },
             });
@@ -482,6 +385,14 @@
             return el;
         }
     });
+
+    fn.style(`
+        .__popup-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'popup',
@@ -551,12 +462,49 @@
             popup.content = content;
             popup.title = title;
             popup._complete = opt.complete;
+            popup._caller = opt.caller;
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
             return popup;
         }
     });
+
+    fn.style(`
+        .__popup {
+            display: flex;
+            flex-direction: column;
+            min-width: 320px;
+            max-width: 80vw;
+            max-height: 80vh;
+            background: #1e2128;
+            color: #e8eaed;
+            border: 1px solid #3a3f4b;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            z-index: 2147483000;
+        }
+        .__popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #3a3f4b;
+            cursor: move;
+        }
+        .__popup-title {
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .__popup-content {
+            padding: 12px;
+            overflow: auto;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'form',
@@ -647,6 +595,31 @@
         }
     });
 
+    fn.style(`
+        .__form {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .__form-row td {
+            padding: 6px 0;
+            vertical-align: middle;
+        }
+        .__form-label {
+            width: 30%;
+            color: #9aa0a6;
+            padding-right: 8px;
+        }
+        .__form-input {
+            box-sizing: border-box;
+            padding: 5px 8px;
+            background: #14161b;
+            border: 1px solid #3a3f4b;
+            border-radius: 4px;
+            color: #e8eaed;
+            font: inherit;
+        }
+    `);
+
     fn.component.layout.set({
         name: 'list',
         value: function(opt = {columns: [], datas: []}) {
@@ -697,7 +670,7 @@
                         class: clickable ? '__list-row __list-row--clickable' : '__list-row',
                     },
                     event: {
-                        click: function() {
+                        click: function(e) {
                             if (!clickable) {
                                 return;
                             }
@@ -705,6 +678,7 @@
                                 name: 'popup',
                                 title: (opt.title || '') + ' 수정',
                                 parent: document.body,
+                                caller: e.target.closest('.__popup'),
                                 action: {
                                     save: true,
                                 },
@@ -753,6 +727,29 @@
             return el;
         }
     });
+
+    fn.style(`
+        .__list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .__list-head-row th {
+            text-align: left;
+            padding: 6px 8px;
+            color: #9aa0a6;
+            border-bottom: 1px solid #3a3f4b;
+        }
+        .__list-cell {
+            padding: 6px 8px;
+            border-bottom: 1px solid #2b2f38;
+        }
+        .__list-row--clickable {
+            cursor: pointer;
+        }
+        .__list-row--clickable:hover {
+            background: #2b2f38;
+        }
+    `);
 
     fn.component.layout.set({
         name: 'menu',
@@ -810,7 +807,44 @@
             return el;
         }
     });
+
+    fn.style(`
+        .__menu {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .__menu-item {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .__menu-item:hover {
+            background: #2b2f38;
+        }
+    `);
 })(window);
+
+fn.style(`
+    .__devtool-open-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: #2b2f38;
+        color: #e8eaed;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+        z-index: 2147483000;
+    }
+    .__devtool-open-btn:hover {
+        background: #3a3f4b;
+    }
+`);
 
 document.addEventListener('keydown', function(e) {
     if(e.ctrlKey && e.key == "`"){
