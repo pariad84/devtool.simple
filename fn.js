@@ -374,7 +374,9 @@
                 },
                 text: '✕',
                 event: {
-                    click: opt.onClick
+                    click: function(e) {
+                        e.target.closest('.__popup').remove();
+                    }
                 },
             });
         }
@@ -414,11 +416,6 @@
             fn.component.create({
                 name: 'popup-close-btn',
                 parent: el,
-                onClick: function() {
-                    if (opt.onClose) {
-                        opt.onClose();
-                    }
-                },
             });
 
             return el;
@@ -474,9 +471,6 @@
                 name: 'popup-actions',
                 parent: header,
                 action: opt.action,
-                onClose: function() {
-                    popup.remove();
-                },
             });
 
             var content = fn.element.create({
