@@ -151,7 +151,11 @@
 
     fn.component.create = function(opt = {}) {
         var layout = this.layout.get(opt);
+        if (!layout) {
+            throw new Error('Unknown component layout: ' + opt.name);
+        }
         var el = layout(opt);
+        el._componentName = opt.name;
 
         // 레이아웃별로 컴포넌트를 fn.component.data에 저장
         if (!this.data[opt.name]) {
@@ -163,6 +167,18 @@
             opt.parent.appendChild(el);
         }
         return el;
+    };
+
+    // fn.component.create로 만든 엘리먼트를 DOM과 fn.component.data에서 함께 제거
+    fn.component.remove = function(el) {
+        var name = el._componentName;
+        if (name && this.data[name]) {
+            var idx = this.data[name].indexOf(el);
+            if (idx !== -1) {
+                this.data[name].splice(idx, 1);
+            }
+        }
+        el.remove();
     };
 
     fn.component.layout.set = function(opt = {}) {
@@ -375,7 +391,7 @@
                 text: '✕',
                 event: {
                     click: function(e) {
-                        e.target.closest('.__popup').remove();
+                        fn.component.remove(e.target.closest('.__popup'));
                     }
                 },
             });
