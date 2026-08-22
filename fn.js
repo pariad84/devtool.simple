@@ -243,6 +243,23 @@
         return render(opt.data);
     };
 
+    fn.component._.applySetting = function(opt) {
+        var settingRows = fn.data.select({ key : '_setting' });
+        var setting = settingRows[0] ? settingRows[0].data : {};
+        if (setting.width) {
+            opt.el.style.width = setting.width;
+        }
+        if (setting.height) {
+            opt.el.style.height = setting.height;
+        }
+        if (setting.background) {
+            opt.el.style.background = setting.background;
+        }
+        if (setting.color) {
+            opt.el.style.color = setting.color;
+        }
+    };
+
     var popupBtnStyle = {
         width : '26px',
         height : '26px',
@@ -326,6 +343,11 @@
                             fn.data.insert({
                                 key : form._.resource.key,
                                 data : data,
+                            });
+                        }
+                        if (form._.resource.key === '_setting') {
+                            fn.component.data.popup.forEach(function(p) {
+                                fn.component._.applySetting({ el : p });
                             });
                         }
                         if (popup._.caller) {
@@ -441,49 +463,33 @@
                 left = callerLeft + offset;
             }
 
-            var settingRows = fn.data.select({ key : '_setting' });
-            var setting = settingRows[0] ? settingRows[0].data : {};
-
-            var style = {
-                position : 'fixed',
-                top : top + 'px',
-                left : left + 'px',
-                display : 'flex',
-                flexDirection : 'column',
-                minWidth : '320px',
-                minHeight : '120px',
-                maxWidth : '80vw',
-                maxHeight : '80vh',
-                background : '#1e2128',
-                color : '#e8eaed',
-                border : '1px solid #3a3f4b',
-                borderRadius : '8px',
-                boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
-                font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                resize : 'both',
-                overflow : 'hidden',
-            };
-            if (setting.width) {
-                style.width = setting.width;
-            }
-            if (setting.height) {
-                style.height = setting.height;
-            }
-            if (setting.background) {
-                style.background = setting.background;
-            }
-            if (setting.color) {
-                style.color = setting.color;
-            }
-
             var popup = fn.element.create({
                 tagName : 'div',
                 attribute : {
                     class : '__popup',
                     tabindex : '-1',
                 },
-                style : style,
+                style : {
+                    position : 'fixed',
+                    top : top + 'px',
+                    left : left + 'px',
+                    display : 'flex',
+                    flexDirection : 'column',
+                    minWidth : '320px',
+                    minHeight : '120px',
+                    maxWidth : '80vw',
+                    maxHeight : '80vh',
+                    background : '#1e2128',
+                    color : '#e8eaed',
+                    border : '1px solid #3a3f4b',
+                    borderRadius : '8px',
+                    boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
+                    font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    resize : 'both',
+                    overflow : 'hidden',
+                },
             });
+            fn.component._.applySetting({ el : popup });
 
             var header = fn.element.create({
                 parent : popup,
