@@ -169,10 +169,10 @@
         fn.localStorage.set({ key: opt.resourceKey, value: JSON.stringify(opt.rows) });
     };
 
-    fn.data.select = function (opt = {}) {
+    fn.data.select = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
         if (opt.id !== undefined) {
-            var row = rows.find(function (row) { return row.id === opt.id; });
+            var row = rows.find(function(row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
             return row;
         }
@@ -180,9 +180,9 @@
         return rows;
     };
 
-    fn.data.insert = function (opt = {}) {
+    fn.data.insert = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
+        var nextId = rows.reduce(function(max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id: nextId, data: opt.data };
         rows.push(row);
         fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
@@ -190,9 +190,9 @@
         return row;
     };
 
-    fn.data.update = function (opt = {}) {
+    fn.data.update = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        var row = rows.find(function (r) { return r.id === opt.id; });
+        var row = rows.find(function(r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
             fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
@@ -201,13 +201,13 @@
         return row;
     };
 
-    fn.data.delete = function (opt = {}) {
+    fn.data.delete = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function (row) { return row.id !== opt.id; }) });
+        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function(row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
-    fn.ajax = async function (opt = {}) {
+    fn.ajax = async function(opt = {}) {
         var method = (opt.method || 'POST').toUpperCase();
         var options = { method: method };
         if (method !== 'GET' && method !== 'HEAD') {
