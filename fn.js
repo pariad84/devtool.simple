@@ -435,8 +435,8 @@
                 left = callerLeft + offset;
             }
 
-            var settingsRows = fn.data.select({ key : '_settings' });
-            var settings = settingsRows[0] ? settingsRows[0].data : {};
+            var settingRows = fn.data.select({ key : '_setting' });
+            var setting = settingRows[0] ? settingRows[0].data : {};
 
             var style = {
                 position : 'fixed',
@@ -457,17 +457,17 @@
                 resize : 'both',
                 overflow : 'hidden',
             };
-            if (settings.width) {
-                style.width = settings.width;
+            if (setting.width) {
+                style.width = setting.width;
             }
-            if (settings.height) {
-                style.height = settings.height;
+            if (setting.height) {
+                style.height = setting.height;
             }
-            if (settings.background) {
-                style.background = settings.background;
+            if (setting.background) {
+                style.background = setting.background;
             }
-            if (settings.color) {
-                style.color = settings.color;
+            if (setting.color) {
+                style.color = setting.color;
             }
 
             var popup = fn.element.create({
@@ -834,20 +834,31 @@
                         event : {
                             click : function(opt){
                                 return function(e){
+                                    var isObject = opt.data.resource.type === 'object';
                                     fn.component.create({
                                         name : 'popup',
-                                        title : opt.data.name,
+                                        title : isObject ? ('Edit ' + opt.data.name) : opt.data.name,
                                         parent : document.body,
                                         caller : opt.caller,
                                         resource : opt.data.resource,
                                         initialize : function(opt) {
                                             fn.component.create({
-                                                name : 'popup-create-btn',
+                                                name : isObject ? 'popup-save-btn' : 'popup-create-btn',
                                                 parent : opt.el.buttons,
                                             });
                                         },
                                         render : function(opt) {
                                             var rows = fn.data.select({ key : data.resource.key });
+                                            if (isObject) {
+                                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
+                                                fn.component.create({
+                                                    name : 'form',
+                                                    resource : data.resource,
+                                                    data : formData,
+                                                    parent : opt.el.content,
+                                                });
+                                                return;
+                                            }
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
                                             });
@@ -884,6 +895,7 @@
                             name : row.data.name,
                             resource : {
                                 key : row.data.key,
+                                type : row.data.type,
                                 columns : JSON.parse(row.data.columns),
                             },
                         };
@@ -919,9 +931,11 @@
                 data : {
                     name : 'Resource',
                     key : '_resource',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                        { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
                         { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                     ]),
                 },
@@ -931,6 +945,7 @@
                 data : {
                     name : 'Memo',
                     key : 'memo',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
@@ -942,6 +957,7 @@
                 data : {
                     name : 'Bookmark',
                     key : 'bookmark',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
@@ -952,8 +968,9 @@
             fn.data.insert({
                 key : '_resource',
                 data : {
-                    name : 'Settings',
-                    key : '_settings',
+                    name : 'Setting',
+                    key : '_setting',
+                    type : 'object',
                     columns : JSON.stringify([
                         { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
@@ -963,7 +980,7 @@
                 },
             });
             fn.data.insert({
-                key : '_settings',
+                key : '_setting',
                 data : { width : '', height : '', background : '', color : '' },
             });
 
