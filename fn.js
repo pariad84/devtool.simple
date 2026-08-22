@@ -9,6 +9,10 @@
     fn.component.layout = {};
     fn.component.layout.data = {};
 
+    fn.log = function(scope, action, ...args) {
+        console.log('[fn.' + scope + ']', action, ...args);
+    };
+
     fn.ajax = async function (opt = {}) {
         var method = (opt.method || 'POST').toUpperCase();
         var options = { method: method };
@@ -38,8 +42,11 @@
     fn.data.select = function (opt = {}) {
         var rows = readTable(opt.resourceKey);
         if (opt.id !== undefined) {
-            return rows.find(function (row) { return row.id === opt.id; });
+            var row = rows.find(function (row) { return row.id === opt.id; });
+            fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
+            return row;
         }
+        fn.log('data', 'select', opt.resourceKey, rows.length + '건', rows);
         return rows;
     };
 
@@ -49,6 +56,7 @@
         var row = { id: nextId, data: opt.data };
         rows.push(row);
         writeTable(opt.resourceKey, rows);
+        fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
 
@@ -59,12 +67,14 @@
             row.data = opt.data;
             writeTable(opt.resourceKey, rows);
         }
+        fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.remove = function (opt = {}) {
         var rows = readTable(opt.resourceKey);
         writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+        fn.log('data', 'remove', opt.resourceKey, 'id=' + opt.id);
     };
 
     fn.localStorage.get = function(opt = {}) {
@@ -183,6 +193,7 @@
                 this.data[opt.name] = [];
             }
             this.data[opt.name].push(el);
+            fn.log('component', 'create', opt.name, this.data[opt.name].length + '개', el);
         }
 
         if (opt.parent) {
@@ -199,6 +210,7 @@
             if (idx !== -1) {
                 this.data[name].splice(idx, 1);
             }
+            fn.log('component', 'remove', name, this.data[name].length + '개', el);
         }
         el.remove();
     };
