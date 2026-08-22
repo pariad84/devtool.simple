@@ -227,7 +227,14 @@
             }
         }
 
-        var options = { method : method, headers : Object.assign({}, opt.headers) };
+        var authHeaders = {};
+        if (opt.auth && opt.auth.type === 'bearer') {
+            authHeaders['Authorization'] = 'Bearer ' + opt.auth.token;
+        } else if (opt.auth && opt.auth.type === 'basic') {
+            authHeaders['Authorization'] = 'Basic ' + btoa(opt.auth.username + ':' + opt.auth.password);
+        }
+
+        var options = { method : method, headers : Object.assign(authHeaders, opt.headers) };
         if (method !== 'GET' && method !== 'HEAD') {
             options.headers['Content-Type'] = options.headers['Content-Type'] || opt.contentType || 'application/json; charset=UTF-8';
             options.body = JSON.stringify(opt.data || {});
@@ -1097,6 +1104,12 @@
                 data : { group : 'method', code : method, name : method },
             });
         });
+        [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ].forEach(function(authType) {
+            fn.data.insert({
+                key : 'code',
+                data : { group : 'authType', code : authType.code, name : authType.name },
+            });
+        });
         fn.data.insert({
             key : '_resource',
             data : {
@@ -1108,9 +1121,11 @@
                     { name : 'method', label : 'Method', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'method' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
                     { name : 'params', label : 'Params (JSON)', form : { inputType : 'textarea' } },
+                    { name : 'authType', label : 'Auth Type', list : { width : '110px' }, form : { inputType : 'select', codeGroup : 'authType' } },
+                    { name : 'auth', label : 'Auth (JSON)', form : { inputType : 'textarea' } },
                     { name : 'headers', label : 'Headers (JSON)', form : { inputType : 'textarea' } },
                     { name : 'body', label : 'Body (JSON)', form : { inputType : 'textarea' } },
-                    { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); var caller = e.target.closest('.__popup'); var show = function(title, text, isError) { fn.component.create({ name: 'popup', title: title, parent: document.body, caller: caller, render: function(opt) { var pre = document.createElement('pre'); pre.style.whiteSpace = 'pre-wrap'; pre.style.wordBreak = 'break-word'; pre.style.margin = '0'; if (isError) { pre.style.color = '#e57373'; } pre.textContent = text; opt.el.content.appendChild(pre); } }); }; fn.ajax({ method: data.method, url: data.url, params: data.params ? JSON.parse(data.params) : undefined, headers: data.headers ? JSON.parse(data.headers) : undefined, data: data.body ? JSON.parse(data.body) : undefined }).then(function(result) { show('Response: ' + data.name, JSON.stringify(result, null, 2), false); }).catch(function(err) { show('Error: ' + data.name, err.message, true); }); }); return btn; }" } },
+                    { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); var caller = e.target.closest('.__popup'); var show = function(title, text, isError) { fn.component.create({ name: 'popup', title: title, parent: document.body, caller: caller, render: function(opt) { var pre = document.createElement('pre'); pre.style.whiteSpace = 'pre-wrap'; pre.style.wordBreak = 'break-word'; pre.style.margin = '0'; if (isError) { pre.style.color = '#e57373'; } pre.textContent = text; opt.el.content.appendChild(pre); } }); }; var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined; fn.ajax({ method: data.method, url: data.url, params: data.params ? JSON.parse(data.params) : undefined, auth: auth, headers: data.headers ? JSON.parse(data.headers) : undefined, data: data.body ? JSON.parse(data.body) : undefined }).then(function(result) { show('Response: ' + data.name, JSON.stringify(result, null, 2), false); }).catch(function(err) { show('Error: ' + data.name, err.message, true); }); }); return btn; }" } },
                 ]),
             },
         });
@@ -1161,15 +1176,15 @@
 
         fn.data.insert({
             key : 'request',
-            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', headers : '', body : '' },
+            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
         });
         fn.data.insert({
             key : 'request',
-            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', headers : '', body : '' },
+            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
         });
         fn.data.insert({
             key : 'request',
-            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
+            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
         });
     };
 
