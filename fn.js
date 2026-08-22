@@ -260,6 +260,12 @@
         }
     };
 
+    fn.component._.applySettingAll = function() {
+        fn.component.data.popup.forEach(function(el) {
+            fn.component._.applySetting({ el : el });
+        });
+    };
+
     var popupBtnStyle = {
         width : '26px',
         height : '26px',
@@ -346,9 +352,7 @@
                             });
                         }
                         if (form._.resource.key === '_setting') {
-                            fn.component.data.popup.forEach(function(p) {
-                                fn.component._.applySetting({ el : p });
-                            });
+                            fn.component._.applySettingAll();
                         }
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -988,7 +992,7 @@
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'background', label : 'Popup background', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'color', label : 'Popup text color', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'reset', label : 'Reset', form : { render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reset all data'; btn.style.padding = '6px 14px'; btn.style.border = '1px solid #3a3f4b'; btn.style.borderRadius = '4px'; btn.style.background = '#2b2f38'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) { return; } fn.devtool._.reset(); var popup = e.target.closest('.__popup'); if (popup._.caller) { popup._.caller.refresh(); } fn.component.remove(popup); }); return btn; }" } },
+                    { name : 'reset', label : 'Reset', form : { render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reset all data'; btn.style.padding = '6px 14px'; btn.style.border = '1px solid #3a3f4b'; btn.style.borderRadius = '4px'; btn.style.background = '#2b2f38'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) { return; } fn.devtool._.reset(); fn.component._.applySettingAll(); var popup = e.target.closest('.__popup'); if (popup._.caller) { popup._.caller.refresh(); } fn.component.remove(popup); }); return btn; }" } },
                 ]),
             },
         });
