@@ -39,8 +39,10 @@ backed by localStorage. See README.md for what it does and how to install the bo
 - **No comments.** If a name needs a comment to explain it, rename it instead.
 - **English only** for UI text, titles, labels, and log output.
 - **CRUD verbs**: `fn.data.select/insert/update/delete` follow SQL naming. `key` (the
-  localStorage/resource key) is always camelCase. `fn.component.remove` is a deliberate exception
-  — it mirrors the native DOM `Element.remove()` name, so don't rename it to match `delete`.
+  localStorage/resource key) is always camelCase. A popup's own lifecycle methods
+  (`popup.refresh()`, `popup.close()`) are named after the header button that triggers them
+  ("Refresh", "Close"), not the CRUD set — they're UI actions on one instance, not table
+  operations.
 - **File order**: within each IIFE, order definitions from most foundational to most
   composed. Core IIFE: `fn.log` → `fn.element.*` → `fn.component.*` → `fn.localStorage.*` /
   `fn.data.*` → `fn.ajax`. Layouts IIFE: leaf button layouts → `popup-buttons` → `popup` →
@@ -48,7 +50,7 @@ backed by localStorage. See README.md for what it does and how to install the bo
   bookmarklet's entry point). New layouts should slot in based on what they depend on, not
   just appended at the end.
 - **Component lifecycle**: `popup` is the only layout tracked in `fn.component.data` and torn
-  down via `fn.component.remove` — it's the only unit ever independently created/removed (every
+  down via its own `popup.close()` — it's the only unit ever independently created/removed (every
   other component lives and dies with its enclosing popup, so `el.remove()`/`child.remove()`
   cascading through the DOM is enough for them; tracking them individually only produced stale
   entries once their popup closed without walking each descendant). `fn.component.create` itself
@@ -57,9 +59,9 @@ backed by localStorage. See README.md for what it does and how to install the bo
   function, so a layout that returns another component's element directly (e.g. `devtool`
   returning a `popup`) can't cause double-registration: the popup only ever registers itself
   once, when it's actually built.
-- **Logging**: call `fn.log(scope, action, ...details)` from `fn.data.*`, the `popup` layout
-  (on self-registering), and `fn.component.remove` so behavior is visible in the console while
-  testing new features. Keep the `[fn.<scope>] <action>` shape.
+- **Logging**: call `fn.log(scope, action, ...details)` from `fn.data.*` and the `popup` layout
+  (on self-registering via `create`, and on tearing down via `popup.close()`) so behavior is
+  visible in the console while testing new features. Keep the `[fn.<scope>] <action>` shape.
 
 ## Workflow for changes
 
