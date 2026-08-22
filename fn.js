@@ -448,6 +448,7 @@
                     display : 'flex',
                     flexDirection : 'column',
                     minWidth : '320px',
+                    minHeight : '120px',
                     maxWidth : '80vw',
                     maxHeight : '80vh',
                     background : '#1e2128',
@@ -457,6 +458,8 @@
                     boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
                     font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                     zIndex : '2147483000',
+                    resize : 'both',
+                    overflow : 'hidden',
                 },
             });
 
