@@ -740,26 +740,17 @@
                     borderBottom : '1px solid #2b2f38',
                 };
 
-                if (opt.resource.columns.length) {
-                    opt.resource.columns.forEach(function(column) {
-                        if (!column.list) {
-                            return;
-                        }
-                        fn.element.create({
-                            tagName : 'td',
-                            style : cellStyle,
-                            text : data[column.name] !== undefined ? data[column.name] : '',
-                            parent : row,
-                        });
-                    });
-                } else {
+                opt.resource.columns.forEach(function(column) {
+                    if (!column.list) {
+                        return;
+                    }
                     fn.element.create({
                         tagName : 'td',
                         style : cellStyle,
-                        text : data.name !== undefined ? data.name : '',
+                        text : data[column.name] !== undefined ? data[column.name] : '',
                         parent : row,
                     });
-                }
+                });
             });
 
             return el;
