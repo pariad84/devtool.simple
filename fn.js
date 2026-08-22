@@ -11,6 +11,7 @@
     fn.devtool._ = {};
     fn.component.data = {};
     fn.component.layout = {};
+    fn.component.layout._ = {};
     fn.component.layout.data = {};
 
     fn.log = function(scope, action, ...args) {
@@ -255,7 +256,7 @@
         });
     };
 
-    fn.component._.style = {
+    fn.component.layout._.style = {
         popupBtn : {
             width : '26px',
             height : '26px',
@@ -301,8 +302,8 @@
                     type : 'button',
                     title : 'New',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '✏️',
                 event : {
                     click : function(e) {
@@ -343,8 +344,8 @@
                     type : 'button',
                     title : 'Save',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '💾',
                 event : {
                     click : function(e) {
@@ -385,8 +386,8 @@
                     type : 'button',
                     title : 'Delete',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '🗑️',
                 event : {
                     click : function(e) {
@@ -418,8 +419,8 @@
                     type : 'button',
                     title : 'Refresh',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '↻',
                 event : {
                     click : function(e) {
@@ -439,8 +440,8 @@
                     type : 'button',
                     title : 'Close',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '✕',
                 event : {
                     click : function(e) {
@@ -476,7 +477,7 @@
                     type : 'text',
                     placeholder : 'Search ' + labels.join(', '),
                 },
-                style : fn.component._.style.input,
+                style : fn.component.layout._.style.input,
                 event : {
                     input : function(e) {
                         var p = e.target.closest('.__popup');
@@ -494,8 +495,8 @@
                     type : 'button',
                     title : 'Search',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '🔍',
                 event : {
                     click : function(e) {
@@ -520,8 +521,8 @@
                     type : 'button',
                     title : 'Settings',
                 },
-                style : fn.component._.style.popupBtn,
-                hoverStyle : fn.component._.style.popupBtnHover,
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
                 text : '⚙',
                 event : {
                     click : function(e) {
@@ -738,7 +739,7 @@
                 attribute : {
                     class : '__form',
                 },
-                style : fn.component._.style.table,
+                style : fn.component.layout._.style.table,
                 data : opt.data,
             });
 
@@ -782,7 +783,7 @@
                     input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
-                    var inputStyle = Object.assign({}, fn.component._.style.input);
+                    var inputStyle = Object.assign({}, fn.component.layout._.style.input);
                     if (column.form.width) {
                         inputStyle.width = column.form.width;
                     }
@@ -866,7 +867,7 @@
         value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
             var el = fn.element.create({
                 tagName : 'table',
-                style : fn.component._.style.table,
+                style : fn.component.layout._.style.table,
             });
 
             if (opt.resource.columns.some(function(column) { return !!column.list; })) {
@@ -1136,7 +1137,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1193,7 +1194,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1265,7 +1266,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Reset all data',
-                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
