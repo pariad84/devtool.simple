@@ -850,7 +850,6 @@
                         key : 'memo',
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
                             { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                         ]),
                     },
@@ -862,7 +861,6 @@
                         key : 'bookmark',
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
                             { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
                         ]),
                     },
