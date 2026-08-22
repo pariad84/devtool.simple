@@ -945,20 +945,6 @@
         fn.data.insert({
             key : '_resource',
             data : {
-                name : 'Resource',
-                key : '_resource',
-                type : 'array',
-                columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                ]),
-            },
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : {
                 name : 'Memo',
                 key : 'memo',
                 type : 'array',
@@ -978,6 +964,20 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Resource',
+                key : '_resource',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                 ]),
             },
         });
