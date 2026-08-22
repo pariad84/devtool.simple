@@ -946,12 +946,6 @@
             },
             parent : document.body,
         });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key == '`') {
-                fn.devtool.open();
-            }
-        });
     };
 })(window);
 
