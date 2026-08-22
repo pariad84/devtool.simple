@@ -267,8 +267,11 @@
                             parent : document.body,
                             caller : listPopup,
                             resource : listPopup._.resource,
-                            buttons : {
-                                save : true,
+                            initialize : function(res) {
+                                fn.component.create({
+                                    name : 'popup-save-btn',
+                                    parent : res.el.buttons,
+                                });
                             },
                             complete : function(res) {
                                 fn.component.create({
@@ -402,7 +405,7 @@
     fn.component.layout.set({
         name : 'popup-buttons',
         value : function(opt = {}) {
-            var el = fn.element.create({
+            return fn.element.create({
                 tagName : 'div',
                 style : {
                     display : 'flex',
@@ -410,39 +413,6 @@
                     flexShrink : '0',
                 },
             });
-
-            if (opt.buttons && opt.buttons.create) {
-                fn.component.create({
-                    name : 'popup-create-btn',
-                    parent : el,
-                });
-            }
-
-            if (opt.buttons && opt.buttons.save) {
-                fn.component.create({
-                    name : 'popup-save-btn',
-                    parent : el,
-                });
-            }
-
-            if (opt.buttons && opt.buttons.delete) {
-                fn.component.create({
-                    name : 'popup-delete-btn',
-                    parent : el,
-                });
-            }
-
-            fn.component.create({
-                name : 'popup-refresh-btn',
-                parent : el,
-            });
-
-            fn.component.create({
-                name : 'popup-close-btn',
-                parent : el,
-            });
-
-            return el;
         }
     });
 
@@ -511,10 +481,9 @@
                 text : opt.title || 'Popup',
             });
 
-            fn.component.create({
+            var buttons = fn.component.create({
                 name : 'popup-buttons',
                 parent : header,
-                buttons : opt.buttons,
             });
 
             var content = fn.element.create({
@@ -532,11 +501,26 @@
             });
 
             popup.header = header;
+            popup.buttons = buttons;
             popup.content = content;
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
             popup._.resource = opt.resource;
             popup._.title = opt.title;
+
+            if (opt.initialize) {
+                opt.initialize({ el : popup });
+            }
+
+            fn.component.create({
+                name : 'popup-refresh-btn',
+                parent : buttons,
+            });
+
+            fn.component.create({
+                name : 'popup-close-btn',
+                parent : buttons,
+            });
 
             var populate = function() {
                 if (popup._.complete) {
@@ -729,9 +713,15 @@
                                 parent : document.body,
                                 caller : e.target.closest('.__popup'),
                                 resource : opt.resource,
-                                buttons : {
-                                    save : true,
-                                    delete : true,
+                                initialize : function(res) {
+                                    fn.component.create({
+                                        name : 'popup-save-btn',
+                                        parent : res.el.buttons,
+                                    });
+                                    fn.component.create({
+                                        name : 'popup-delete-btn',
+                                        parent : res.el.buttons,
+                                    });
                                 },
                                 complete : function(res) {
                                     fn.component.create({
@@ -813,8 +803,11 @@
                                         parent : document.body,
                                         caller : opt.caller,
                                         resource : opt.data.resource,
-                                        buttons : {
-                                            create : true,
+                                        initialize : function(res) {
+                                            fn.component.create({
+                                                name : 'popup-create-btn',
+                                                parent : res.el.buttons,
+                                            });
                                         },
                                         complete : function(res) {
                                             var rows = fn.data.select({ key : opt.data.resource.key });
