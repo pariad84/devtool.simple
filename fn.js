@@ -762,7 +762,7 @@
                         style : cellStyle,
                         parent : row,
                     });
-                    if (column.list.type === 'button') {
+                    if (column.list.inputType === 'button') {
                         fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -926,7 +926,7 @@
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                        { name : 'run', label : 'Run', list : { width : '70px', type : 'button', field : 'url' } },
+                        { name : 'run', label : 'Run', list : { width : '70px', inputType : 'button', field : 'url' } },
                     ]),
                 },
             });
