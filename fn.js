@@ -435,31 +435,42 @@
                 left = callerLeft + offset;
             }
 
+            var settingsRows = fn.data.select({ key : '_settings' });
+            var settings = settingsRows[0] ? settingsRows[0].data : {};
+
+            var style = {
+                position : 'fixed',
+                top : top + 'px',
+                left : left + 'px',
+                display : 'flex',
+                flexDirection : 'column',
+                minWidth : '320px',
+                minHeight : '120px',
+                maxWidth : '80vw',
+                maxHeight : '80vh',
+                background : '#1e2128',
+                color : '#e8eaed',
+                border : '1px solid #3a3f4b',
+                borderRadius : '8px',
+                boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
+                font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                resize : 'both',
+                overflow : 'hidden',
+            };
+            if (settings.width) {
+                style.width = settings.width;
+            }
+            if (settings.height) {
+                style.height = settings.height;
+            }
+
             var popup = fn.element.create({
                 tagName : 'div',
                 attribute : {
                     class : '__popup',
                     tabindex : '-1',
                 },
-                style : {
-                    position : 'fixed',
-                    top : top + 'px',
-                    left : left + 'px',
-                    display : 'flex',
-                    flexDirection : 'column',
-                    minWidth : '320px',
-                    minHeight : '120px',
-                    maxWidth : '80vw',
-                    maxHeight : '80vh',
-                    background : '#1e2128',
-                    color : '#e8eaed',
-                    border : '1px solid #3a3f4b',
-                    borderRadius : '8px',
-                    boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
-                    font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                    resize : 'both',
-                    overflow : 'hidden',
-                },
+                style : style,
             });
 
             var header = fn.element.create({
@@ -931,6 +942,21 @@
                         { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
                     ]),
                 },
+            });
+            fn.data.insert({
+                key : '_resource',
+                data : {
+                    name : 'Settings',
+                    key : '_settings',
+                    columns : JSON.stringify([
+                        { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                    ]),
+                },
+            });
+            fn.data.insert({
+                key : '_settings',
+                data : { width : '', height : '' },
             });
 
             for (var i = 1; i <= 20; i++) {
