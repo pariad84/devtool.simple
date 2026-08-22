@@ -111,27 +111,10 @@
         }
         var el = layout(opt);
 
-        if (opt.name === 'popup') {
-            if (!this.data.popup) {
-                this.data.popup = [];
-            }
-            this.data.popup.push(el);
-            fn.log('component', 'create', opt.name, this.data.popup.length + ' alive', el);
-        }
-
         if (opt.parent) {
             opt.parent.appendChild(el);
         }
         return el;
-    };
-
-    fn.component.remove = function(el) {
-        var idx = this.data.popup.indexOf(el);
-        if (idx !== -1) {
-            this.data.popup.splice(idx, 1);
-        }
-        fn.log('component', 'remove', 'popup', this.data.popup.length + ' alive', el);
-        el.remove();
     };
 
     fn.component.layout.set = function(opt = {}) {
@@ -371,7 +354,7 @@
                         if (popup._.caller) {
                             popup._.caller.refresh();
                         }
-                        fn.component.remove(popup);
+                        popup.close();
                     }
                 },
             });
@@ -404,7 +387,7 @@
                         if (popup._.caller) {
                             popup._.caller.refresh();
                         }
-                        fn.component.remove(popup);
+                        popup.close();
                     }
                 },
             });
@@ -446,7 +429,7 @@
                 text : '✕',
                 event : {
                     click : function(e) {
-                        fn.component.remove(e.target.closest('.__popup'));
+                        e.target.closest('.__popup').close();
                     }
                 },
             });
@@ -720,7 +703,23 @@
                 render();
             };
 
+            popup.close = function() {
+                var idx = fn.component.data.popup.indexOf(popup);
+                if (idx !== -1) {
+                    fn.component.data.popup.splice(idx, 1);
+                }
+                fn.log('component', 'close', 'popup', fn.component.data.popup.length + ' alive', popup);
+                popup.remove();
+            };
+
             render();
+
+            if (!fn.component.data.popup) {
+                fn.component.data.popup = [];
+            }
+            fn.component.data.popup.push(popup);
+            fn.log('component', 'create', 'popup', fn.component.data.popup.length + ' alive', popup);
+
             return popup;
         }
     });
@@ -1285,7 +1284,7 @@
                                     if (popup._.caller) {
                                         popup._.caller.refresh();
                                     }
-                                    fn.component.remove(popup);
+                                    popup.close();
                                 }
                             }
                         });
