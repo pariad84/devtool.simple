@@ -988,7 +988,7 @@
         });
         fn.data.insert({
             key : '_setting',
-            data : { width : '', height : '', background : '', color : '' },
+            data : { width : '420px', height : '320px', background : '#1e2128', color : '#e8eaed' },
         });
 
         for (var i = 1; i <= 20; i++) {
