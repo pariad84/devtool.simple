@@ -799,7 +799,7 @@
                                         },
                                         complete: function(res) {
                                             res.el._.resourceKey = opt.data.resourceKey;
-                                            res.el._.columns = opt.data.fields;
+                                            res.el._.columns = opt.data.columns;
                                             var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id: row.id }, row.data);
@@ -807,7 +807,7 @@
                                             fn.component.create({
                                                 name: 'list',
                                                 title: opt.data.name,
-                                                columns: opt.data.fields,
+                                                columns: opt.data.columns,
                                                 datas: listDatas,
                                                 resourceKey: opt.data.resourceKey,
                                                 parent: res.el.content,
@@ -833,7 +833,7 @@
                     id: 1,
                     name: 'Memo',
                     resourceKey: 'memo',
-                    fields: [
+                    columns: [
                         { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
                         { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
                         { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
@@ -843,7 +843,7 @@
                     id: 2,
                     name: 'Bookmark',
                     resourceKey: 'bookmark',
-                    fields: [
+                    columns: [
                         { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
                         { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
                         { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
