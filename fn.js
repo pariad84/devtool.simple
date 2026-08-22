@@ -16,6 +16,7 @@
 
     fn.element.create = function(opt = {}) {
         var el = document.createElement(opt.tagName);
+        el._ = {};
         if (opt.attribute) {
             for (const [key, value] of Object.entries(opt.attribute)) {
                 el.setAttribute(key, value);
@@ -56,15 +57,15 @@
         if (opt.complete) {
             opt.complete({el: el});
         }
-        el._opt = opt;
+        el._.opt = opt;
         if (opt.datas) {
-            el._datas = opt.datas || [];
+            el._.datas = opt.datas || [];
         }
         if (opt.data) {
-            el._data = opt.data || {};
+            el._.data = opt.data || {};
         }
         if (opt.caller) {
-            el._caller = opt.caller;
+            el._.caller = opt.caller;
         }
         return el;
     };
@@ -107,8 +108,8 @@
         }
         var el = layout(opt);
 
-        if (!el._componentName) {
-            el._componentName = opt.name;
+        if (!el._.componentName) {
+            el._.componentName = opt.name;
 
             if (!this.data[opt.name]) {
                 this.data[opt.name] = [];
@@ -124,7 +125,7 @@
     };
 
     fn.component.remove = function(el) {
-        var name = el._componentName;
+        var name = el._.componentName;
         if (name && this.data[name]) {
             var idx = this.data[name].indexOf(el);
             if (idx !== -1) {
@@ -228,14 +229,14 @@
 
     fn.component._refreshPopup = function(popup) {
         Array.from(popup.content.children).forEach(function(child) {
-            if (child._componentName) {
+            if (child._.componentName) {
                 fn.component.remove(child);
             } else {
                 child.remove();
             }
         });
-        if (popup._complete) {
-            popup._complete({ el: popup });
+        if (popup._.complete) {
+            popup._.complete({ el: popup });
         }
     };
 
@@ -292,9 +293,9 @@
                         fn.component._openFormPopup({
                             title: 'New',
                             caller: listPopup,
-                            columns: listPopup._columns,
+                            columns: listPopup._.columns,
                             data: {},
-                            resourceKey: listPopup._resourceKey,
+                            resourceKey: listPopup._.resourceKey,
                         });
                     }
                 },
@@ -319,20 +320,20 @@
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
                         var data = form.getData();
-                        if (form._data.id !== undefined) {
+                        if (form._.data.id !== undefined) {
                             fn.data.update({
-                                resourceKey: form._resourceKey,
-                                id: form._data.id,
+                                resourceKey: form._.resourceKey,
+                                id: form._.data.id,
                                 data: data,
                             });
                         } else {
                             fn.data.insert({
-                                resourceKey: form._resourceKey,
+                                resourceKey: form._.resourceKey,
                                 data: data,
                             });
                         }
-                        if (popup._caller) {
-                            fn.component._refreshPopup(popup._caller);
+                        if (popup._.caller) {
+                            fn.component._refreshPopup(popup._.caller);
                         }
                     }
                 },
@@ -356,15 +357,15 @@
                     click: function(e) {
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
-                        if (form._data.id === undefined) {
+                        if (form._.data.id === undefined) {
                             return;
                         }
                         fn.data.delete({
-                            resourceKey: form._resourceKey,
-                            id: form._data.id,
+                            resourceKey: form._.resourceKey,
+                            id: form._.data.id,
                         });
-                        if (popup._caller) {
-                            fn.component._refreshPopup(popup._caller);
+                        if (popup._.caller) {
+                            fn.component._refreshPopup(popup._.caller);
                         }
                         fn.component.remove(popup);
                     }
@@ -546,8 +547,8 @@
 
             popup.header = header;
             popup.content = content;
-            popup._complete = opt.complete;
-            popup._caller = opt.caller;
+            popup._.complete = opt.complete;
+            popup._.caller = opt.caller;
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
@@ -570,8 +571,8 @@
                 data: opt.data,
             });
 
-            el._resourceKey = opt.resourceKey;
-            el._inputs = {};
+            el._.resourceKey = opt.resourceKey;
+            el._.inputs = {};
 
             opt.columns.forEach(function(column) {
                 if (!column.form) {
@@ -628,7 +629,7 @@
                     input.value = opt.data[column.name];
                 }
 
-                el._inputs[column.name] = input;
+                el._.inputs[column.name] = input;
             });
 
             el.getData = function() {
@@ -637,7 +638,7 @@
                     if (!column.form) {
                         return;
                     }
-                    var input = el._inputs[column.name];
+                    var input = el._.inputs[column.name];
                     result[column.name] = column.form.dataType === 'number' ? Number(input.value) : input.value;
                 });
                 return result;
@@ -648,7 +649,7 @@
                     if (!column.form) {
                         return;
                     }
-                    var input = el._inputs[column.name];
+                    var input = el._.inputs[column.name];
                     if (newData[column.name] !== undefined) {
                         input.value = newData[column.name];
                     }
@@ -795,8 +796,8 @@
                                             create: true,
                                         },
                                         complete: function(res) {
-                                            res.el._resourceKey = opt.data.resourceKey;
-                                            res.el._columns = opt.data.fields;
+                                            res.el._.resourceKey = opt.data.resourceKey;
+                                            res.el._.columns = opt.data.fields;
                                             var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id: row.id }, row.data);
