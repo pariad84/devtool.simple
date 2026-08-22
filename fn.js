@@ -925,7 +925,7 @@
             tagName : 'button',
             attribute : {
                 type : 'button',
-                title : 'Open DevTool (Ctrl+`)',
+                title : 'Open DevTool',
             },
             style : {
                 position : 'fixed',
