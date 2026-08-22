@@ -900,7 +900,7 @@
                             inputType : 'button',
                             event : {
                                 click : function(e) {
-                                    
+                                    alert('Run bookmark');
                                 }
                             },
                         }},
