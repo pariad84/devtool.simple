@@ -273,7 +273,7 @@
                                     parent : res.el.buttons,
                                 });
                             },
-                            complete : function(res) {
+                            render : function(res) {
                                 fn.component.create({
                                     name : 'form',
                                     resource : listPopup._.resource,
@@ -503,7 +503,7 @@
             popup.header = header;
             popup.buttons = buttons;
             popup.content = content;
-            popup._.complete = opt.complete;
+            popup._.render = opt.render;
             popup._.caller = opt.caller;
             popup._.resource = opt.resource;
             popup._.title = opt.title;
@@ -522,9 +522,9 @@
                 parent : buttons,
             });
 
-            var populate = function() {
-                if (popup._.complete) {
-                    popup._.complete({ el : popup });
+            var render = function() {
+                if (popup._.render) {
+                    popup._.render({ el : popup });
                 }
             };
 
@@ -536,10 +536,10 @@
                         child.remove();
                     }
                 });
-                populate();
+                render();
             };
 
-            populate();
+            render();
             return popup;
         }
     });
@@ -723,7 +723,7 @@
                                         parent : res.el.buttons,
                                     });
                                 },
-                                complete : function(res) {
+                                render : function(res) {
                                     fn.component.create({
                                         name : 'form',
                                         resource : opt.resource,
@@ -809,7 +809,7 @@
                                                 parent : res.el.buttons,
                                             });
                                         },
-                                        complete : function(res) {
+                                        render : function(res) {
                                             var rows = fn.data.select({ key : opt.data.resource.key });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
@@ -840,7 +840,7 @@
             return fn.component.create({
                 name : 'popup',
                 title : 'DevTool',
-                complete : function(res) {
+                render : function(res) {
                     if (fn.data.select({ key : '_resource' }).length === 0) {
                         fn.data.insert({
                             key : '_resource',
