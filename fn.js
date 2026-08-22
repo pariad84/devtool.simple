@@ -230,19 +230,6 @@
 (function(global) {
     var fn = global.fn;
 
-    fn.component._.refreshPopup = function(popup) {
-        Array.from(popup.content.children).forEach(function(child) {
-            if (child._.componentName) {
-                fn.component.remove(child);
-            } else {
-                child.remove();
-            }
-        });
-        if (popup._.complete) {
-            popup._.complete({ el: popup });
-        }
-    };
-
     fn.component._.openFormPopup = function(opt) {
         fn.component.create({
             name: 'popup',
@@ -336,7 +323,7 @@
                             });
                         }
                         if (popup._.caller) {
-                            fn.component._.refreshPopup(popup._.caller);
+                            popup._.caller.refresh();
                         }
                     }
                 },
@@ -368,7 +355,7 @@
                             id: form._.data.id,
                         });
                         if (popup._.caller) {
-                            fn.component._.refreshPopup(popup._.caller);
+                            popup._.caller.refresh();
                         }
                         fn.component.remove(popup);
                     }
@@ -391,7 +378,7 @@
                 text: '↻',
                 event: {
                     click: function(e) {
-                        fn.component._.refreshPopup(e.target.closest('.__popup'));
+                        e.target.closest('.__popup').refresh();
                     }
                 },
             });
@@ -552,6 +539,18 @@
             popup.content = content;
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
+            popup.refresh = function() {
+                Array.from(popup.content.children).forEach(function(child) {
+                    if (child._.componentName) {
+                        fn.component.remove(child);
+                    } else {
+                        child.remove();
+                    }
+                });
+                if (popup._.complete) {
+                    popup._.complete({ el: popup });
+                }
+            };
             if (opt.complete) {
                 opt.complete({ el: popup });
             }
