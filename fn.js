@@ -226,7 +226,7 @@
 (function(global) {
     var fn = global.fn;
 
-    function refreshPopup(popup) {
+    fn.component._refreshPopup = function(popup) {
         Array.from(popup.content.children).forEach(function(child) {
             if (child._componentName) {
                 fn.component.remove(child);
@@ -237,9 +237,9 @@
         if (popup._complete) {
             popup._complete({ el: popup });
         }
-    }
+    };
 
-    function openFormPopup(opt) {
+    fn.component._openFormPopup = function(opt) {
         fn.component.create({
             name: 'popup',
             title: opt.title,
@@ -258,7 +258,7 @@
                 });
             },
         });
-    }
+    };
 
     var popupBtnStyle = {
         width: '26px',
@@ -289,7 +289,7 @@
                 event: {
                     click: function(e) {
                         var listPopup = e.target.closest('.__popup');
-                        openFormPopup({
+                        fn.component._openFormPopup({
                             title: 'New',
                             caller: listPopup,
                             columns: listPopup._columns,
@@ -332,7 +332,7 @@
                             });
                         }
                         if (popup._caller) {
-                            refreshPopup(popup._caller);
+                            fn.component._refreshPopup(popup._caller);
                         }
                     }
                 },
@@ -364,7 +364,7 @@
                             id: form._data.id,
                         });
                         if (popup._caller) {
-                            refreshPopup(popup._caller);
+                            fn.component._refreshPopup(popup._caller);
                         }
                         fn.component.remove(popup);
                     }
@@ -387,7 +387,7 @@
                 text: '↻',
                 event: {
                     click: function(e) {
-                        refreshPopup(e.target.closest('.__popup'));
+                        fn.component._refreshPopup(e.target.closest('.__popup'));
                     }
                 },
             });
@@ -714,7 +714,7 @@
                             if (!clickable) {
                                 return;
                             }
-                            openFormPopup({
+                            fn.component._openFormPopup({
                                 title: 'Edit ' + (opt.title || ''),
                                 caller: e.target.closest('.__popup'),
                                 columns: opt.columns,
