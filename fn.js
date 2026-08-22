@@ -4,8 +4,11 @@
     fn.localStorage = {};
     fn.element = {};
     fn.data = {};
+    fn.data._ = {};
     fn.component = {};
+    fn.component._ = {};
     fn.devtool = {};
+    fn.devtool._ = {};
     fn.component.data = {};
     fn.component.layout = {};
     fn.component.layout.data = {};
@@ -157,17 +160,17 @@
         }
     };
 
-    fn.data._readTable = function(resourceKey) {
+    fn.data._.readTable = function(resourceKey) {
         var raw = fn.localStorage.get({ key: resourceKey });
         return raw ? JSON.parse(raw) : [];
     };
 
-    fn.data._writeTable = function(opt = {}) {
+    fn.data._.writeTable = function(opt = {}) {
         fn.localStorage.set({ key: opt.resourceKey, value: JSON.stringify(opt.rows) });
     };
 
     fn.data.select = function (opt = {}) {
-        var rows = fn.data._readTable(opt.resourceKey);
+        var rows = fn.data._.readTable(opt.resourceKey);
         if (opt.id !== undefined) {
             var row = rows.find(function (row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
@@ -178,29 +181,29 @@
     };
 
     fn.data.insert = function (opt = {}) {
-        var rows = fn.data._readTable(opt.resourceKey);
+        var rows = fn.data._.readTable(opt.resourceKey);
         var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id: nextId, data: opt.data };
         rows.push(row);
-        fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows });
+        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
         fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
 
     fn.data.update = function (opt = {}) {
-        var rows = fn.data._readTable(opt.resourceKey);
+        var rows = fn.data._.readTable(opt.resourceKey);
         var row = rows.find(function (r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows });
+            fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
         }
         fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.delete = function (opt = {}) {
-        var rows = fn.data._readTable(opt.resourceKey);
-        fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function (row) { return row.id !== opt.id; }) });
+        var rows = fn.data._.readTable(opt.resourceKey);
+        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function (row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
@@ -227,7 +230,7 @@
 (function(global) {
     var fn = global.fn;
 
-    fn.component._refreshPopup = function(popup) {
+    fn.component._.refreshPopup = function(popup) {
         Array.from(popup.content.children).forEach(function(child) {
             if (child._.componentName) {
                 fn.component.remove(child);
@@ -240,7 +243,7 @@
         }
     };
 
-    fn.component._openFormPopup = function(opt) {
+    fn.component._.openFormPopup = function(opt) {
         fn.component.create({
             name: 'popup',
             title: opt.title,
@@ -290,7 +293,7 @@
                 event: {
                     click: function(e) {
                         var listPopup = e.target.closest('.__popup');
-                        fn.component._openFormPopup({
+                        fn.component._.openFormPopup({
                             title: 'New',
                             caller: listPopup,
                             columns: listPopup._.columns,
@@ -333,7 +336,7 @@
                             });
                         }
                         if (popup._.caller) {
-                            fn.component._refreshPopup(popup._.caller);
+                            fn.component._.refreshPopup(popup._.caller);
                         }
                     }
                 },
@@ -365,7 +368,7 @@
                             id: form._.data.id,
                         });
                         if (popup._.caller) {
-                            fn.component._refreshPopup(popup._.caller);
+                            fn.component._.refreshPopup(popup._.caller);
                         }
                         fn.component.remove(popup);
                     }
@@ -388,7 +391,7 @@
                 text: '↻',
                 event: {
                     click: function(e) {
-                        fn.component._refreshPopup(e.target.closest('.__popup'));
+                        fn.component._.refreshPopup(e.target.closest('.__popup'));
                     }
                 },
             });
@@ -715,7 +718,7 @@
                             if (!clickable) {
                                 return;
                             }
-                            fn.component._openFormPopup({
+                            fn.component._.openFormPopup({
                                 title: 'Edit ' + (opt.title || ''),
                                 caller: e.target.closest('.__popup'),
                                 columns: opt.columns,
@@ -872,10 +875,10 @@
     };
 
     fn.devtool.start = function() {
-        if (fn.devtool._started) {
+        if (fn.devtool._.started) {
             return;
         }
-        fn.devtool._started = true;
+        fn.devtool._.started = true;
 
         fn.element.create({
             tagName: 'button',
