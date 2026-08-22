@@ -160,6 +160,12 @@
         }
     };
 
+    fn.localStorage.remove = function(opt = {}) {
+        if (typeof(Storage) !== "undefined") {
+            localStorage.removeItem(opt.key);
+        }
+    };
+
     fn.data._.readTable = function(opt = {}) {
         var raw = fn.localStorage.get({ key : opt.key });
         return raw ? JSON.parse(raw) : [];
@@ -653,7 +659,7 @@
                     });
                 }
 
-                if (opt.data[column.name] !== undefined) {
+                if (input.tagName !== 'BUTTON' && opt.data[column.name] !== undefined) {
                     input.value = opt.data[column.name];
                 }
 
@@ -667,6 +673,9 @@
                         return;
                     }
                     var input = el._.inputs[column.name];
+                    if (input.tagName === 'BUTTON') {
+                        return;
+                    }
                     result[column.name] = column.form.dataType === 'number' ? Number(input.value) : input.value;
                 });
                 return result;
@@ -678,6 +687,9 @@
                         return;
                     }
                     var input = el._.inputs[column.name];
+                    if (input.tagName === 'BUTTON') {
+                        return;
+                    }
                     if (newData[column.name] !== undefined) {
                         input.value = newData[column.name];
                     }
@@ -919,6 +931,86 @@
         });
     };
 
+    fn.devtool._.seed = function() {
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Resource',
+                key : '_resource',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Memo',
+                key : 'memo',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Bookmark',
+                key : 'bookmark',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                    { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Setting',
+                key : '_setting',
+                type : 'object',
+                columns : JSON.stringify([
+                    { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'background', label : 'Popup background', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'color', label : 'Popup text color', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'reset', label : 'Reset', form : { render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reset all data'; btn.style.padding = '6px 14px'; btn.style.border = '1px solid #3a3f4b'; btn.style.borderRadius = '4px'; btn.style.background = '#2b2f38'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) { return; } fn.devtool._.reset(); var popup = e.target.closest('.__popup'); if (popup._.caller) { popup._.caller.refresh(); } fn.component.remove(popup); }); return btn; }" } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_setting',
+            data : { width : '', height : '', background : '', color : '' },
+        });
+
+        for (var i = 1; i <= 20; i++) {
+            fn.data.insert({
+                key : 'memo',
+                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
+            });
+            fn.data.insert({
+                key : 'bookmark',
+                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
+            });
+        }
+    };
+
+    fn.devtool._.reset = function() {
+        var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
+        keys.forEach(function(key) {
+            fn.localStorage.remove({ key : key });
+        });
+        fn.devtool._.seed();
+    };
+
     fn.devtool.start = function() {
         if (fn.devtool._.started) {
             return;
@@ -926,74 +1018,7 @@
         fn.devtool._.started = true;
 
         if (fn.data.select({ key : '_resource' }).length === 0) {
-            fn.data.insert({
-                key : '_resource',
-                data : {
-                    name : 'Resource',
-                    key : '_resource',
-                    type : 'array',
-                    columns : JSON.stringify([
-                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                        { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
-                        { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                    ]),
-                },
-            });
-            fn.data.insert({
-                key : '_resource',
-                data : {
-                    name : 'Memo',
-                    key : 'memo',
-                    type : 'array',
-                    columns : JSON.stringify([
-                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                    ]),
-                },
-            });
-            fn.data.insert({
-                key : '_resource',
-                data : {
-                    name : 'Bookmark',
-                    key : 'bookmark',
-                    type : 'array',
-                    columns : JSON.stringify([
-                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                        { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
-                    ]),
-                },
-            });
-            fn.data.insert({
-                key : '_resource',
-                data : {
-                    name : 'Setting',
-                    key : '_setting',
-                    type : 'object',
-                    columns : JSON.stringify([
-                        { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'background', label : 'Popup background', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'color', label : 'Popup text color', list : { width : '160px' }, form : { inputType : 'text' } },
-                    ]),
-                },
-            });
-            fn.data.insert({
-                key : '_setting',
-                data : { width : '', height : '', background : '', color : '' },
-            });
-
-            for (var i = 1; i <= 20; i++) {
-                fn.data.insert({
-                    key : 'memo',
-                    data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
-                });
-                fn.data.insert({
-                    key : 'bookmark',
-                    data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
-                });
-            }
+            fn.devtool._.seed();
         }
 
         fn.element.create({
