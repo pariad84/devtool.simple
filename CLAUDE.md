@@ -51,12 +51,15 @@ backed by localStorage. See README.md for what it does and how to install the bo
   down via `fn.component.remove` — it's the only unit ever independently created/removed (every
   other component lives and dies with its enclosing popup, so `el.remove()`/`child.remove()`
   cascading through the DOM is enough for them; tracking them individually only produced stale
-  entries once their popup closed without walking each descendant). If a layout's `value`
-  function returns another component's element directly (e.g. `devtool` returning a `popup`),
-  that's fine — `fn.component.create` guards against double-registering it.
-- **Logging**: call `fn.log(scope, action, ...details)` from `fn.data.*` and
-  `fn.component.create`/`remove` so behavior is visible in the console while testing new
-  features. Keep the `[fn.<scope>] <action>` shape.
+  entries once their popup closed without walking each descendant). `fn.component.create` itself
+  is a plain dispatcher (look up the layout, run it, append to `parent` if given) — the `popup`
+  layout registers itself into `fn.component.data.popup` as the last step of its own `value`
+  function, so a layout that returns another component's element directly (e.g. `devtool`
+  returning a `popup`) can't cause double-registration: the popup only ever registers itself
+  once, when it's actually built.
+- **Logging**: call `fn.log(scope, action, ...details)` from `fn.data.*`, the `popup` layout
+  (on self-registering), and `fn.component.remove` so behavior is visible in the console while
+  testing new features. Keep the `[fn.<scope>] <action>` shape.
 
 ## Workflow for changes
 

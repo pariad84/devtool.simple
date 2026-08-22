@@ -111,14 +111,6 @@
         }
         var el = layout(opt);
 
-        if (opt.name === 'popup') {
-            if (!this.data.popup) {
-                this.data.popup = [];
-            }
-            this.data.popup.push(el);
-            fn.log('component', 'create', opt.name, this.data.popup.length + ' alive', el);
-        }
-
         if (opt.parent) {
             opt.parent.appendChild(el);
         }
@@ -721,6 +713,13 @@
             };
 
             render();
+
+            if (!fn.component.data.popup) {
+                fn.component.data.popup = [];
+            }
+            fn.component.data.popup.push(popup);
+            fn.log('component', 'create', 'popup', fn.component.data.popup.length + ' alive', popup);
+
             return popup;
         }
     });
