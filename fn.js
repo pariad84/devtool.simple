@@ -444,6 +444,12 @@
         value : function(opt = {}) {
             var popup = opt.parent.closest('.__popup');
 
+            var labels = popup._.resource.columns.filter(function(column) {
+                return !!column.list;
+            }).map(function(column) {
+                return column.label || column.name;
+            });
+
             var searchBar = fn.element.create({
                 tagName : 'div',
                 style : {
@@ -456,7 +462,7 @@
                 tagName : 'input',
                 attribute : {
                     type : 'text',
-                    placeholder : 'Search...',
+                    placeholder : 'Search ' + labels.join(', '),
                 },
                 style : {
                     width : '100%',
