@@ -276,6 +276,20 @@
             fontSize : '13px',
             cursor : 'pointer',
         },
+        input : {
+            width : '100%',
+            boxSizing : 'border-box',
+            padding : '5px 8px',
+            background : '#14161b',
+            border : '1px solid #3a3f4b',
+            borderRadius : '4px',
+            color : '#e8eaed',
+            font : 'inherit',
+        },
+        table : {
+            width : '100%',
+            borderCollapse : 'collapse',
+        },
     };
 
     fn.component.layout.set({
@@ -462,16 +476,7 @@
                     type : 'text',
                     placeholder : 'Search ' + labels.join(', '),
                 },
-                style : {
-                    width : '100%',
-                    boxSizing : 'border-box',
-                    padding : '5px 8px',
-                    background : '#14161b',
-                    border : '1px solid #3a3f4b',
-                    borderRadius : '4px',
-                    color : '#e8eaed',
-                    font : 'inherit',
-                },
+                style : fn.component._.style.input,
                 event : {
                     input : function(e) {
                         var p = e.target.closest('.__popup');
@@ -733,10 +738,7 @@
                 attribute : {
                     class : '__form',
                 },
-                style : {
-                    width : '100%',
-                    borderCollapse : 'collapse',
-                },
+                style : fn.component._.style.table,
                 data : opt.data,
             });
 
@@ -780,16 +782,10 @@
                     input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
-                    var inputStyle = {
-                        width : column.form.width || '100%',
-                        boxSizing : 'border-box',
-                        padding : '5px 8px',
-                        background : '#14161b',
-                        border : '1px solid #3a3f4b',
-                        borderRadius : '4px',
-                        color : '#e8eaed',
-                        font : 'inherit',
-                    };
+                    var inputStyle = Object.assign({}, fn.component._.style.input);
+                    if (column.form.width) {
+                        inputStyle.width = column.form.width;
+                    }
 
                     if (column.form.inputType === 'select') {
                         input = fn.element.create({
@@ -870,10 +866,7 @@
         value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
             var el = fn.element.create({
                 tagName : 'table',
-                style : {
-                    width : '100%',
-                    borderCollapse : 'collapse',
-                },
+                style : fn.component._.style.table,
             });
 
             if (opt.resource.columns.some(function(column) { return !!column.list; })) {
