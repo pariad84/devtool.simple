@@ -232,6 +232,11 @@
 (function(global) {
     var fn = global.fn;
 
+    fn.component._.renderColumn = function(opt) {
+        var render = eval('(' + opt.source + ')');
+        return render(opt.data);
+    };
+
     var popupBtnStyle = {
         width : '26px',
         height : '26px',
@@ -590,28 +595,34 @@
                     parent : row,
                 });
 
-                var isTextarea = column.form.inputType === 'textarea';
-                var inputStyle = {
-                    width : column.form.width || '100%',
-                    boxSizing : 'border-box',
-                    padding : '5px 8px',
-                    background : '#14161b',
-                    border : '1px solid #3a3f4b',
-                    borderRadius : '4px',
-                    color : '#e8eaed',
-                    font : 'inherit',
-                };
-                if (isTextarea) {
-                    inputStyle.resize = 'vertical';
-                    inputStyle.minHeight = '60px';
-                }
+                var input;
+                if (column.form.render) {
+                    input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
+                    valueCell.appendChild(input);
+                } else {
+                    var isTextarea = column.form.inputType === 'textarea';
+                    var inputStyle = {
+                        width : column.form.width || '100%',
+                        boxSizing : 'border-box',
+                        padding : '5px 8px',
+                        background : '#14161b',
+                        border : '1px solid #3a3f4b',
+                        borderRadius : '4px',
+                        color : '#e8eaed',
+                        font : 'inherit',
+                    };
+                    if (isTextarea) {
+                        inputStyle.resize = 'vertical';
+                        inputStyle.minHeight = '60px';
+                    }
 
-                var input = fn.element.create({
-                    tagName : isTextarea ? 'textarea' : 'input',
-                    attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
-                    style : inputStyle,
-                    parent : valueCell,
-                });
+                    input = fn.element.create({
+                        tagName : isTextarea ? 'textarea' : 'input',
+                        attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
+                        style : inputStyle,
+                        parent : valueCell,
+                    });
+                }
 
                 if (opt.data[column.name] !== undefined) {
                     input.value = opt.data[column.name];
@@ -750,8 +761,7 @@
                         parent : row,
                     });
                     if (column.list.render) {
-                        var render = eval('(' + column.list.render + ')');
-                        var rendered = render(data);
+                        var rendered = fn.component._.renderColumn({ source : column.list.render, data : data });
                         if (rendered instanceof HTMLElement) {
                             cell.appendChild(rendered);
                         } else {
