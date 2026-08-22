@@ -161,50 +161,50 @@
     };
 
     fn.data._.readTable = function(opt = {}) {
-        var raw = fn.localStorage.get({ key : opt.resourceKey });
+        var raw = fn.localStorage.get({ key : opt.key });
         return raw ? JSON.parse(raw) : [];
     };
 
     fn.data._.writeTable = function(opt = {}) {
-        fn.localStorage.set({ key : opt.resourceKey, value : JSON.stringify(opt.rows) });
+        fn.localStorage.set({ key : opt.key, value : JSON.stringify(opt.rows) });
     };
 
     fn.data.select = function(opt = {}) {
-        var rows = fn.data._.readTable({ resourceKey : opt.resourceKey });
+        var rows = fn.data._.readTable({ key : opt.key });
         if (opt.id !== undefined) {
             var row = rows.find(function(row) { return row.id === opt.id; });
-            fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
+            fn.log('data', 'select', opt.key, 'id=' + opt.id, row);
             return row;
         }
-        fn.log('data', 'select', opt.resourceKey, rows.length + ' rows', rows);
+        fn.log('data', 'select', opt.key, rows.length + ' rows', rows);
         return rows;
     };
 
     fn.data.insert = function(opt = {}) {
-        var rows = fn.data._.readTable({ resourceKey : opt.resourceKey });
+        var rows = fn.data._.readTable({ key : opt.key });
         var nextId = rows.reduce(function(max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id : nextId, data : opt.data };
         rows.push(row);
-        fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows });
-        fn.log('data', 'insert', opt.resourceKey, row);
+        fn.data._.writeTable({ key : opt.key, rows : rows });
+        fn.log('data', 'insert', opt.key, row);
         return row;
     };
 
     fn.data.update = function(opt = {}) {
-        var rows = fn.data._.readTable({ resourceKey : opt.resourceKey });
+        var rows = fn.data._.readTable({ key : opt.key });
         var row = rows.find(function(r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows });
+            fn.data._.writeTable({ key : opt.key, rows : rows });
         }
-        fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
+        fn.log('data', 'update', opt.key, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.delete = function(opt = {}) {
-        var rows = fn.data._.readTable({ resourceKey : opt.resourceKey });
-        fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
-        fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
+        var rows = fn.data._.readTable({ key : opt.key });
+        fn.data._.writeTable({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
+        fn.log('data', 'delete', opt.key, 'id=' + opt.id);
     };
 
     fn.ajax = async function(opt = {}) {
@@ -311,13 +311,13 @@
                         var data = form.getData();
                         if (form._.data.id !== undefined) {
                             fn.data.update({
-                                resourceKey : form._.resource.key,
+                                key : form._.resource.key,
                                 id : form._.data.id,
                                 data : data,
                             });
                         } else {
                             fn.data.insert({
-                                resourceKey : form._.resource.key,
+                                key : form._.resource.key,
                                 data : data,
                             });
                         }
@@ -351,7 +351,7 @@
                             return;
                         }
                         fn.data.delete({
-                            resourceKey : form._.resource.key,
+                            key : form._.resource.key,
                             id : form._.data.id,
                         });
                         if (popup._.caller) {
@@ -803,7 +803,7 @@
                                             create : true,
                                         },
                                         complete : function(res) {
-                                            var rows = fn.data.select({ resourceKey : opt.data.resource.key });
+                                            var rows = fn.data.select({ key : opt.data.resource.key });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
                                             });
@@ -830,9 +830,9 @@
     fn.component.layout.set({
         name : 'devtool',
         value : function(opt = {}) {
-            if (fn.data.select({ resourceKey : '_resource' }).length === 0) {
+            if (fn.data.select({ key : '_resource' }).length === 0) {
                 fn.data.insert({
-                    resourceKey : '_resource',
+                    key : '_resource',
                     data : {
                         name : 'Resource',
                         key : '_resource',
@@ -844,7 +844,7 @@
                     },
                 });
                 fn.data.insert({
-                    resourceKey : '_resource',
+                    key : '_resource',
                     data : {
                         name : 'Memo',
                         key : 'memo',
@@ -856,7 +856,7 @@
                     },
                 });
                 fn.data.insert({
-                    resourceKey : '_resource',
+                    key : '_resource',
                     data : {
                         name : 'Bookmark',
                         key : 'bookmark',
@@ -869,7 +869,7 @@
                 });
             }
 
-            var datas = fn.data.select({ resourceKey : '_resource' }).map(function(row) {
+            var datas = fn.data.select({ key : '_resource' }).map(function(row) {
                 return {
                     id : row.id,
                     name : row.data.name,
