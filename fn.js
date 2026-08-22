@@ -71,10 +71,10 @@
         return row;
     };
 
-    fn.data.remove = function (opt = {}) {
+    fn.data.delete = function (opt = {}) {
         var rows = readTable(opt.resourceKey);
         writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
-        fn.log('data', 'remove', opt.resourceKey, 'id=' + opt.id);
+        fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
     fn.localStorage.get = function(opt = {}) {
@@ -273,7 +273,7 @@
                             title: 'New',
                             parent: document.body,
                             caller: listPopup,
-                            action: {
+                            buttons: {
                                 save: true,
                             },
                             complete: function(formRes) {
@@ -349,7 +349,7 @@
                         if (form._data.id === undefined) {
                             return;
                         }
-                        fn.data.remove({
+                        fn.data.delete({
                             resourceKey: form._resourceKey,
                             id: form._data.id,
                         });
@@ -406,7 +406,7 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-actions',
+        name: 'popup-buttons',
         value: function(opt = {}) {
             var el = fn.element.create({
                 tagName: 'div',
@@ -417,14 +417,14 @@
                 },
             });
 
-            if (opt.action && opt.action.create) {
+            if (opt.buttons && opt.buttons.create) {
                 fn.component.create({
                     name: 'popup-create-btn',
                     parent: el,
                 });
             }
 
-            if (opt.action && opt.action.save) {
+            if (opt.buttons && opt.buttons.save) {
                 fn.component.create({
                     name: 'popup-save-btn',
                     parent: el,
@@ -514,10 +514,10 @@
                 text: opt.title || 'Popup',
             });
 
-            var actions = fn.component.create({
-                name: 'popup-actions',
+            fn.component.create({
+                name: 'popup-buttons',
                 parent: header,
-                action: opt.action,
+                buttons: opt.buttons,
             });
 
             var content = fn.element.create({
@@ -709,7 +709,7 @@
                                 title: 'Edit ' + (opt.title || ''),
                                 parent: document.body,
                                 caller: e.target.closest('.__popup'),
-                                action: {
+                                buttons: {
                                     save: true,
                                 },
                                 complete: function(formRes) {
@@ -792,7 +792,7 @@
                                         title: opt.data.name,
                                         parent: document.body,
                                         caller: opt.caller,
-                                        action: {
+                                        buttons: {
                                             create: true,
                                         },
                                         complete: function(res) {
