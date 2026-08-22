@@ -474,15 +474,16 @@
                     borderBottom : '1px solid #3a3f4b',
                     cursor : 'move',
                 },
-            });
-
-            header.addEventListener('pointerdown', function(e) {
-                if (e.target.closest('button, input, select, textarea')) {
-                    return;
-                }
-                setTimeout(function() {
-                    document.body.appendChild(popup);
-                }, 0);
+                event : {
+                    pointerdown : function(e) {
+                        if (e.target.closest('button, input, select, textarea')) {
+                            return;
+                        }
+                        setTimeout(function() {
+                            document.body.appendChild(popup);
+                        }, 0);
+                    },
+                },
             });
 
             fn.element.create({
@@ -963,7 +964,6 @@
                 fontSize : '18px',
                 cursor : 'pointer',
                 boxShadow : '0 2px 8px rgba(0, 0, 0, 0.35)',
-                zIndex : '2147483000',
             },
             hoverStyle : {
                 background : '#3a3f4b',
