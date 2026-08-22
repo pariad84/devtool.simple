@@ -38,8 +38,8 @@ backed by localStorage. See README.md for what it does and how to install the bo
   a `<style>` block or CSS classes for styling.
 - **No comments.** If a name needs a comment to explain it, rename it instead.
 - **English only** for UI text, titles, labels, and log output.
-- **CRUD verbs**: `fn.data.select/insert/update/delete` follow SQL naming. `resourceKey` is
-  always camelCase (never `resource_key`). `fn.component.remove` is a deliberate exception
+- **CRUD verbs**: `fn.data.select/insert/update/delete` follow SQL naming. `key` (the
+  localStorage/resource key) is always camelCase. `fn.component.remove` is a deliberate exception
   — it mirrors the native DOM `Element.remove()` name, so don't rename it to match `delete`.
 - **File order**: within each IIFE, order definitions from most foundational to most
   composed. Core IIFE: `fn.log` → `fn.element.*` → `fn.component.*` → `fn.localStorage.*` /
