@@ -608,22 +608,26 @@
                     parent : row,
                 });
 
+                var isTextarea = column.form.inputType === 'textarea';
+                var inputStyle = {
+                    width : column.form.width || '100%',
+                    boxSizing : 'border-box',
+                    padding : '5px 8px',
+                    background : '#14161b',
+                    border : '1px solid #3a3f4b',
+                    borderRadius : '4px',
+                    color : '#e8eaed',
+                    font : 'inherit',
+                };
+                if (isTextarea) {
+                    inputStyle.resize = 'vertical';
+                    inputStyle.minHeight = '60px';
+                }
+
                 var input = fn.element.create({
-                    tagName : 'input',
-                    attribute : {
-                        type : column.form.inputType || 'text',
-                        name : column.name,
-                    },
-                    style : {
-                        width : column.form.width || '100%',
-                        boxSizing : 'border-box',
-                        padding : '5px 8px',
-                        background : '#14161b',
-                        border : '1px solid #3a3f4b',
-                        borderRadius : '4px',
-                        color : '#e8eaed',
-                        font : 'inherit',
-                    },
+                    tagName : isTextarea ? 'textarea' : 'input',
+                    attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
+                    style : inputStyle,
                     parent : valueCell,
                 });
 
@@ -834,7 +838,7 @@
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                             { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'text' } },
+                            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                         ]),
                     },
                 });
@@ -846,7 +850,7 @@
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                             { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
-                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'text' } },
+                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                         ]),
                     },
                 });
