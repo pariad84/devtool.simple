@@ -651,6 +651,19 @@
     fn.component.layout.set({
         name : 'list',
         value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
+            var listButtonStyle = {
+                padding : '4px 10px',
+                border : 'none',
+                borderRadius : '4px',
+                background : 'transparent',
+                color : '#e8eaed',
+                fontSize : '13px',
+                cursor : 'pointer',
+            };
+            var listButtonHoverStyle = {
+                background : '#3a3f4b',
+            };
+
             var el = fn.element.create({
                 tagName : 'table',
                 style : {
@@ -744,12 +757,29 @@
                     if (!column.list) {
                         return;
                     }
-                    fn.element.create({
+                    var cell = fn.element.create({
                         tagName : 'td',
                         style : cellStyle,
-                        text : data[column.name] !== undefined ? data[column.name] : '',
                         parent : row,
                     });
+                    if (column.list.type === 'button') {
+                        fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            style : listButtonStyle,
+                            hoverStyle : listButtonHoverStyle,
+                            text : column.label || column.name,
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    window.open(data[column.list.field], '_blank');
+                                },
+                            },
+                            parent : cell,
+                        });
+                    } else {
+                        cell.textContent = data[column.name] !== undefined ? data[column.name] : '';
+                    }
                 });
             });
 
@@ -895,15 +925,8 @@
                     key : 'bookmark',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'url', label : 'URL', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'run', label : 'Run', list : {
-                            inputType : 'button',
-                            event : {
-                                click : function(e) {
-                                    alert('Run bookmark');
-                                }
-                            },
-                        }},
+                        { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        { name : 'run', label : 'Run', list : { width : '70px', type : 'button', field : 'url' } },
                     ]),
                 },
             });
