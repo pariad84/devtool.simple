@@ -277,6 +277,14 @@
         });
     };
 
+    fn.component._.actionButtonStyle = {
+        border : 'none',
+        borderRadius : '4px',
+        color : '#e8eaed',
+        fontSize : '13px',
+        cursor : 'pointer',
+    };
+
     var popupBtnStyle = {
         width : '26px',
         height : '26px',
@@ -1136,21 +1144,18 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = 'Run';
-                        btn.style.padding = '4px 10px';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '4px';
-                        btn.style.background = 'transparent';
-                        btn.style.color = '#e8eaed';
-                        btn.style.fontSize = '13px';
-                        btn.style.cursor = 'pointer';
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            window.open(data.url, '_blank');
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Run',
+                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    window.open(data.url, '_blank');
+                                }
+                            }
                         });
-                        return btn;
                     }` } },
                 ]),
             },
@@ -1196,53 +1201,50 @@
                     { name : 'headers', label : 'Headers (JSON)', form : { inputType : 'textarea' } },
                     { name : 'body', label : 'Body (JSON)', form : { inputType : 'textarea' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = 'Run';
-                        btn.style.padding = '4px 10px';
-                        btn.style.border = 'none';
-                        btn.style.borderRadius = '4px';
-                        btn.style.background = 'transparent';
-                        btn.style.color = '#e8eaed';
-                        btn.style.fontSize = '13px';
-                        btn.style.cursor = 'pointer';
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            var caller = e.target.closest('.__popup');
-                            var show = function(title, text, isError) {
-                                fn.component.create({
-                                    name: 'popup',
-                                    title: title,
-                                    parent: document.body,
-                                    caller: caller,
-                                    render: function(opt) {
-                                        var pre = document.createElement('pre');
-                                        pre.style.whiteSpace = 'pre-wrap';
-                                        pre.style.wordBreak = 'break-word';
-                                        pre.style.margin = '0';
-                                        if (isError) {
-                                            pre.style.color = '#e57373';
-                                        }
-                                        pre.textContent = text;
-                                        opt.el.content.appendChild(pre);
-                                    }
-                                });
-                            };
-                            var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
-                            fn.ajax({
-                                method: data.method,
-                                url: data.url,
-                                params: data.params ? JSON.parse(data.params) : undefined,
-                                auth: auth,
-                                headers: data.headers ? JSON.parse(data.headers) : undefined,
-                                data: data.body ? JSON.parse(data.body) : undefined
-                            }).then(function(result) {
-                                show('Response: ' + data.name, JSON.stringify(result, null, 2), false);
-                            }).catch(function(err) {
-                                show('Error: ' + data.name, err.message, true);
-                            });
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Run',
+                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var caller = e.target.closest('.__popup');
+                                    var show = function(title, text, isError) {
+                                        fn.component.create({
+                                            name: 'popup',
+                                            title: title,
+                                            parent: document.body,
+                                            caller: caller,
+                                            render: function(opt) {
+                                                var pre = document.createElement('pre');
+                                                pre.style.whiteSpace = 'pre-wrap';
+                                                pre.style.wordBreak = 'break-word';
+                                                pre.style.margin = '0';
+                                                if (isError) {
+                                                    pre.style.color = '#e57373';
+                                                }
+                                                pre.textContent = text;
+                                                opt.el.content.appendChild(pre);
+                                            }
+                                        });
+                                    };
+                                    var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
+                                    fn.ajax({
+                                        method: data.method,
+                                        url: data.url,
+                                        params: data.params ? JSON.parse(data.params) : undefined,
+                                        auth: auth,
+                                        headers: data.headers ? JSON.parse(data.headers) : undefined,
+                                        data: data.body ? JSON.parse(data.body) : undefined
+                                    }).then(function(result) {
+                                        show('Response: ' + data.name, JSON.stringify(result, null, 2), false);
+                                    }).catch(function(err) {
+                                        show('Error: ' + data.name, err.message, true);
+                                    });
+                                }
+                            }
                         });
-                        return btn;
                     }` } },
                 ]),
             },
@@ -1271,30 +1273,27 @@
                     { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'reset', label : 'Reset', form : { render : `function(data) {
-                        var btn = document.createElement('button');
-                        btn.type = 'button';
-                        btn.textContent = 'Reset all data';
-                        btn.style.padding = '6px 14px';
-                        btn.style.border = '1px solid #3a3f4b';
-                        btn.style.borderRadius = '4px';
-                        btn.style.background = '#2b2f38';
-                        btn.style.color = '#e8eaed';
-                        btn.style.fontSize = '13px';
-                        btn.style.cursor = 'pointer';
-                        btn.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
-                                return;
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Reset all data',
+                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
+                                        return;
+                                    }
+                                    fn.devtool._.reset();
+                                    fn.component._.applySettingAll();
+                                    var popup = e.target.closest('.__popup');
+                                    if (popup._.caller) {
+                                        popup._.caller.refresh();
+                                    }
+                                    fn.component.remove(popup);
+                                }
                             }
-                            fn.devtool._.reset();
-                            fn.component._.applySettingAll();
-                            var popup = e.target.closest('.__popup');
-                            if (popup._.caller) {
-                                popup._.caller.refresh();
-                            }
-                            fn.component.remove(popup);
                         });
-                        return btn;
                     }` } },
                 ]),
             },
