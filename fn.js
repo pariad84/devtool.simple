@@ -705,7 +705,7 @@
                             }
                             fn.component.create({
                                 name: 'popup',
-                                title: (opt.title || '') + ' Edit',
+                                title: 'Edit ' + (opt.title || ''),
                                 parent: document.body,
                                 caller: e.target.closest('.__popup'),
                                 action: {
