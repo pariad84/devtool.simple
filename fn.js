@@ -423,6 +423,9 @@
                     name : 'popup-save-btn',
                     parent : el,
                 });
+            }
+
+            if (opt.buttons && opt.buttons.delete) {
                 fn.component.create({
                     name : 'popup-delete-btn',
                     parent : el,
@@ -728,6 +731,7 @@
                                 resource : opt.resource,
                                 buttons : {
                                     save : true,
+                                    delete : true,
                                 },
                                 complete : function(res) {
                                     fn.component.create({
