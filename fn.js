@@ -162,8 +162,8 @@
         return raw ? JSON.parse(raw) : [];
     };
 
-    fn.data._writeTable = function(resourceKey, rows) {
-        fn.localStorage.set({ key: resourceKey, value: JSON.stringify(rows) });
+    fn.data._writeTable = function(opt = {}) {
+        fn.localStorage.set({ key: opt.resourceKey, value: JSON.stringify(opt.rows) });
     };
 
     fn.data.select = function (opt = {}) {
@@ -182,7 +182,7 @@
         var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id: nextId, data: opt.data };
         rows.push(row);
-        fn.data._writeTable(opt.resourceKey, rows);
+        fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows });
         fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
@@ -192,7 +192,7 @@
         var row = rows.find(function (r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._writeTable(opt.resourceKey, rows);
+            fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows });
         }
         fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
@@ -200,7 +200,7 @@
 
     fn.data.delete = function (opt = {}) {
         var rows = fn.data._readTable(opt.resourceKey);
-        fn.data._writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+        fn.data._writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function (row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
