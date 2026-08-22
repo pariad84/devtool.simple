@@ -14,82 +14,6 @@
         console.log('[fn.' + scope + ']', action, ...args);
     };
 
-    fn.ajax = async function (opt = {}) {
-        var method = (opt.method || 'POST').toUpperCase();
-        var options = { method: method };
-        if (method !== 'GET' && method !== 'HEAD') {
-            options.headers = { 'Content-Type': opt.contentType || 'application/json; charset=UTF-8' };
-            options.body = JSON.stringify(opt.data || {});
-        }
-
-        var response = await fetch(opt.url, options);
-        var result = await response.json();
-        if (!response.ok) {
-            throw new Error(result.error || response.statusText);
-        }
-        return result;
-    };
-
-    function readTable(resourceKey) {
-        var raw = fn.localStorage.get({ key: resourceKey });
-        return raw ? JSON.parse(raw) : [];
-    }
-
-    function writeTable(resourceKey, rows) {
-        fn.localStorage.set({ key: resourceKey, value: JSON.stringify(rows) });
-    }
-
-    fn.data.select = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
-        if (opt.id !== undefined) {
-            var row = rows.find(function (row) { return row.id === opt.id; });
-            fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
-            return row;
-        }
-        fn.log('data', 'select', opt.resourceKey, rows.length + ' rows', rows);
-        return rows;
-    };
-
-    fn.data.insert = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
-        var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
-        var row = { id: nextId, data: opt.data };
-        rows.push(row);
-        writeTable(opt.resourceKey, rows);
-        fn.log('data', 'insert', opt.resourceKey, row);
-        return row;
-    };
-
-    fn.data.update = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
-        var row = rows.find(function (r) { return r.id === opt.id; });
-        if (row) {
-            row.data = opt.data;
-            writeTable(opt.resourceKey, rows);
-        }
-        fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
-        return row;
-    };
-
-    fn.data.delete = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
-        writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
-        fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
-    };
-
-    fn.localStorage.get = function(opt = {}) {
-        if (typeof(Storage) !== "undefined") {
-            return localStorage.getItem(opt.key);
-        }
-        return null;
-    };
-
-    fn.localStorage.set = function(opt = {}) {
-        if (typeof(Storage) !== "undefined") {
-            localStorage.setItem(opt.key, opt.value);
-        }
-    };
-
     fn.element.create = function(opt = {}) {
         var el = document.createElement(opt.tagName);
         if (opt.attribute) {
@@ -218,6 +142,82 @@
     fn.component.layout.get = function(opt = {}) {
         return this.data[opt.name];
     }
+
+    fn.localStorage.get = function(opt = {}) {
+        if (typeof(Storage) !== "undefined") {
+            return localStorage.getItem(opt.key);
+        }
+        return null;
+    };
+
+    fn.localStorage.set = function(opt = {}) {
+        if (typeof(Storage) !== "undefined") {
+            localStorage.setItem(opt.key, opt.value);
+        }
+    };
+
+    function readTable(resourceKey) {
+        var raw = fn.localStorage.get({ key: resourceKey });
+        return raw ? JSON.parse(raw) : [];
+    }
+
+    function writeTable(resourceKey, rows) {
+        fn.localStorage.set({ key: resourceKey, value: JSON.stringify(rows) });
+    }
+
+    fn.data.select = function (opt = {}) {
+        var rows = readTable(opt.resourceKey);
+        if (opt.id !== undefined) {
+            var row = rows.find(function (row) { return row.id === opt.id; });
+            fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
+            return row;
+        }
+        fn.log('data', 'select', opt.resourceKey, rows.length + ' rows', rows);
+        return rows;
+    };
+
+    fn.data.insert = function (opt = {}) {
+        var rows = readTable(opt.resourceKey);
+        var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
+        var row = { id: nextId, data: opt.data };
+        rows.push(row);
+        writeTable(opt.resourceKey, rows);
+        fn.log('data', 'insert', opt.resourceKey, row);
+        return row;
+    };
+
+    fn.data.update = function (opt = {}) {
+        var rows = readTable(opt.resourceKey);
+        var row = rows.find(function (r) { return r.id === opt.id; });
+        if (row) {
+            row.data = opt.data;
+            writeTable(opt.resourceKey, rows);
+        }
+        fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
+        return row;
+    };
+
+    fn.data.delete = function (opt = {}) {
+        var rows = readTable(opt.resourceKey);
+        writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+        fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
+    };
+
+    fn.ajax = async function (opt = {}) {
+        var method = (opt.method || 'POST').toUpperCase();
+        var options = { method: method };
+        if (method !== 'GET' && method !== 'HEAD') {
+            options.headers = { 'Content-Type': opt.contentType || 'application/json; charset=UTF-8' };
+            options.body = JSON.stringify(opt.data || {});
+        }
+
+        var response = await fetch(opt.url, options);
+        var result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error || response.statusText);
+        }
+        return result;
+    };
 
     global.fn = fn;
 })(window);
