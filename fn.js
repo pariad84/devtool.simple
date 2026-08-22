@@ -267,7 +267,17 @@
                             parent : document.body,
                             caller : listPopup,
                             resource : listPopup._.resource,
-                            data : {},
+                            buttons : {
+                                save : true,
+                            },
+                            complete : function(res) {
+                                fn.component.create({
+                                    name : 'form',
+                                    resource : listPopup._.resource,
+                                    data : {},
+                                    parent : res.el.content,
+                                });
+                            },
                         });
                     }
                 },
@@ -498,11 +508,10 @@
                 text : opt.title || 'Popup',
             });
 
-            var buttons = opt.data !== undefined ? Object.assign({ save : true }, opt.buttons) : opt.buttons;
             fn.component.create({
                 name : 'popup-buttons',
                 parent : header,
-                buttons : buttons,
+                buttons : opt.buttons,
             });
 
             var content = fn.element.create({
@@ -524,18 +533,9 @@
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
             popup._.resource = opt.resource;
-            popup._.data = opt.data;
             popup._.title = opt.title;
 
             var populate = function() {
-                if (popup._.data !== undefined) {
-                    fn.component.create({
-                        name : 'form',
-                        resource : popup._.resource,
-                        data : popup._.data,
-                        parent : popup.content,
-                    });
-                }
                 if (popup._.complete) {
                     popup._.complete({ el : popup });
                 }
@@ -726,7 +726,17 @@
                                 parent : document.body,
                                 caller : e.target.closest('.__popup'),
                                 resource : opt.resource,
-                                data : data,
+                                buttons : {
+                                    save : true,
+                                },
+                                complete : function(res) {
+                                    fn.component.create({
+                                        name : 'form',
+                                        resource : opt.resource,
+                                        data : data,
+                                        parent : res.el.content,
+                                    });
+                                },
                             });
                         },
                     },
