@@ -651,19 +651,6 @@
     fn.component.layout.set({
         name : 'list',
         value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
-            var listButtonStyle = {
-                padding : '4px 10px',
-                border : 'none',
-                borderRadius : '4px',
-                background : 'transparent',
-                color : '#e8eaed',
-                fontSize : '13px',
-                cursor : 'pointer',
-            };
-            var listButtonHoverStyle = {
-                background : '#3a3f4b',
-            };
-
             var el = fn.element.create({
                 tagName : 'table',
                 style : {
@@ -762,21 +749,14 @@
                         style : cellStyle,
                         parent : row,
                     });
-                    if (column.list.inputType === 'button') {
-                        fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            style : listButtonStyle,
-                            hoverStyle : listButtonHoverStyle,
-                            text : column.label || column.name,
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    window.open(data[column.list.field], '_blank');
-                                },
-                            },
-                            parent : cell,
-                        });
+                    if (column.list.render) {
+                        var render = eval('(' + column.list.render + ')');
+                        var rendered = render(data);
+                        if (rendered instanceof HTMLElement) {
+                            cell.appendChild(rendered);
+                        } else {
+                            cell.textContent = rendered;
+                        }
                     } else {
                         cell.textContent = data[column.name] !== undefined ? data[column.name] : '';
                     }
@@ -926,7 +906,7 @@
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                        { name : 'run', label : 'Run', list : { width : '70px', inputType : 'button', field : 'url' } },
+                        { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
                     ]),
                 },
             });
