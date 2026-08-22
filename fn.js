@@ -29,7 +29,6 @@
         return result;
     };
 
-    // localStorage를 테이블처럼 사용: key = resourceKey(테이블명), value = 레코드 배열(JSON)
     function readTable(resourceKey) {
         var raw = fn.localStorage.get({ key: resourceKey });
         return raw ? JSON.parse(raw) : [];
@@ -183,12 +182,9 @@
         }
         var el = layout(opt);
 
-        // 레이아웃이 다른 컴포넌트(fn.component.create 결과)를 그대로 반환한 경우
-        // (예: devtool -> popup) 이미 등록돼있으므로 이중 등록하지 않음
         if (!el._componentName) {
             el._componentName = opt.name;
 
-            // 레이아웃별로 컴포넌트를 fn.component.data에 저장
             if (!this.data[opt.name]) {
                 this.data[opt.name] = [];
             }
@@ -202,7 +198,6 @@
         return el;
     };
 
-    // fn.component.create로 만든 엘리먼트를 DOM과 fn.component.data에서 함께 제거
     fn.component.remove = function(el) {
         var name = el._componentName;
         if (name && this.data[name]) {
@@ -230,7 +225,6 @@
 (function(global) {
     var fn = global.fn;
 
-    // 팝업의 content 영역을 비우고 자기 complete 콜백으로 다시 그림
     function refreshPopup(popup) {
         Array.from(popup.content.children).forEach(function(child) {
             if (child._componentName) {
@@ -244,7 +238,6 @@
         }
     }
 
-    // popup-create/save/refresh/close-btn이 공유하는 기본 버튼 스타일
     var popupBtnStyle = {
         width: '26px',
         height: '26px',
@@ -458,7 +451,6 @@
     fn.component.layout.set({
         name: 'popup',
         value: function(opt = {}) {
-            // 팝업 위치 계산
             var top = 50;
             var left = 50;
             var offset = 30;
