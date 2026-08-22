@@ -24,4 +24,4 @@ The `?t=...` cache-busting query param means each click always fetches the lates
 
 ## Usage
 
-Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it, or press `Ctrl+\`` , to open the DevTool popup.
+Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it to open the DevTool popup.
