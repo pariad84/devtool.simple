@@ -868,6 +868,7 @@
             var el = fn.element.create({
                 tagName : 'table',
                 style : fn.component.layout._.style.table,
+                datas : opt.datas,
             });
 
             if (opt.resource.columns.some(function(column) { return !!column.list; })) {
@@ -987,6 +988,7 @@
                     flexDirection : 'column',
                     gap : '2px',
                 },
+                datas : opt.datas,
             });
             if (opt.datas && Array.isArray(opt.datas)) {
                 opt.datas.forEach(function(data) {
