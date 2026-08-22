@@ -145,7 +145,7 @@
 
     fn.component.layout.get = function(opt = {}) {
         return this.data[opt.name];
-    }
+    };
 
     fn.localStorage.get = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
