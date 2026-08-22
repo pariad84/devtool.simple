@@ -826,11 +826,6 @@
         name : 'devtool',
         value : function(opt = {}) {
             if (fn.data.select({ resourceKey : '_resource' }).length === 0) {
-                var basicColumns = [
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
-                    { name : 'data', label : 'Data', list : { width : 'auto' }, form : { inputType : 'text' } },
-                ];
                 fn.data.insert({
                     resourceKey : '_resource',
                     data : {
@@ -843,8 +838,30 @@
                         ]),
                     },
                 });
-                fn.data.insert({ resourceKey : '_resource', data : { name : 'Memo', key : 'memo', columns : JSON.stringify(basicColumns) } });
-                fn.data.insert({ resourceKey : '_resource', data : { name : 'Bookmark', key : 'bookmark', columns : JSON.stringify(basicColumns) } });
+                fn.data.insert({
+                    resourceKey : '_resource',
+                    data : {
+                        name : 'Memo',
+                        key : 'memo',
+                        columns : JSON.stringify([
+                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
+                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        ]),
+                    },
+                });
+                fn.data.insert({
+                    resourceKey : '_resource',
+                    data : {
+                        name : 'Bookmark',
+                        key : 'bookmark',
+                        columns : JSON.stringify([
+                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
+                            { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        ]),
+                    },
+                });
             }
 
             var datas = fn.data.select({ resourceKey : '_resource' }).map(function(row) {
