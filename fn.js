@@ -269,12 +269,6 @@
         if (setting.height) {
             opt.el.style.height = setting.height;
         }
-        if (setting.background) {
-            opt.el.style.background = setting.background;
-        }
-        if (setting.color) {
-            opt.el.style.color = setting.color;
-        }
     };
 
     fn.component._.applySettingAll = function() {
@@ -519,6 +513,58 @@
                         if (!visible) {
                             p.search.querySelector('input').focus();
                         }
+                    }
+                },
+            });
+        }
+    });
+
+    fn.component.layout.set({
+        name : 'popup-setting-btn',
+        value : function(opt = {}) {
+            return fn.element.create({
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Settings',
+                },
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '⚙',
+                event : {
+                    click : function(e) {
+                        var caller = e.target.closest('.__popup');
+                        var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
+                            return row.data.key === '_setting';
+                        });
+                        var resource = {
+                            key : resourceRow.data.key,
+                            type : resourceRow.data.type,
+                            columns : JSON.parse(resourceRow.data.columns),
+                        };
+                        fn.component.create({
+                            name : 'popup',
+                            title : 'Edit Setting',
+                            parent : document.body,
+                            caller : caller,
+                            resource : resource,
+                            initialize : function(opt) {
+                                fn.component.create({
+                                    name : 'popup-save-btn',
+                                    parent : opt.el.buttons,
+                                });
+                            },
+                            render : function(opt) {
+                                var rows = fn.data.select({ key : resource.key });
+                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
+                                fn.component.create({
+                                    name : 'form',
+                                    resource : resource,
+                                    data : formData,
+                                    parent : opt.el.content,
+                                });
+                            },
+                        });
                     }
                 },
             });
@@ -1028,8 +1074,16 @@
             return fn.component.create({
                 name : 'popup',
                 title : 'DevTool',
+                initialize : function(opt) {
+                    fn.component.create({
+                        name : 'popup-setting-btn',
+                        parent : opt.el.buttons,
+                    });
+                },
                 render : function(opt) {
-                    var datas = fn.data.select({ key : '_resource' }).map(function(row) {
+                    var datas = fn.data.select({ key : '_resource' }).filter(function(row) {
+                        return row.data.key !== '_setting';
+                    }).map(function(row) {
                         return {
                             id : row.id,
                             name : row.data.name,
@@ -1152,15 +1206,13 @@
                 columns : JSON.stringify([
                     { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'background', label : 'Popup background', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'color', label : 'Popup text color', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'reset', label : 'Reset', form : { render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reset all data'; btn.style.padding = '6px 14px'; btn.style.border = '1px solid #3a3f4b'; btn.style.borderRadius = '4px'; btn.style.background = '#2b2f38'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) { return; } fn.devtool._.reset(); fn.component._.applySettingAll(); var popup = e.target.closest('.__popup'); if (popup._.caller) { popup._.caller.refresh(); } fn.component.remove(popup); }); return btn; }" } },
                 ]),
             },
         });
         fn.data.insert({
             key : '_setting',
-            data : { width : '420px', height : '320px', background : '#1e2128', color : '#e8eaed' },
+            data : { width : '420px', height : '320px' },
         });
 
         for (var i = 1; i <= 20; i++) {
