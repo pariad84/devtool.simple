@@ -256,7 +256,7 @@
     var fn = global.fn;
 
     fn.component._.renderColumn = function(opt) {
-        var render = eval('(' + opt.source + ')');
+        var render = new Function('return (' + opt.source + ')')();
         return render(opt.data);
     };
 
