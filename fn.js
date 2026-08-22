@@ -236,15 +236,15 @@
             title: opt.title,
             parent: document.body,
             caller: opt.caller,
+            resource: opt.resource,
             buttons: {
                 save: true,
             },
             complete: function(formRes) {
                 fn.component.create({
                     name: 'form',
-                    columns: opt.columns,
+                    resource: opt.resource,
                     data: opt.data,
-                    resourceKey: opt.resourceKey,
                     parent: formRes.el.content,
                 });
             },
@@ -283,9 +283,8 @@
                         fn.component._.openFormPopup({
                             title: 'New',
                             caller: listPopup,
-                            columns: listPopup._.columns,
+                            resource: listPopup._.resource,
                             data: {},
-                            resourceKey: listPopup._.resourceKey,
                         });
                     }
                 },
@@ -312,13 +311,13 @@
                         var data = form.getData();
                         if (form._.data.id !== undefined) {
                             fn.data.update({
-                                resourceKey: form._.resourceKey,
+                                resourceKey: form._.resource.key,
                                 id: form._.data.id,
                                 data: data,
                             });
                         } else {
                             fn.data.insert({
-                                resourceKey: form._.resourceKey,
+                                resourceKey: form._.resource.key,
                                 data: data,
                             });
                         }
@@ -351,7 +350,7 @@
                             return;
                         }
                         fn.data.delete({
-                            resourceKey: form._.resourceKey,
+                            resourceKey: form._.resource.key,
                             id: form._.data.id,
                         });
                         if (popup._.caller) {
@@ -539,6 +538,7 @@
             popup.content = content;
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
+            popup._.resource = opt.resource;
             popup.refresh = function() {
                 Array.from(popup.content.children).forEach(function(child) {
                     if (child._.componentName) {
@@ -560,7 +560,7 @@
 
     fn.component.layout.set({
         name: 'form',
-        value: function(opt = {columns: [], data: {}}) {
+        value: function(opt = {resource: {key: '', columns: []}, data: {}}) {
             var el = fn.element.create({
                 tagName: 'table',
                 attribute: {
@@ -573,10 +573,10 @@
                 data: opt.data,
             });
 
-            el._.resourceKey = opt.resourceKey;
+            el._.resource = opt.resource;
             el._.inputs = {};
 
-            opt.columns.forEach(function(column) {
+            opt.resource.columns.forEach(function(column) {
                 if (!column.form) {
                     return;
                 }
@@ -636,7 +636,7 @@
 
             el.getData = function() {
                 var result = {};
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -647,7 +647,7 @@
             };
 
             el.setData = function(newData) {
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -664,7 +664,7 @@
 
     fn.component.layout.set({
         name: 'list',
-        value: function(opt = {columns: [], datas: []}) {
+        value: function(opt = {resource: {key: '', columns: []}, datas: []}) {
             var el = fn.element.create({
                 tagName: 'table',
                 style: {
@@ -673,7 +673,7 @@
                 },
             });
 
-            if (opt.columns.some(function(column) { return !!column.list; })) {
+            if (opt.resource.columns.some(function(column) { return !!column.list; })) {
                 var thead = fn.element.create({
                     tagName: 'thead',
                     parent: el,
@@ -682,7 +682,7 @@
                     tagName: 'tr',
                     parent: thead,
                 });
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.list) {
                         return;
                     }
@@ -707,7 +707,7 @@
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = !!opt.resourceKey;
+                var clickable = !!opt.resource;
                 var row = fn.element.create({
                     tagName: 'tr',
                     style: clickable ? { cursor: 'pointer' } : {},
@@ -720,9 +720,8 @@
                             fn.component._.openFormPopup({
                                 title: 'Edit ' + (opt.title || ''),
                                 caller: e.target.closest('.__popup'),
-                                columns: opt.columns,
+                                resource: opt.resource,
                                 data: data,
-                                resourceKey: opt.resourceKey,
                             });
                         },
                     },
@@ -735,8 +734,8 @@
                     borderBottom: '1px solid #2b2f38',
                 };
 
-                if (opt.columns.length) {
-                    opt.columns.forEach(function(column) {
+                if (opt.resource.columns.length) {
+                    opt.resource.columns.forEach(function(column) {
                         if (!column.list) {
                             return;
                         }
@@ -794,22 +793,20 @@
                                         title: opt.data.name,
                                         parent: document.body,
                                         caller: opt.caller,
+                                        resource: opt.data.resource,
                                         buttons: {
                                             create: true,
                                         },
                                         complete: function(res) {
-                                            res.el._.resourceKey = opt.data.resourceKey;
-                                            res.el._.columns = opt.data.columns;
-                                            var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
+                                            var rows = fn.data.select({ resourceKey: opt.data.resource.key });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id: row.id }, row.data);
                                             });
                                             fn.component.create({
                                                 name: 'list',
                                                 title: opt.data.name,
-                                                columns: opt.data.columns,
+                                                resource: opt.data.resource,
                                                 datas: listDatas,
-                                                resourceKey: opt.data.resourceKey,
                                                 parent: res.el.content,
                                             });
                                         },
@@ -832,22 +829,26 @@
                 {
                     id: 1,
                     name: 'Memo',
-                    resourceKey: 'memo',
-                    columns: [
-                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
-                    ],
+                    resource: {
+                        key: 'memo',
+                        columns: [
+                            { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
+                            { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
+                            { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
+                        ],
+                    },
                 },
                 {
                     id: 2,
                     name: 'Bookmark',
-                    resourceKey: 'bookmark',
-                    columns: [
-                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
-                    ],
+                    resource: {
+                        key: 'bookmark',
+                        columns: [
+                            { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
+                            { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
+                            { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
+                        ],
+                    },
                 },
             ];
 
