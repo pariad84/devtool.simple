@@ -230,27 +230,6 @@
 (function(global) {
     var fn = global.fn;
 
-    fn.component._.openFormPopup = function(opt) {
-        fn.component.create({
-            name : 'popup',
-            title : opt.title,
-            parent : document.body,
-            caller : opt.caller,
-            resource : opt.resource,
-            buttons : {
-                save : true,
-            },
-            complete : function(formRes) {
-                fn.component.create({
-                    name : 'form',
-                    resource : opt.resource,
-                    data : opt.data,
-                    parent : formRes.el.content,
-                });
-            },
-        });
-    };
-
     var popupBtnStyle = {
         width : '26px',
         height : '26px',
@@ -280,8 +259,10 @@
                 event : {
                     click : function(e) {
                         var listPopup = e.target.closest('.__popup');
-                        fn.component._.openFormPopup({
+                        fn.component.create({
+                            name : 'popup',
                             title : 'New',
+                            parent : document.body,
                             caller : listPopup,
                             resource : listPopup._.resource,
                             data : {},
@@ -515,10 +496,11 @@
                 text : opt.title || 'Popup',
             });
 
+            var buttons = opt.data !== undefined ? Object.assign({ save : true }, opt.buttons) : opt.buttons;
             fn.component.create({
                 name : 'popup-buttons',
                 parent : header,
-                buttons : opt.buttons,
+                buttons : buttons,
             });
 
             var content = fn.element.create({
@@ -540,6 +522,22 @@
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
             popup._.resource = opt.resource;
+            popup._.data = opt.data;
+
+            var populate = function() {
+                if (popup._.data !== undefined) {
+                    fn.component.create({
+                        name : 'form',
+                        resource : popup._.resource,
+                        data : popup._.data,
+                        parent : popup.content,
+                    });
+                }
+                if (popup._.complete) {
+                    popup._.complete({ el : popup });
+                }
+            };
+
             popup.refresh = function() {
                 Array.from(popup.content.children).forEach(function(child) {
                     if (child._.componentName) {
@@ -548,13 +546,10 @@
                         child.remove();
                     }
                 });
-                if (popup._.complete) {
-                    popup._.complete({ el : popup });
-                }
+                populate();
             };
-            if (opt.complete) {
-                opt.complete({ el : popup });
-            }
+
+            populate();
             return popup;
         }
     });
@@ -722,8 +717,10 @@
                             if (!clickable) {
                                 return;
                             }
-                            fn.component._.openFormPopup({
+                            fn.component.create({
+                                name : 'popup',
                                 title : 'Edit ' + (opt.title || ''),
+                                parent : document.body,
                                 caller : e.target.closest('.__popup'),
                                 resource : opt.resource,
                                 data : data,
