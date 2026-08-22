@@ -9,6 +9,10 @@
     fn.component.layout = {};
     fn.component.layout.data = {};
 
+    fn.log = function(scope, action, ...args) {
+        console.log('[fn.' + scope + ']', action, ...args);
+    };
+
     fn.ajax = async function (opt = {}) {
         var method = (opt.method || 'POST').toUpperCase();
         var options = { method: method };
@@ -25,7 +29,6 @@
         return result;
     };
 
-    // localStorage를 테이블처럼 사용: key = resourceKey(테이블명), value = 레코드 배열(JSON)
     function readTable(resourceKey) {
         var raw = fn.localStorage.get({ key: resourceKey });
         return raw ? JSON.parse(raw) : [];
@@ -38,8 +41,11 @@
     fn.data.select = function (opt = {}) {
         var rows = readTable(opt.resourceKey);
         if (opt.id !== undefined) {
-            return rows.find(function (row) { return row.id === opt.id; });
+            var row = rows.find(function (row) { return row.id === opt.id; });
+            fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
+            return row;
         }
+        fn.log('data', 'select', opt.resourceKey, rows.length + '건', rows);
         return rows;
     };
 
@@ -49,6 +55,7 @@
         var row = { id: nextId, data: opt.data };
         rows.push(row);
         writeTable(opt.resourceKey, rows);
+        fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
 
@@ -59,12 +66,14 @@
             row.data = opt.data;
             writeTable(opt.resourceKey, rows);
         }
+        fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.remove = function (opt = {}) {
         var rows = readTable(opt.resourceKey);
         writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+        fn.log('data', 'remove', opt.resourceKey, 'id=' + opt.id);
     };
 
     fn.localStorage.get = function(opt = {}) {
@@ -173,16 +182,14 @@
         }
         var el = layout(opt);
 
-        // 레이아웃이 다른 컴포넌트(fn.component.create 결과)를 그대로 반환한 경우
-        // (예: devtool -> popup) 이미 등록돼있으므로 이중 등록하지 않음
         if (!el._componentName) {
             el._componentName = opt.name;
 
-            // 레이아웃별로 컴포넌트를 fn.component.data에 저장
             if (!this.data[opt.name]) {
                 this.data[opt.name] = [];
             }
             this.data[opt.name].push(el);
+            fn.log('component', 'create', opt.name, this.data[opt.name].length + '개', el);
         }
 
         if (opt.parent) {
@@ -191,7 +198,6 @@
         return el;
     };
 
-    // fn.component.create로 만든 엘리먼트를 DOM과 fn.component.data에서 함께 제거
     fn.component.remove = function(el) {
         var name = el._componentName;
         if (name && this.data[name]) {
@@ -199,6 +205,7 @@
             if (idx !== -1) {
                 this.data[name].splice(idx, 1);
             }
+            fn.log('component', 'remove', name, this.data[name].length + '개', el);
         }
         el.remove();
     };
@@ -218,7 +225,6 @@
 (function(global) {
     var fn = global.fn;
 
-    // 팝업의 content 영역을 비우고 자기 complete 콜백으로 다시 그림
     function refreshPopup(popup) {
         Array.from(popup.content.children).forEach(function(child) {
             if (child._componentName) {
@@ -232,7 +238,6 @@
         }
     }
 
-    // popup-create/save/refresh/close-btn이 공유하는 기본 버튼 스타일
     var popupBtnStyle = {
         width: '26px',
         height: '26px',
@@ -446,7 +451,6 @@
     fn.component.layout.set({
         name: 'popup',
         value: function(opt = {}) {
-            // 팝업 위치 계산
             var top = 50;
             var left = 50;
             var offset = 30;
