@@ -111,14 +111,12 @@
         }
         var el = layout(opt);
 
-        if (opt.name === 'popup' && !el._.componentName) {
-            el._.componentName = opt.name;
-
-            if (!this.data[opt.name]) {
-                this.data[opt.name] = [];
+        if (opt.name === 'popup') {
+            if (!this.data.popup) {
+                this.data.popup = [];
             }
-            this.data[opt.name].push(el);
-            fn.log('component', 'create', opt.name, this.data[opt.name].length + ' alive', el);
+            this.data.popup.push(el);
+            fn.log('component', 'create', opt.name, this.data.popup.length + ' alive', el);
         }
 
         if (opt.parent) {
@@ -128,14 +126,11 @@
     };
 
     fn.component.remove = function(el) {
-        var name = el._.componentName;
-        if (name && this.data[name]) {
-            var idx = this.data[name].indexOf(el);
-            if (idx !== -1) {
-                this.data[name].splice(idx, 1);
-            }
-            fn.log('component', 'remove', name, this.data[name].length + ' alive', el);
+        var idx = this.data.popup.indexOf(el);
+        if (idx !== -1) {
+            this.data.popup.splice(idx, 1);
         }
+        fn.log('component', 'remove', 'popup', this.data.popup.length + ' alive', el);
         el.remove();
     };
 
