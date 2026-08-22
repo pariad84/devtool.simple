@@ -440,6 +440,69 @@
     });
 
     fn.component.layout.set({
+        name : 'popup-search-btn',
+        value : function(opt = {}) {
+            var popup = opt.parent.closest('.__popup');
+
+            var searchBar = fn.element.create({
+                tagName : 'div',
+                style : {
+                    display : 'none',
+                    padding : '0 12px 12px',
+                },
+            });
+            fn.element.create({
+                parent : searchBar,
+                tagName : 'input',
+                attribute : {
+                    type : 'text',
+                    placeholder : 'Search...',
+                },
+                style : {
+                    width : '100%',
+                    boxSizing : 'border-box',
+                    padding : '5px 8px',
+                    background : '#14161b',
+                    border : '1px solid #3a3f4b',
+                    borderRadius : '4px',
+                    color : '#e8eaed',
+                    font : 'inherit',
+                },
+                event : {
+                    input : function(e) {
+                        var p = e.target.closest('.__popup');
+                        p._.search = e.target.value;
+                        p.refresh();
+                    },
+                },
+            });
+            popup.content.parentNode.insertBefore(searchBar, popup.content);
+            popup.search = searchBar;
+
+            return fn.element.create({
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Search',
+                },
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '🔍',
+                event : {
+                    click : function(e) {
+                        var p = e.target.closest('.__popup');
+                        var visible = p.search.style.display !== 'none';
+                        p.search.style.display = visible ? 'none' : 'block';
+                        if (!visible) {
+                            p.search.querySelector('input').focus();
+                        }
+                    }
+                },
+            });
+        }
+    });
+
+    fn.component.layout.set({
         name : 'popup-buttons',
         value : function(opt = {}) {
             return fn.element.create({
@@ -868,6 +931,12 @@
                                                 name : isObject ? 'popup-save-btn' : 'popup-create-btn',
                                                 parent : opt.el.buttons,
                                             });
+                                            if (!isObject) {
+                                                fn.component.create({
+                                                    name : 'popup-search-btn',
+                                                    parent : opt.el.buttons,
+                                                });
+                                            }
                                         },
                                         render : function(opt) {
                                             var rows = fn.data.select({ key : data.resource.key });
@@ -880,6 +949,12 @@
                                                     parent : opt.el.content,
                                                 });
                                                 return;
+                                            }
+                                            var search = (opt.el._.search || '').toLowerCase();
+                                            if (search) {
+                                                rows = rows.filter(function(row) {
+                                                    return JSON.stringify(row.data).toLowerCase().indexOf(search) !== -1;
+                                                });
                                             }
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
