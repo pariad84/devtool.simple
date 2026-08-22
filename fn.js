@@ -255,26 +255,27 @@
         });
     };
 
-    fn.component._.actionButtonStyle = {
-        border : 'none',
-        borderRadius : '4px',
-        color : '#e8eaed',
-        fontSize : '13px',
-        cursor : 'pointer',
-    };
-
-    var popupBtnStyle = {
-        width : '26px',
-        height : '26px',
-        border : 'none',
-        borderRadius : '4px',
-        background : 'transparent',
-        color : '#e8eaed',
-        fontSize : '13px',
-        cursor : 'pointer',
-    };
-    var popupBtnHoverStyle = {
-        background : '#3a3f4b',
+    fn.component._.style = {
+        popupBtn : {
+            width : '26px',
+            height : '26px',
+            border : 'none',
+            borderRadius : '4px',
+            background : 'transparent',
+            color : '#e8eaed',
+            fontSize : '13px',
+            cursor : 'pointer',
+        },
+        popupBtnHover : {
+            background : '#3a3f4b',
+        },
+        actionButton : {
+            border : 'none',
+            borderRadius : '4px',
+            color : '#e8eaed',
+            fontSize : '13px',
+            cursor : 'pointer',
+        },
     };
 
     fn.component.layout.set({
@@ -286,8 +287,8 @@
                     type : 'button',
                     title : 'New',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '✏️',
                 event : {
                     click : function(e) {
@@ -328,8 +329,8 @@
                     type : 'button',
                     title : 'Save',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '💾',
                 event : {
                     click : function(e) {
@@ -370,8 +371,8 @@
                     type : 'button',
                     title : 'Delete',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '🗑️',
                 event : {
                     click : function(e) {
@@ -403,8 +404,8 @@
                     type : 'button',
                     title : 'Refresh',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '↻',
                 event : {
                     click : function(e) {
@@ -424,8 +425,8 @@
                     type : 'button',
                     title : 'Close',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '✕',
                 event : {
                     click : function(e) {
@@ -488,8 +489,8 @@
                     type : 'button',
                     title : 'Search',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '🔍',
                 event : {
                     click : function(e) {
@@ -514,8 +515,8 @@
                     type : 'button',
                     title : 'Settings',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '⚙',
                 event : {
                     click : function(e) {
@@ -1142,7 +1143,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1199,7 +1200,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1271,7 +1272,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Reset all data',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
