@@ -463,6 +463,12 @@
             if (settings.height) {
                 style.height = settings.height;
             }
+            if (settings.background) {
+                style.background = settings.background;
+            }
+            if (settings.color) {
+                style.color = settings.color;
+            }
 
             var popup = fn.element.create({
                 tagName : 'div',
@@ -951,12 +957,14 @@
                     columns : JSON.stringify([
                         { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'background', label : 'Popup background', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'color', label : 'Popup text color', list : { width : '160px' }, form : { inputType : 'text' } },
                     ]),
                 },
             });
             fn.data.insert({
                 key : '_settings',
-                data : { width : '', height : '' },
+                data : { width : '', height : '', background : '', color : '' },
             });
 
             for (var i = 1; i <= 20; i++) {
