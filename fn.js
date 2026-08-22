@@ -834,7 +834,7 @@
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                             { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'text' } },
+                            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                         ]),
                     },
                 });
@@ -846,7 +846,7 @@
                         columns : JSON.stringify([
                             { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                             { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
-                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'text' } },
+                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                         ]),
                     },
                 });
