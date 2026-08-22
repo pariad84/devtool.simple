@@ -898,11 +898,6 @@
                         { name : 'url', label : 'URL', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'run', label : 'Run', list : {
                             inputType : 'button',
-                            event : {
-                                click : function(e) {
-                                    
-                                }
-                            },
                         }},
                     ]),
                 },
