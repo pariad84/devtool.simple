@@ -435,8 +435,8 @@
                 left = callerLeft + offset;
             }
 
-            var settingsRows = fn.data.select({ key : '_settings' });
-            var settings = settingsRows[0] ? settingsRows[0].data : {};
+            var settingRows = fn.data.select({ key : '_setting' });
+            var setting = settingRows[0] ? settingRows[0].data : {};
 
             var style = {
                 position : 'fixed',
@@ -457,17 +457,17 @@
                 resize : 'both',
                 overflow : 'hidden',
             };
-            if (settings.width) {
-                style.width = settings.width;
+            if (setting.width) {
+                style.width = setting.width;
             }
-            if (settings.height) {
-                style.height = settings.height;
+            if (setting.height) {
+                style.height = setting.height;
             }
-            if (settings.background) {
-                style.background = settings.background;
+            if (setting.background) {
+                style.background = setting.background;
             }
-            if (settings.color) {
-                style.color = settings.color;
+            if (setting.color) {
+                style.color = setting.color;
             }
 
             var popup = fn.element.create({
@@ -952,8 +952,8 @@
             fn.data.insert({
                 key : '_resource',
                 data : {
-                    name : 'Settings',
-                    key : '_settings',
+                    name : 'Setting',
+                    key : '_setting',
                     columns : JSON.stringify([
                         { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
@@ -963,7 +963,7 @@
                 },
             });
             fn.data.insert({
-                key : '_settings',
+                key : '_setting',
                 data : { width : '', height : '', background : '', color : '' },
             });
 
