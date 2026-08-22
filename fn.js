@@ -501,7 +501,7 @@
                 },
             });
 
-            var title = fn.element.create({
+            fn.element.create({
                 parent: header,
                 tagName: 'div',
                 style: {
@@ -535,7 +535,6 @@
 
             popup.header = header;
             popup.content = content;
-            popup.title = title;
             popup._complete = opt.complete;
             popup._caller = opt.caller;
             if (opt.complete) {
