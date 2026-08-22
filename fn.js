@@ -267,18 +267,18 @@
                             parent : document.body,
                             caller : listPopup,
                             resource : listPopup._.resource,
-                            initialize : function(res) {
+                            initialize : function(opt) {
                                 fn.component.create({
                                     name : 'popup-save-btn',
-                                    parent : res.el.buttons,
+                                    parent : opt.el.buttons,
                                 });
                             },
-                            render : function(res) {
+                            render : function(opt) {
                                 fn.component.create({
                                     name : 'form',
                                     resource : listPopup._.resource,
                                     data : {},
-                                    parent : res.el.content,
+                                    parent : opt.el.content,
                                 });
                             },
                         });
@@ -703,28 +703,29 @@
                             if (!clickable) {
                                 return;
                             }
+                            var resource = opt.resource;
                             fn.component.create({
                                 name : 'popup',
                                 title : 'Edit ' + (opt.title || ''),
                                 parent : document.body,
                                 caller : e.target.closest('.__popup'),
-                                resource : opt.resource,
-                                initialize : function(res) {
+                                resource : resource,
+                                initialize : function(opt) {
                                     fn.component.create({
                                         name : 'popup-save-btn',
-                                        parent : res.el.buttons,
+                                        parent : opt.el.buttons,
                                     });
                                     fn.component.create({
                                         name : 'popup-delete-btn',
-                                        parent : res.el.buttons,
+                                        parent : opt.el.buttons,
                                     });
                                 },
-                                render : function(res) {
+                                render : function(opt) {
                                     fn.component.create({
                                         name : 'form',
-                                        resource : opt.resource,
+                                        resource : resource,
                                         data : data,
-                                        parent : res.el.content,
+                                        parent : opt.el.content,
                                     });
                                 },
                             });
@@ -799,23 +800,23 @@
                                         parent : document.body,
                                         caller : opt.caller,
                                         resource : opt.data.resource,
-                                        initialize : function(res) {
+                                        initialize : function(opt) {
                                             fn.component.create({
                                                 name : 'popup-create-btn',
-                                                parent : res.el.buttons,
+                                                parent : opt.el.buttons,
                                             });
                                         },
-                                        render : function(res) {
-                                            var rows = fn.data.select({ key : opt.data.resource.key });
+                                        render : function(opt) {
+                                            var rows = fn.data.select({ key : data.resource.key });
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
                                             });
                                             fn.component.create({
                                                 name : 'list',
-                                                title : opt.data.name,
-                                                resource : opt.data.resource,
+                                                title : data.name,
+                                                resource : data.resource,
                                                 datas : listDatas,
-                                                parent : res.el.content,
+                                                parent : opt.el.content,
                                             });
                                         },
                                     });
@@ -836,7 +837,7 @@
             return fn.component.create({
                 name : 'popup',
                 title : 'DevTool',
-                render : function(res) {
+                render : function(opt) {
                     if (fn.data.select({ key : '_resource' }).length === 0) {
                         fn.data.insert({
                             key : '_resource',
@@ -898,9 +899,9 @@
 
                     fn.component.create({
                         name : 'menu',
-                        caller : res.el,
+                        caller : opt.el,
                         datas : datas,
-                        parent : res.el.content,
+                        parent : opt.el.content,
                     });
                 },
             });
