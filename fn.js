@@ -834,20 +834,31 @@
                         event : {
                             click : function(opt){
                                 return function(e){
+                                    var isObject = opt.data.resource.type === 'object';
                                     fn.component.create({
                                         name : 'popup',
-                                        title : opt.data.name,
+                                        title : isObject ? ('Edit ' + opt.data.name) : opt.data.name,
                                         parent : document.body,
                                         caller : opt.caller,
                                         resource : opt.data.resource,
                                         initialize : function(opt) {
                                             fn.component.create({
-                                                name : 'popup-create-btn',
+                                                name : isObject ? 'popup-save-btn' : 'popup-create-btn',
                                                 parent : opt.el.buttons,
                                             });
                                         },
                                         render : function(opt) {
                                             var rows = fn.data.select({ key : data.resource.key });
+                                            if (isObject) {
+                                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
+                                                fn.component.create({
+                                                    name : 'form',
+                                                    resource : data.resource,
+                                                    data : formData,
+                                                    parent : opt.el.content,
+                                                });
+                                                return;
+                                            }
                                             var listDatas = rows.map(function(row) {
                                                 return Object.assign({ id : row.id }, row.data);
                                             });
@@ -884,6 +895,7 @@
                             name : row.data.name,
                             resource : {
                                 key : row.data.key,
+                                type : row.data.type,
                                 columns : JSON.parse(row.data.columns),
                             },
                         };
@@ -919,9 +931,11 @@
                 data : {
                     name : 'Resource',
                     key : '_resource',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                        { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
                         { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                     ]),
                 },
@@ -931,6 +945,7 @@
                 data : {
                     name : 'Memo',
                     key : 'memo',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
@@ -942,6 +957,7 @@
                 data : {
                     name : 'Bookmark',
                     key : 'bookmark',
+                    type : 'array',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
@@ -954,6 +970,7 @@
                 data : {
                     name : 'Setting',
                     key : '_setting',
+                    type : 'object',
                     columns : JSON.stringify([
                         { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                         { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
