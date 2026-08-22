@@ -840,58 +840,58 @@
     fn.component.layout.set({
         name : 'devtool',
         value : function(opt = {}) {
-            if (fn.data.select({ key : '_resource' }).length === 0) {
-                fn.data.insert({
-                    key : '_resource',
-                    data : {
-                        name : 'Resource',
-                        key : '_resource',
-                        columns : JSON.stringify([
-                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                            { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                        ]),
-                    },
-                });
-                fn.data.insert({
-                    key : '_resource',
-                    data : {
-                        name : 'Memo',
-                        key : 'memo',
-                        columns : JSON.stringify([
-                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                            { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                        ]),
-                    },
-                });
-                fn.data.insert({
-                    key : '_resource',
-                    data : {
-                        name : 'Bookmark',
-                        key : 'bookmark',
-                        columns : JSON.stringify([
-                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                            { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                        ]),
-                    },
-                });
-            }
-
-            var datas = fn.data.select({ key : '_resource' }).map(function(row) {
-                return {
-                    id : row.id,
-                    name : row.data.name,
-                    resource : {
-                        key : row.data.key,
-                        columns : JSON.parse(row.data.columns),
-                    },
-                };
-            });
-
             return fn.component.create({
                 name : 'popup',
                 title : 'DevTool',
                 complete : function(res) {
+                    if (fn.data.select({ key : '_resource' }).length === 0) {
+                        fn.data.insert({
+                            key : '_resource',
+                            data : {
+                                name : 'Resource',
+                                key : '_resource',
+                                columns : JSON.stringify([
+                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                                ]),
+                            },
+                        });
+                        fn.data.insert({
+                            key : '_resource',
+                            data : {
+                                name : 'Memo',
+                                key : 'memo',
+                                columns : JSON.stringify([
+                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                                    { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                                ]),
+                            },
+                        });
+                        fn.data.insert({
+                            key : '_resource',
+                            data : {
+                                name : 'Bookmark',
+                                key : 'bookmark',
+                                columns : JSON.stringify([
+                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                                ]),
+                            },
+                        });
+                    }
+
+                    var datas = fn.data.select({ key : '_resource' }).map(function(row) {
+                        return {
+                            id : row.id,
+                            name : row.data.name,
+                            resource : {
+                                key : row.data.key,
+                                columns : JSON.parse(row.data.columns),
+                            },
+                        };
+                    });
+
                     fn.component.create({
                         name : 'menu',
                         caller : res.el,
