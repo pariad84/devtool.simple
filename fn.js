@@ -255,26 +255,41 @@
         });
     };
 
-    fn.component._.actionButtonStyle = {
-        border : 'none',
-        borderRadius : '4px',
-        color : '#e8eaed',
-        fontSize : '13px',
-        cursor : 'pointer',
-    };
-
-    var popupBtnStyle = {
-        width : '26px',
-        height : '26px',
-        border : 'none',
-        borderRadius : '4px',
-        background : 'transparent',
-        color : '#e8eaed',
-        fontSize : '13px',
-        cursor : 'pointer',
-    };
-    var popupBtnHoverStyle = {
-        background : '#3a3f4b',
+    fn.component._.style = {
+        popupBtn : {
+            width : '26px',
+            height : '26px',
+            border : 'none',
+            borderRadius : '4px',
+            background : 'transparent',
+            color : '#e8eaed',
+            fontSize : '13px',
+            cursor : 'pointer',
+        },
+        popupBtnHover : {
+            background : '#3a3f4b',
+        },
+        actionButton : {
+            border : 'none',
+            borderRadius : '4px',
+            color : '#e8eaed',
+            fontSize : '13px',
+            cursor : 'pointer',
+        },
+        input : {
+            width : '100%',
+            boxSizing : 'border-box',
+            padding : '5px 8px',
+            background : '#14161b',
+            border : '1px solid #3a3f4b',
+            borderRadius : '4px',
+            color : '#e8eaed',
+            font : 'inherit',
+        },
+        table : {
+            width : '100%',
+            borderCollapse : 'collapse',
+        },
     };
 
     fn.component.layout.set({
@@ -286,8 +301,8 @@
                     type : 'button',
                     title : 'New',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '✏️',
                 event : {
                     click : function(e) {
@@ -328,8 +343,8 @@
                     type : 'button',
                     title : 'Save',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '💾',
                 event : {
                     click : function(e) {
@@ -370,8 +385,8 @@
                     type : 'button',
                     title : 'Delete',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '🗑️',
                 event : {
                     click : function(e) {
@@ -403,8 +418,8 @@
                     type : 'button',
                     title : 'Refresh',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '↻',
                 event : {
                     click : function(e) {
@@ -424,8 +439,8 @@
                     type : 'button',
                     title : 'Close',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '✕',
                 event : {
                     click : function(e) {
@@ -461,16 +476,7 @@
                     type : 'text',
                     placeholder : 'Search ' + labels.join(', '),
                 },
-                style : {
-                    width : '100%',
-                    boxSizing : 'border-box',
-                    padding : '5px 8px',
-                    background : '#14161b',
-                    border : '1px solid #3a3f4b',
-                    borderRadius : '4px',
-                    color : '#e8eaed',
-                    font : 'inherit',
-                },
+                style : fn.component._.style.input,
                 event : {
                     input : function(e) {
                         var p = e.target.closest('.__popup');
@@ -488,8 +494,8 @@
                     type : 'button',
                     title : 'Search',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '🔍',
                 event : {
                     click : function(e) {
@@ -514,8 +520,8 @@
                     type : 'button',
                     title : 'Settings',
                 },
-                style : popupBtnStyle,
-                hoverStyle : popupBtnHoverStyle,
+                style : fn.component._.style.popupBtn,
+                hoverStyle : fn.component._.style.popupBtnHover,
                 text : '⚙',
                 event : {
                     click : function(e) {
@@ -732,10 +738,7 @@
                 attribute : {
                     class : '__form',
                 },
-                style : {
-                    width : '100%',
-                    borderCollapse : 'collapse',
-                },
+                style : fn.component._.style.table,
                 data : opt.data,
             });
 
@@ -779,16 +782,10 @@
                     input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
-                    var inputStyle = {
-                        width : column.form.width || '100%',
-                        boxSizing : 'border-box',
-                        padding : '5px 8px',
-                        background : '#14161b',
-                        border : '1px solid #3a3f4b',
-                        borderRadius : '4px',
-                        color : '#e8eaed',
-                        font : 'inherit',
-                    };
+                    var inputStyle = Object.assign({}, fn.component._.style.input);
+                    if (column.form.width) {
+                        inputStyle.width = column.form.width;
+                    }
 
                     if (column.form.inputType === 'select') {
                         input = fn.element.create({
@@ -869,10 +866,7 @@
         value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
             var el = fn.element.create({
                 tagName : 'table',
-                style : {
-                    width : '100%',
-                    borderCollapse : 'collapse',
-                },
+                style : fn.component._.style.table,
             });
 
             if (opt.resource.columns.some(function(column) { return !!column.list; })) {
@@ -1142,7 +1136,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1199,7 +1193,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1271,7 +1265,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Reset all data',
-                            style : Object.assign({}, fn.component._.actionButtonStyle, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            style : Object.assign({}, fn.component._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
