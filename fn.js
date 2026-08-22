@@ -879,6 +879,17 @@
                                 ]),
                             },
                         });
+
+                        for (var i = 1; i <= 20; i++) {
+                            fn.data.insert({
+                                key : 'memo',
+                                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
+                            });
+                            fn.data.insert({
+                                key : 'bookmark',
+                                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
+                            });
+                        }
                     }
 
                     var datas = fn.data.select({ key : '_resource' }).map(function(row) {
