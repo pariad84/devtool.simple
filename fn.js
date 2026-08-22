@@ -239,6 +239,27 @@
         }
     }
 
+    function openFormPopup(opt) {
+        fn.component.create({
+            name: 'popup',
+            title: opt.title,
+            parent: document.body,
+            caller: opt.caller,
+            buttons: {
+                save: true,
+            },
+            complete: function(formRes) {
+                fn.component.create({
+                    name: 'form',
+                    columns: opt.columns,
+                    data: opt.data,
+                    resourceKey: opt.resourceKey,
+                    parent: formRes.el.content,
+                });
+            },
+        });
+    }
+
     var popupBtnStyle = {
         width: '26px',
         height: '26px',
@@ -268,23 +289,12 @@
                 event: {
                     click: function(e) {
                         var listPopup = e.target.closest('.__popup');
-                        fn.component.create({
-                            name: 'popup',
+                        openFormPopup({
                             title: 'New',
-                            parent: document.body,
                             caller: listPopup,
-                            buttons: {
-                                save: true,
-                            },
-                            complete: function(formRes) {
-                                fn.component.create({
-                                    name: 'form',
-                                    columns: listPopup._columns,
-                                    data: {},
-                                    resourceKey: listPopup._resourceKey,
-                                    parent: formRes.el.content,
-                                });
-                            },
+                            columns: listPopup._columns,
+                            data: {},
+                            resourceKey: listPopup._resourceKey,
                         });
                     }
                 },
@@ -573,25 +583,25 @@
                     parent: el,
                 });
 
+                var cellStyle = {
+                    padding: '6px 0',
+                    verticalAlign: 'middle',
+                };
+
                 fn.element.create({
                     tagName: 'td',
-                    style: {
-                        padding: '6px 0',
-                        verticalAlign: 'middle',
+                    style: Object.assign({}, cellStyle, {
                         width: '30%',
                         color: '#9aa0a6',
                         paddingRight: '8px',
-                    },
+                    }),
                     text: column.label || column.name,
                     parent: row,
                 });
 
                 var valueCell = fn.element.create({
                     tagName: 'td',
-                    style: {
-                        padding: '6px 0',
-                        verticalAlign: 'middle',
-                    },
+                    style: cellStyle,
                     parent: row,
                 });
 
@@ -704,23 +714,12 @@
                             if (!clickable) {
                                 return;
                             }
-                            fn.component.create({
-                                name: 'popup',
+                            openFormPopup({
                                 title: 'Edit ' + (opt.title || ''),
-                                parent: document.body,
                                 caller: e.target.closest('.__popup'),
-                                buttons: {
-                                    save: true,
-                                },
-                                complete: function(formRes) {
-                                    fn.component.create({
-                                        name: 'form',
-                                        columns: opt.columns,
-                                        data: data,
-                                        resourceKey: opt.resourceKey,
-                                        parent: formRes.el.content,
-                                    });
-                                },
+                                columns: opt.columns,
+                                data: data,
+                                resourceKey: opt.resourceKey,
                             });
                         },
                     },
@@ -813,7 +812,7 @@
                                         },
                                     });
                                 }
-                            }({caller : el, data : data}),
+                            }({caller : opt.caller, data : data}),
                         },
                         data: data,
                     });
