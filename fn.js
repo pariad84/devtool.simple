@@ -5,6 +5,7 @@
     fn.element = {};
     fn.data = {};
     fn.component = {};
+    fn.devtool = {};
     fn.component.data = {};
     fn.component.layout = {};
     fn.component.layout.data = {};
@@ -862,10 +863,20 @@
             });
         }
     });
-})(window);
 
-document.addEventListener('keydown', function(e) {
-    if(e.ctrlKey && e.key == "`"){
+    fn.devtool.open = function() {
+        fn.component.create({
+            name: 'devtool',
+            parent: document.body,
+        });
+    };
+
+    fn.devtool.start = function() {
+        if (fn.devtool._started) {
+            return;
+        }
+        fn.devtool._started = true;
+
         fn.element.create({
             tagName: 'button',
             attribute: {
@@ -892,14 +903,17 @@ document.addEventListener('keydown', function(e) {
             },
             text: '⚙',
             event: {
-                click: function() {
-                    fn.component.create({
-                        name: 'devtool',
-                        parent: document.body,
-                    });
-                },
+                click: fn.devtool.open,
             },
             parent: document.body,
         });
-    }
-});
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key == '`') {
+                fn.devtool.open();
+            }
+        });
+    };
+})(window);
+
+fn.devtool.start();
