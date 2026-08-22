@@ -895,7 +895,15 @@
                     key : 'bookmark',
                     columns : JSON.stringify([
                         { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                        { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        { name : 'url', label : 'URL', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'run', label : 'Run', list : { width : 'auto' }, form : {
+                            inputType : 'button',
+                            event : {
+                                click : function(e) {
+                                    
+                                }
+                            },
+                        } },
                     ]),
                 },
             });
