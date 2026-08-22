@@ -45,7 +45,7 @@
             fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
             return row;
         }
-        fn.log('data', 'select', opt.resourceKey, rows.length + '건', rows);
+        fn.log('data', 'select', opt.resourceKey, rows.length + ' rows', rows);
         return rows;
     };
 
@@ -189,7 +189,7 @@
                 this.data[opt.name] = [];
             }
             this.data[opt.name].push(el);
-            fn.log('component', 'create', opt.name, this.data[opt.name].length + '개', el);
+            fn.log('component', 'create', opt.name, this.data[opt.name].length + ' alive', el);
         }
 
         if (opt.parent) {
@@ -205,7 +205,7 @@
             if (idx !== -1) {
                 this.data[name].splice(idx, 1);
             }
-            fn.log('component', 'remove', name, this.data[name].length + '개', el);
+            fn.log('component', 'remove', name, this.data[name].length + ' alive', el);
         }
         el.remove();
     };
@@ -259,7 +259,7 @@
                 tagName: 'button',
                 attribute: {
                     type: 'button',
-                    title: '새로 만들기',
+                    title: 'New',
                 },
                 style: popupBtnStyle,
                 hoverStyle: popupBtnHoverStyle,
@@ -269,7 +269,7 @@
                         var listPopup = e.target.closest('.__popup');
                         fn.component.create({
                             name: 'popup',
-                            title: '새로 만들기',
+                            title: 'New',
                             parent: document.body,
                             caller: listPopup,
                             action: {
@@ -298,7 +298,7 @@
                 tagName: 'button',
                 attribute: {
                     type: 'button',
-                    title: '저장',
+                    title: 'Save',
                 },
                 style: popupBtnStyle,
                 hoverStyle: popupBtnHoverStyle,
@@ -336,7 +336,7 @@
                 tagName: 'button',
                 attribute: {
                     type: 'button',
-                    title: '삭제',
+                    title: 'Delete',
                 },
                 style: popupBtnStyle,
                 hoverStyle: popupBtnHoverStyle,
@@ -369,7 +369,7 @@
                 tagName: 'button',
                 attribute: {
                     type: 'button',
-                    title: '새로고침',
+                    title: 'Refresh',
                 },
                 style: popupBtnStyle,
                 hoverStyle: popupBtnHoverStyle,
@@ -390,7 +390,7 @@
                 tagName: 'button',
                 attribute: {
                     type: 'button',
-                    title: '닫기',
+                    title: 'Close',
                 },
                 style: popupBtnStyle,
                 hoverStyle: popupBtnHoverStyle,
@@ -706,7 +706,7 @@
                             }
                             fn.component.create({
                                 name: 'popup',
-                                title: (opt.title || '') + ' 수정',
+                                title: (opt.title || '') + ' Edit',
                                 parent: document.body,
                                 caller: e.target.closest('.__popup'),
                                 action: {
@@ -829,22 +829,22 @@
             var datas = [
                 {
                     id: 1,
-                    name: '메모',
+                    name: 'Memo',
                     resourceKey: 'memo',
                     fields: [
-                        { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
+                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
+                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
+                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
                     ],
                 },
                 {
                     id: 2,
-                    name: '북마크',
+                    name: 'Bookmark',
                     resourceKey: 'bookmark',
                     fields: [
-                        { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
+                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
+                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
+                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
                     ],
                 },
             ];
@@ -871,7 +871,7 @@ document.addEventListener('keydown', function(e) {
             tagName: 'button',
             attribute: {
                 type: 'button',
-                title: 'DevTool 열기 (Ctrl+`)',
+                title: 'Open DevTool (Ctrl+`)',
             },
             style: {
                 position: 'fixed',
