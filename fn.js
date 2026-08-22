@@ -1206,15 +1206,12 @@
                                             parent: document.body,
                                             caller: caller,
                                             render: function(opt) {
-                                                var pre = document.createElement('pre');
-                                                pre.style.whiteSpace = 'pre-wrap';
-                                                pre.style.wordBreak = 'break-word';
-                                                pre.style.margin = '0';
-                                                if (isError) {
-                                                    pre.style.color = '#e57373';
-                                                }
-                                                pre.textContent = text;
-                                                opt.el.content.appendChild(pre);
+                                                fn.element.create({
+                                                    tagName: 'pre',
+                                                    parent: opt.el.content,
+                                                    style: Object.assign({ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0' }, isError ? { color: '#e57373' } : {}),
+                                                    text: text,
+                                                });
                                             }
                                         });
                                     };
