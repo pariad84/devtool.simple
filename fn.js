@@ -58,7 +58,7 @@
             }
         }
         if (opt.complete) {
-            opt.complete({el: el});
+            opt.complete({el : el});
         }
         el._.opt = opt;
         if (opt.datas) {
@@ -145,7 +145,7 @@
 
     fn.component.layout.get = function(opt = {}) {
         return this.data[opt.name];
-    }
+    };
 
     fn.localStorage.get = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
@@ -161,18 +161,18 @@
     };
 
     fn.data._.readTable = function(resourceKey) {
-        var raw = fn.localStorage.get({ key: resourceKey });
+        var raw = fn.localStorage.get({ key : resourceKey });
         return raw ? JSON.parse(raw) : [];
     };
 
     fn.data._.writeTable = function(opt = {}) {
-        fn.localStorage.set({ key: opt.resourceKey, value: JSON.stringify(opt.rows) });
+        fn.localStorage.set({ key : opt.resourceKey, value : JSON.stringify(opt.rows) });
     };
 
-    fn.data.select = function (opt = {}) {
+    fn.data.select = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
         if (opt.id !== undefined) {
-            var row = rows.find(function (row) { return row.id === opt.id; });
+            var row = rows.find(function(row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
             return row;
         }
@@ -180,38 +180,38 @@
         return rows;
     };
 
-    fn.data.insert = function (opt = {}) {
+    fn.data.insert = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
-        var row = { id: nextId, data: opt.data };
+        var nextId = rows.reduce(function(max, row) { return Math.max(max, row.id); }, 0) + 1;
+        var row = { id : nextId, data : opt.data };
         rows.push(row);
-        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
+        fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows });
         fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
 
-    fn.data.update = function (opt = {}) {
+    fn.data.update = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        var row = rows.find(function (r) { return r.id === opt.id; });
+        var row = rows.find(function(r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows });
+            fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows });
         }
         fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
     };
 
-    fn.data.delete = function (opt = {}) {
+    fn.data.delete = function(opt = {}) {
         var rows = fn.data._.readTable(opt.resourceKey);
-        fn.data._.writeTable({ resourceKey: opt.resourceKey, rows: rows.filter(function (row) { return row.id !== opt.id; }) });
+        fn.data._.writeTable({ resourceKey : opt.resourceKey, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
-    fn.ajax = async function (opt = {}) {
+    fn.ajax = async function(opt = {}) {
         var method = (opt.method || 'POST').toUpperCase();
-        var options = { method: method };
+        var options = { method : method };
         if (method !== 'GET' && method !== 'HEAD') {
-            options.headers = { 'Content-Type': opt.contentType || 'application/json; charset=UTF-8' };
+            options.headers = { 'Content-Type' : opt.contentType || 'application/json; charset=UTF-8' };
             options.body = JSON.stringify(opt.data || {});
         }
 
@@ -232,60 +232,59 @@
 
     fn.component._.openFormPopup = function(opt) {
         fn.component.create({
-            name: 'popup',
-            title: opt.title,
-            parent: document.body,
-            caller: opt.caller,
-            buttons: {
-                save: true,
+            name : 'popup',
+            title : opt.title,
+            parent : document.body,
+            caller : opt.caller,
+            resource : opt.resource,
+            buttons : {
+                save : true,
             },
-            complete: function(formRes) {
+            complete : function(formRes) {
                 fn.component.create({
-                    name: 'form',
-                    columns: opt.columns,
-                    data: opt.data,
-                    resourceKey: opt.resourceKey,
-                    parent: formRes.el.content,
+                    name : 'form',
+                    resource : opt.resource,
+                    data : opt.data,
+                    parent : formRes.el.content,
                 });
             },
         });
     };
 
     var popupBtnStyle = {
-        width: '26px',
-        height: '26px',
-        border: 'none',
-        borderRadius: '4px',
-        background: 'transparent',
-        color: '#e8eaed',
-        fontSize: '13px',
-        cursor: 'pointer',
+        width : '26px',
+        height : '26px',
+        border : 'none',
+        borderRadius : '4px',
+        background : 'transparent',
+        color : '#e8eaed',
+        fontSize : '13px',
+        cursor : 'pointer',
     };
     var popupBtnHoverStyle = {
-        background: '#3a3f4b',
+        background : '#3a3f4b',
     };
 
     fn.component.layout.set({
-        name: 'popup-create-btn',
-        value: function(opt = {}) {
+        name : 'popup-create-btn',
+        value : function(opt = {}) {
             return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: 'New',
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'New',
                 },
-                style: popupBtnStyle,
-                hoverStyle: popupBtnHoverStyle,
-                text: '✏️',
-                event: {
-                    click: function(e) {
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '✏️',
+                event : {
+                    click : function(e) {
                         var listPopup = e.target.closest('.__popup');
                         fn.component._.openFormPopup({
-                            title: 'New',
-                            caller: listPopup,
-                            columns: listPopup._.columns,
-                            data: {},
-                            resourceKey: listPopup._.resourceKey,
+                            title : 'New',
+                            caller : listPopup,
+                            resource : listPopup._.resource,
+                            data : {},
                         });
                     }
                 },
@@ -294,32 +293,32 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-save-btn',
-        value: function(opt = {}) {
+        name : 'popup-save-btn',
+        value : function(opt = {}) {
             return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: 'Save',
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Save',
                 },
-                style: popupBtnStyle,
-                hoverStyle: popupBtnHoverStyle,
-                text: '💾',
-                event: {
-                    click: function(e) {
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '💾',
+                event : {
+                    click : function(e) {
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
                         var data = form.getData();
                         if (form._.data.id !== undefined) {
                             fn.data.update({
-                                resourceKey: form._.resourceKey,
-                                id: form._.data.id,
-                                data: data,
+                                resourceKey : form._.resource.key,
+                                id : form._.data.id,
+                                data : data,
                             });
                         } else {
                             fn.data.insert({
-                                resourceKey: form._.resourceKey,
-                                data: data,
+                                resourceKey : form._.resource.key,
+                                data : data,
                             });
                         }
                         if (popup._.caller) {
@@ -332,27 +331,27 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-delete-btn',
-        value: function(opt = {}) {
+        name : 'popup-delete-btn',
+        value : function(opt = {}) {
             return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: 'Delete',
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Delete',
                 },
-                style: popupBtnStyle,
-                hoverStyle: popupBtnHoverStyle,
-                text: '🗑️',
-                event: {
-                    click: function(e) {
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '🗑️',
+                event : {
+                    click : function(e) {
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
                         if (form._.data.id === undefined) {
                             return;
                         }
                         fn.data.delete({
-                            resourceKey: form._.resourceKey,
-                            id: form._.data.id,
+                            resourceKey : form._.resource.key,
+                            id : form._.data.id,
                         });
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -365,19 +364,19 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-refresh-btn',
-        value: function(opt = {}) {
+        name : 'popup-refresh-btn',
+        value : function(opt = {}) {
             return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: 'Refresh',
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Refresh',
                 },
-                style: popupBtnStyle,
-                hoverStyle: popupBtnHoverStyle,
-                text: '↻',
-                event: {
-                    click: function(e) {
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '↻',
+                event : {
+                    click : function(e) {
                         e.target.closest('.__popup').refresh();
                     }
                 },
@@ -386,19 +385,19 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-close-btn',
-        value: function(opt = {}) {
+        name : 'popup-close-btn',
+        value : function(opt = {}) {
             return fn.element.create({
-                tagName: 'button',
-                attribute: {
-                    type: 'button',
-                    title: 'Close',
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Close',
                 },
-                style: popupBtnStyle,
-                hoverStyle: popupBtnHoverStyle,
-                text: '✕',
-                event: {
-                    click: function(e) {
+                style : popupBtnStyle,
+                hoverStyle : popupBtnHoverStyle,
+                text : '✕',
+                event : {
+                    click : function(e) {
                         fn.component.remove(e.target.closest('.__popup'));
                     }
                 },
@@ -407,43 +406,43 @@
     });
 
     fn.component.layout.set({
-        name: 'popup-buttons',
-        value: function(opt = {}) {
+        name : 'popup-buttons',
+        value : function(opt = {}) {
             var el = fn.element.create({
-                tagName: 'div',
-                style: {
-                    display: 'flex',
-                    gap: '4px',
-                    flexShrink: '0',
+                tagName : 'div',
+                style : {
+                    display : 'flex',
+                    gap : '4px',
+                    flexShrink : '0',
                 },
             });
 
             if (opt.buttons && opt.buttons.create) {
                 fn.component.create({
-                    name: 'popup-create-btn',
-                    parent: el,
+                    name : 'popup-create-btn',
+                    parent : el,
                 });
             }
 
             if (opt.buttons && opt.buttons.save) {
                 fn.component.create({
-                    name: 'popup-save-btn',
-                    parent: el,
+                    name : 'popup-save-btn',
+                    parent : el,
                 });
                 fn.component.create({
-                    name: 'popup-delete-btn',
-                    parent: el,
+                    name : 'popup-delete-btn',
+                    parent : el,
                 });
             }
 
             fn.component.create({
-                name: 'popup-refresh-btn',
-                parent: el,
+                name : 'popup-refresh-btn',
+                parent : el,
             });
 
             fn.component.create({
-                name: 'popup-close-btn',
-                parent: el,
+                name : 'popup-close-btn',
+                parent : el,
             });
 
             return el;
@@ -451,8 +450,8 @@
     });
 
     fn.component.layout.set({
-        name: 'popup',
-        value: function(opt = {}) {
+        name : 'popup',
+        value : function(opt = {}) {
             var top = 50;
             var left = 50;
             var offset = 30;
@@ -465,80 +464,81 @@
             }
 
             var popup = fn.element.create({
-                tagName: 'div',
-                attribute: {
-                    class: '__popup',
-                    tabindex: '-1',
+                tagName : 'div',
+                attribute : {
+                    class : '__popup',
+                    tabindex : '-1',
                 },
-                style: {
-                    position: 'fixed',
-                    top: top + 'px',
-                    left: left + 'px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    minWidth: '320px',
-                    maxWidth: '80vw',
-                    maxHeight: '80vh',
-                    background: '#1e2128',
-                    color: '#e8eaed',
-                    border: '1px solid #3a3f4b',
-                    borderRadius: '8px',
-                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.45)',
-                    font: "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                    zIndex: '2147483000',
+                style : {
+                    position : 'fixed',
+                    top : top + 'px',
+                    left : left + 'px',
+                    display : 'flex',
+                    flexDirection : 'column',
+                    minWidth : '320px',
+                    maxWidth : '80vw',
+                    maxHeight : '80vh',
+                    background : '#1e2128',
+                    color : '#e8eaed',
+                    border : '1px solid #3a3f4b',
+                    borderRadius : '8px',
+                    boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
+                    font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    zIndex : '2147483000',
                 },
             });
 
             var header = fn.element.create({
-                parent: popup,
-                tagName: 'div',
-                style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '8px',
-                    padding: '8px 12px',
-                    borderBottom: '1px solid #3a3f4b',
-                    cursor: 'move',
+                parent : popup,
+                tagName : 'div',
+                style : {
+                    display : 'flex',
+                    alignItems : 'center',
+                    justifyContent : 'space-between',
+                    gap : '8px',
+                    padding : '8px 12px',
+                    borderBottom : '1px solid #3a3f4b',
+                    cursor : 'move',
                 },
             });
 
             fn.element.create({
-                parent: header,
-                tagName: 'div',
-                style: {
-                    fontWeight: '600',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
+                parent : header,
+                tagName : 'div',
+                style : {
+                    fontWeight : '600',
+                    overflow : 'hidden',
+                    textOverflow : 'ellipsis',
+                    whiteSpace : 'nowrap',
                 },
-                text: opt.title || 'Popup',
+                text : opt.title || 'Popup',
             });
 
             fn.component.create({
-                name: 'popup-buttons',
-                parent: header,
-                buttons: opt.buttons,
+                name : 'popup-buttons',
+                parent : header,
+                buttons : opt.buttons,
             });
 
             var content = fn.element.create({
-                parent: popup,
-                tagName: 'div',
-                style: {
-                    padding: '12px',
-                    overflow: 'auto',
+                parent : popup,
+                tagName : 'div',
+                style : {
+                    padding : '12px',
+                    overflow : 'auto',
                 },
             });
 
             fn.element.draggable({
-                el: popup,
-                handle: header,
+                el : popup,
+                handle : header,
             });
 
             popup.header = header;
             popup.content = content;
             popup._.complete = opt.complete;
             popup._.caller = opt.caller;
+            popup._.resource = opt.resource;
             popup.refresh = function() {
                 Array.from(popup.content.children).forEach(function(child) {
                     if (child._.componentName) {
@@ -548,83 +548,83 @@
                     }
                 });
                 if (popup._.complete) {
-                    popup._.complete({ el: popup });
+                    popup._.complete({ el : popup });
                 }
             };
             if (opt.complete) {
-                opt.complete({ el: popup });
+                opt.complete({ el : popup });
             }
             return popup;
         }
     });
 
     fn.component.layout.set({
-        name: 'form',
-        value: function(opt = {columns: [], data: {}}) {
+        name : 'form',
+        value : function(opt = {resource : {key : '', columns : []}, data : {}}) {
             var el = fn.element.create({
-                tagName: 'table',
-                attribute: {
-                    class: '__form',
+                tagName : 'table',
+                attribute : {
+                    class : '__form',
                 },
-                style: {
-                    width: '100%',
-                    borderCollapse: 'collapse',
+                style : {
+                    width : '100%',
+                    borderCollapse : 'collapse',
                 },
-                data: opt.data,
+                data : opt.data,
             });
 
-            el._.resourceKey = opt.resourceKey;
+            el._.resource = opt.resource;
             el._.inputs = {};
 
-            opt.columns.forEach(function(column) {
+            opt.resource.columns.forEach(function(column) {
                 if (!column.form) {
                     return;
                 }
 
                 var row = fn.element.create({
-                    tagName: 'tr',
-                    parent: el,
+                    tagName : 'tr',
+                    parent : el,
                 });
 
                 var cellStyle = {
-                    padding: '6px 0',
-                    verticalAlign: 'middle',
+                    padding : '6px 0',
+                    verticalAlign : 'middle',
                 };
 
                 fn.element.create({
-                    tagName: 'td',
-                    style: Object.assign({}, cellStyle, {
-                        width: '30%',
-                        color: '#9aa0a6',
-                        paddingRight: '8px',
+                    tagName : 'td',
+                    style : Object.assign({}, cellStyle, {
+                        width : '30%',
+                        color : '#9aa0a6',
+                        paddingRight : '8px',
                     }),
-                    text: column.label || column.name,
-                    parent: row,
+                    text : column.label || column.name,
+                    parent : row,
                 });
 
                 var valueCell = fn.element.create({
-                    tagName: 'td',
-                    style: cellStyle,
-                    parent: row,
+                    tagName : 'td',
+                    style : cellStyle,
+                    parent : row,
                 });
 
                 var input = fn.element.create({
-                    tagName: 'input',
-                    attribute: {
-                        type: column.form.inputType || 'text',
-                        name: column.name,
+                    tagName : 'input',
+                    attribute : {
+                        type : column.form.inputType || 'text',
+                        name : column.name,
                     },
-                    style: {
-                        width: column.form.width || '100%',
-                        boxSizing: 'border-box',
-                        padding: '5px 8px',
-                        background: '#14161b',
-                        border: '1px solid #3a3f4b',
-                        borderRadius: '4px',
-                        color: '#e8eaed',
-                        font: 'inherit',
+                    style : {
+                        width : column.form.width || '100%',
+                        boxSizing : 'border-box',
+                        padding : '5px 8px',
+                        background : '#14161b',
+                        border : '1px solid #3a3f4b',
+                        borderRadius : '4px',
+                        color : '#e8eaed',
+                        font : 'inherit',
                     },
-                    parent: valueCell,
+                    parent : valueCell,
                 });
 
                 if (opt.data[column.name] !== undefined) {
@@ -636,7 +636,7 @@
 
             el.getData = function() {
                 var result = {};
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -647,7 +647,7 @@
             };
 
             el.setData = function(newData) {
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.form) {
                         return;
                     }
@@ -663,96 +663,95 @@
     });
 
     fn.component.layout.set({
-        name: 'list',
-        value: function(opt = {columns: [], datas: []}) {
+        name : 'list',
+        value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
             var el = fn.element.create({
-                tagName: 'table',
-                style: {
-                    width: '100%',
-                    borderCollapse: 'collapse',
+                tagName : 'table',
+                style : {
+                    width : '100%',
+                    borderCollapse : 'collapse',
                 },
             });
 
-            if (opt.columns.some(function(column) { return !!column.list; })) {
+            if (opt.resource.columns.some(function(column) { return !!column.list; })) {
                 var thead = fn.element.create({
-                    tagName: 'thead',
-                    parent: el,
+                    tagName : 'thead',
+                    parent : el,
                 });
                 var headRow = fn.element.create({
-                    tagName: 'tr',
-                    parent: thead,
+                    tagName : 'tr',
+                    parent : thead,
                 });
-                opt.columns.forEach(function(column) {
+                opt.resource.columns.forEach(function(column) {
                     if (!column.list) {
                         return;
                     }
                     fn.element.create({
-                        tagName: 'th',
-                        text: column.label || column.name,
-                        style: {
-                            width: column.list.width || 'auto',
-                            textAlign: 'left',
-                            padding: '6px 8px',
-                            color: '#9aa0a6',
-                            borderBottom: '1px solid #3a3f4b',
+                        tagName : 'th',
+                        text : column.label || column.name,
+                        style : {
+                            width : column.list.width || 'auto',
+                            textAlign : 'left',
+                            padding : '6px 8px',
+                            color : '#9aa0a6',
+                            borderBottom : '1px solid #3a3f4b',
                         },
-                        parent: headRow,
+                        parent : headRow,
                     });
                 });
             }
 
             var tbody = fn.element.create({
-                tagName: 'tbody',
-                parent: el,
+                tagName : 'tbody',
+                parent : el,
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = !!opt.resourceKey;
+                var clickable = !!opt.resource;
                 var row = fn.element.create({
-                    tagName: 'tr',
-                    style: clickable ? { cursor: 'pointer' } : {},
-                    hoverStyle: clickable ? { background: '#2b2f38' } : undefined,
-                    event: {
-                        click: function(e) {
+                    tagName : 'tr',
+                    style : clickable ? { cursor : 'pointer' } : {},
+                    hoverStyle : clickable ? { background : '#2b2f38' } : undefined,
+                    event : {
+                        click : function(e) {
                             if (!clickable) {
                                 return;
                             }
                             fn.component._.openFormPopup({
-                                title: 'Edit ' + (opt.title || ''),
-                                caller: e.target.closest('.__popup'),
-                                columns: opt.columns,
-                                data: data,
-                                resourceKey: opt.resourceKey,
+                                title : 'Edit ' + (opt.title || ''),
+                                caller : e.target.closest('.__popup'),
+                                resource : opt.resource,
+                                data : data,
                             });
                         },
                     },
-                    data: data,
-                    parent: tbody,
+                    data : data,
+                    parent : tbody,
                 });
 
                 var cellStyle = {
-                    padding: '6px 8px',
-                    borderBottom: '1px solid #2b2f38',
+                    padding : '6px 8px',
+                    borderBottom : '1px solid #2b2f38',
                 };
 
-                if (opt.columns.length) {
-                    opt.columns.forEach(function(column) {
+                if (opt.resource.columns.length) {
+                    opt.resource.columns.forEach(function(column) {
                         if (!column.list) {
                             return;
                         }
                         fn.element.create({
-                            tagName: 'td',
-                            style: cellStyle,
-                            text: data[column.name] !== undefined ? data[column.name] : '',
-                            parent: row,
+                            tagName : 'td',
+                            style : cellStyle,
+                            text : data[column.name] !== undefined ? data[column.name] : '',
+                            parent : row,
                         });
                     });
                 } else {
                     fn.element.create({
-                        tagName: 'td',
-                        style: cellStyle,
-                        text: data.name !== undefined ? data.name : '',
-                        parent: row,
+                        tagName : 'td',
+                        style : cellStyle,
+                        text : data.name !== undefined ? data.name : '',
+                        parent : row,
                     });
                 }
             });
@@ -762,62 +761,60 @@
     });
 
     fn.component.layout.set({
-        name: 'menu',
-        value: function(opt = {}) {
+        name : 'menu',
+        value : function(opt = {}) {
             var el = fn.element.create({
-                tagName: 'div',
-                style: {
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '2px',
+                tagName : 'div',
+                style : {
+                    display : 'flex',
+                    flexDirection : 'column',
+                    gap : '2px',
                 },
             });
             if (opt.datas && Array.isArray(opt.datas)) {
                 opt.datas.forEach(function(data) {
                     fn.element.create({
-                        parent: el,
-                        tagName: 'div',
-                        style: {
-                            padding: '8px 10px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
+                        parent : el,
+                        tagName : 'div',
+                        style : {
+                            padding : '8px 10px',
+                            borderRadius : '4px',
+                            cursor : 'pointer',
                         },
-                        hoverStyle: {
-                            background: '#2b2f38',
+                        hoverStyle : {
+                            background : '#2b2f38',
                         },
-                        text: data.name,
-                        event: {
-                            click: function(opt){
+                        text : data.name,
+                        event : {
+                            click : function(opt){
                                 return function(e){
                                     fn.component.create({
-                                        name: 'popup',
-                                        title: opt.data.name,
-                                        parent: document.body,
-                                        caller: opt.caller,
-                                        buttons: {
-                                            create: true,
+                                        name : 'popup',
+                                        title : opt.data.name,
+                                        parent : document.body,
+                                        caller : opt.caller,
+                                        resource : opt.data.resource,
+                                        buttons : {
+                                            create : true,
                                         },
-                                        complete: function(res) {
-                                            res.el._.resourceKey = opt.data.resourceKey;
-                                            res.el._.columns = opt.data.fields;
-                                            var rows = fn.data.select({ resourceKey: opt.data.resourceKey });
+                                        complete : function(res) {
+                                            var rows = fn.data.select({ resourceKey : opt.data.resource.key });
                                             var listDatas = rows.map(function(row) {
-                                                return Object.assign({ id: row.id }, row.data);
+                                                return Object.assign({ id : row.id }, row.data);
                                             });
                                             fn.component.create({
-                                                name: 'list',
-                                                title: opt.data.name,
-                                                columns: opt.data.fields,
-                                                datas: listDatas,
-                                                resourceKey: opt.data.resourceKey,
-                                                parent: res.el.content,
+                                                name : 'list',
+                                                title : opt.data.name,
+                                                resource : opt.data.resource,
+                                                datas : listDatas,
+                                                parent : res.el.content,
                                             });
                                         },
                                     });
                                 }
                             }({caller : opt.caller, data : data}),
                         },
-                        data: data,
+                        data : data,
                     });
                 });
             }
@@ -826,40 +823,44 @@
     });
 
     fn.component.layout.set({
-        name: 'devtool',
-        value: function(opt = {}) {
+        name : 'devtool',
+        value : function(opt = {}) {
             var datas = [
                 {
-                    id: 1,
-                    name: 'Memo',
-                    resourceKey: 'memo',
-                    fields: [
-                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
-                    ],
+                    id : 1,
+                    name : 'Memo',
+                    resource : {
+                        key : 'memo',
+                        columns : [
+                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
+                            { name : 'data', label : 'Data', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        ],
+                    },
                 },
                 {
-                    id: 2,
-                    name: 'Bookmark',
-                    resourceKey: 'bookmark',
-                    fields: [
-                        { name: 'name', label: 'Name', list: { width: '160px' }, form: { inputType: 'text' } },
-                        { name: 'status', label: 'Status', list: { width: '100px' }, form: { inputType: 'text' } },
-                        { name: 'data', label: 'Data', list: { width: 'auto' }, form: { inputType: 'text' } },
-                    ],
+                    id : 2,
+                    name : 'Bookmark',
+                    resource : {
+                        key : 'bookmark',
+                        columns : [
+                            { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                            { name : 'status', label : 'Status', list : { width : '100px' }, form : { inputType : 'text' } },
+                            { name : 'data', label : 'Data', list : { width : 'auto' }, form : { inputType : 'text' } },
+                        ],
+                    },
                 },
             ];
 
             return fn.component.create({
-                name: 'popup',
-                title: 'DevTool',
-                complete: function(res) {
+                name : 'popup',
+                title : 'DevTool',
+                complete : function(res) {
                     fn.component.create({
-                        name: 'menu',
-                        caller: res.el,
-                        datas: datas,
-                        parent: res.el.content,
+                        name : 'menu',
+                        caller : res.el,
+                        datas : datas,
+                        parent : res.el.content,
                     });
                 },
             });
@@ -868,8 +869,8 @@
 
     fn.devtool.open = function() {
         fn.component.create({
-            name: 'devtool',
-            parent: document.body,
+            name : 'devtool',
+            parent : document.body,
         });
     };
 
@@ -880,34 +881,34 @@
         fn.devtool._.started = true;
 
         fn.element.create({
-            tagName: 'button',
-            attribute: {
-                type: 'button',
-                title: 'Open DevTool (Ctrl+`)',
+            tagName : 'button',
+            attribute : {
+                type : 'button',
+                title : 'Open DevTool (Ctrl+`)',
             },
-            style: {
-                position: 'fixed',
-                right: '20px',
-                bottom: '20px',
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                border: 'none',
-                background: '#2b2f38',
-                color: '#e8eaed',
-                fontSize: '18px',
-                cursor: 'pointer',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.35)',
-                zIndex: '2147483000',
+            style : {
+                position : 'fixed',
+                right : '20px',
+                bottom : '20px',
+                width : '40px',
+                height : '40px',
+                borderRadius : '50%',
+                border : 'none',
+                background : '#2b2f38',
+                color : '#e8eaed',
+                fontSize : '18px',
+                cursor : 'pointer',
+                boxShadow : '0 2px 8px rgba(0, 0, 0, 0.35)',
+                zIndex : '2147483000',
             },
-            hoverStyle: {
-                background: '#3a3f4b',
+            hoverStyle : {
+                background : '#3a3f4b',
             },
-            text: '⚙',
-            event: {
-                click: fn.devtool.open,
+            text : '⚙',
+            event : {
+                click : fn.devtool.open,
             },
-            parent: document.body,
+            parent : document.body,
         });
 
         document.addEventListener('keydown', function(e) {
