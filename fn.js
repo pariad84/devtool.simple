@@ -829,54 +829,6 @@
                 name : 'popup',
                 title : 'DevTool',
                 render : function(opt) {
-                    if (fn.data.select({ key : '_resource' }).length === 0) {
-                        fn.data.insert({
-                            key : '_resource',
-                            data : {
-                                name : 'Resource',
-                                key : '_resource',
-                                columns : JSON.stringify([
-                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                                ]),
-                            },
-                        });
-                        fn.data.insert({
-                            key : '_resource',
-                            data : {
-                                name : 'Memo',
-                                key : 'memo',
-                                columns : JSON.stringify([
-                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                                    { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                                ]),
-                            },
-                        });
-                        fn.data.insert({
-                            key : '_resource',
-                            data : {
-                                name : 'Bookmark',
-                                key : 'bookmark',
-                                columns : JSON.stringify([
-                                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                                ]),
-                            },
-                        });
-
-                        for (var i = 1; i <= 20; i++) {
-                            fn.data.insert({
-                                key : 'memo',
-                                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
-                            });
-                            fn.data.insert({
-                                key : 'bookmark',
-                                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
-                            });
-                        }
-                    }
-
                     var datas = fn.data.select({ key : '_resource' }).map(function(row) {
                         return {
                             id : row.id,
@@ -911,6 +863,54 @@
             return;
         }
         fn.devtool._.started = true;
+
+        if (fn.data.select({ key : '_resource' }).length === 0) {
+            fn.data.insert({
+                key : '_resource',
+                data : {
+                    name : 'Resource',
+                    key : '_resource',
+                    columns : JSON.stringify([
+                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                        { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    ]),
+                },
+            });
+            fn.data.insert({
+                key : '_resource',
+                data : {
+                    name : 'Memo',
+                    key : 'memo',
+                    columns : JSON.stringify([
+                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    ]),
+                },
+            });
+            fn.data.insert({
+                key : '_resource',
+                data : {
+                    name : 'Bookmark',
+                    key : 'bookmark',
+                    columns : JSON.stringify([
+                        { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                        { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                    ]),
+                },
+            });
+
+            for (var i = 1; i <= 20; i++) {
+                fn.data.insert({
+                    key : 'memo',
+                    data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
+                });
+                fn.data.insert({
+                    key : 'bookmark',
+                    data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
+                });
+            }
+        }
 
         fn.element.create({
             tagName : 'button',
