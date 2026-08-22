@@ -156,17 +156,17 @@
         }
     };
 
-    function readTable(resourceKey) {
+    fn.data._readTable = function(resourceKey) {
         var raw = fn.localStorage.get({ key: resourceKey });
         return raw ? JSON.parse(raw) : [];
-    }
+    };
 
-    function writeTable(resourceKey, rows) {
+    fn.data._writeTable = function(resourceKey, rows) {
         fn.localStorage.set({ key: resourceKey, value: JSON.stringify(rows) });
-    }
+    };
 
     fn.data.select = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
+        var rows = fn.data._readTable(opt.resourceKey);
         if (opt.id !== undefined) {
             var row = rows.find(function (row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.resourceKey, 'id=' + opt.id, row);
@@ -177,29 +177,29 @@
     };
 
     fn.data.insert = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
+        var rows = fn.data._readTable(opt.resourceKey);
         var nextId = rows.reduce(function (max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id: nextId, data: opt.data };
         rows.push(row);
-        writeTable(opt.resourceKey, rows);
+        fn.data._writeTable(opt.resourceKey, rows);
         fn.log('data', 'insert', opt.resourceKey, row);
         return row;
     };
 
     fn.data.update = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
+        var rows = fn.data._readTable(opt.resourceKey);
         var row = rows.find(function (r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            writeTable(opt.resourceKey, rows);
+            fn.data._writeTable(opt.resourceKey, rows);
         }
         fn.log('data', 'update', opt.resourceKey, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.delete = function (opt = {}) {
-        var rows = readTable(opt.resourceKey);
-        writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
+        var rows = fn.data._readTable(opt.resourceKey);
+        fn.data._writeTable(opt.resourceKey, rows.filter(function (row) { return row.id !== opt.id; }));
         fn.log('data', 'delete', opt.resourceKey, 'id=' + opt.id);
     };
 
