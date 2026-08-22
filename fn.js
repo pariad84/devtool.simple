@@ -324,6 +324,7 @@
                         if (popup._.caller) {
                             popup._.caller.refresh();
                         }
+                        fn.component.remove(popup);
                     }
                 },
             });
