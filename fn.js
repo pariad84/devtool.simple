@@ -714,7 +714,6 @@
                     input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
-                    var isTextarea = column.form.inputType === 'textarea';
                     var inputStyle = {
                         width : column.form.width || '100%',
                         boxSizing : 'border-box',
@@ -725,17 +724,38 @@
                         color : '#e8eaed',
                         font : 'inherit',
                     };
-                    if (isTextarea) {
-                        inputStyle.resize = 'vertical';
-                        inputStyle.minHeight = '60px';
-                    }
 
-                    input = fn.element.create({
-                        tagName : isTextarea ? 'textarea' : 'input',
-                        attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
-                        style : inputStyle,
-                        parent : valueCell,
-                    });
+                    if (column.form.inputType === 'select') {
+                        input = fn.element.create({
+                            tagName : 'select',
+                            attribute : { name : column.name },
+                            style : inputStyle,
+                            parent : valueCell,
+                        });
+                        fn.data.select({ key : 'code' }).filter(function(row) {
+                            return row.data.group === column.form.codeGroup;
+                        }).forEach(function(row) {
+                            fn.element.create({
+                                tagName : 'option',
+                                attribute : { value : row.data.code },
+                                text : row.data.name,
+                                parent : input,
+                            });
+                        });
+                    } else {
+                        var isTextarea = column.form.inputType === 'textarea';
+                        if (isTextarea) {
+                            inputStyle.resize = 'vertical';
+                            inputStyle.minHeight = '60px';
+                        }
+
+                        input = fn.element.create({
+                            tagName : isTextarea ? 'textarea' : 'input',
+                            attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
+                            style : inputStyle,
+                            parent : valueCell,
+                        });
+                    }
                 }
 
                 if (input.tagName !== 'BUTTON' && opt.data[column.name] !== undefined) {
@@ -1045,6 +1065,19 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); window.open(data.url, '_blank'); }); return btn; }" } },
+                ]),
+            },
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Code',
+                key : 'code',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'group', label : 'Group', list : { width : '140px' }, form : { inputType : 'text' } },
+                    { name : 'code', label : 'Code', list : { width : '120px' }, form : { inputType : 'text' } },
+                    { name : 'name', label : 'Name', list : { width : 'auto' }, form : { inputType : 'text' } },
                 ]),
             },
         });
