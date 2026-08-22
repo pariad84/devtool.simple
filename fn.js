@@ -172,13 +172,18 @@
             throw new Error('Unknown component layout: ' + opt.name);
         }
         var el = layout(opt);
-        el._componentName = opt.name;
 
-        // 레이아웃별로 컴포넌트를 fn.component.data에 저장
-        if (!this.data[opt.name]) {
-            this.data[opt.name] = [];
+        // 레이아웃이 다른 컴포넌트(fn.component.create 결과)를 그대로 반환한 경우
+        // (예: devtool -> popup) 이미 등록돼있으므로 이중 등록하지 않음
+        if (!el._componentName) {
+            el._componentName = opt.name;
+
+            // 레이아웃별로 컴포넌트를 fn.component.data에 저장
+            if (!this.data[opt.name]) {
+                this.data[opt.name] = [];
+            }
+            this.data[opt.name].push(el);
         }
-        this.data[opt.name].push(el);
 
         if (opt.parent) {
             opt.parent.appendChild(el);
@@ -813,6 +818,47 @@
             return el;
         }
     });
+
+    fn.component.layout.set({
+        name: 'devtool',
+        value: function(opt = {}) {
+            var datas = [
+                {
+                    id: 1,
+                    name: '메모',
+                    resourceKey: 'memo',
+                    fields: [
+                        { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
+                        { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
+                        { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
+                    ],
+                },
+                {
+                    id: 2,
+                    name: '북마크',
+                    resourceKey: 'bookmark',
+                    fields: [
+                        { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
+                        { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
+                        { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
+                    ],
+                },
+            ];
+
+            return fn.component.create({
+                name: 'popup',
+                title: 'DevTool',
+                complete: function(res) {
+                    fn.component.create({
+                        name: 'menu',
+                        caller: res.el,
+                        datas: datas,
+                        parent: res.el.content,
+                    });
+                },
+            });
+        }
+    });
 })(window);
 
 document.addEventListener('keydown', function(e) {
@@ -844,41 +890,9 @@ document.addEventListener('keydown', function(e) {
             text: '⚙',
             event: {
                 click: function() {
-                    var datas = [
-                        {
-                            id: 1,
-                            name: '메모',
-                            resourceKey: 'memo',
-                            fields: [
-                                { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
-                                { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
-                                { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
-                            ],
-                        },
-                        {
-                            id: 2,
-                            name: '북마크',
-                            resourceKey: 'bookmark',
-                            fields: [
-                                { name: 'name', label: '이름', list: { width: '160px' }, form: { inputType: 'text' } },
-                                { name: 'status', label: '상태', list: { width: '100px' }, form: { inputType: 'text' } },
-                                { name: 'data', label: '데이터', list: { width: 'auto' }, form: { inputType: 'text' } },
-                            ],
-                        },
-                    ];
-
                     fn.component.create({
-                        name: 'popup',
-                        title: 'DevTool',
+                        name: 'devtool',
                         parent: document.body,
-                        complete: function(res) {
-                            fn.component.create({
-                                name: 'menu',
-                                caller: res.el,
-                                datas: datas,
-                                parent: res.el.content,
-                            });
-                        },
                     });
                 },
             },
