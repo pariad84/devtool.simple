@@ -1146,6 +1146,19 @@
                 data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
             });
         }
+
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', body : '{"title": "foo", "body": "bar", "userId": 1}' },
+        });
     };
 
     fn.devtool._.reset = function() {
