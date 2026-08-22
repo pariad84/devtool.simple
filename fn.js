@@ -1081,6 +1081,27 @@
                 ]),
             },
         });
+        [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].forEach(function(method) {
+            fn.data.insert({
+                key : 'code',
+                data : { group : 'method', code : method, name : method },
+            });
+        });
+        fn.data.insert({
+            key : '_resource',
+            data : {
+                name : 'Request',
+                key : 'request',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'method', label : 'Method', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'method' } },
+                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                    { name : 'body', label : 'Body (JSON)', form : { inputType : 'textarea' } },
+                    { name : 'run', label : 'Run', list : { width : '70px', render : "function(data) { var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Run'; btn.style.padding = '4px 10px'; btn.style.border = 'none'; btn.style.borderRadius = '4px'; btn.style.background = 'transparent'; btn.style.color = '#e8eaed'; btn.style.fontSize = '13px'; btn.style.cursor = 'pointer'; btn.addEventListener('click', function(e) { e.stopPropagation(); var caller = e.target.closest('.__popup'); var show = function(title, text, isError) { fn.component.create({ name: 'popup', title: title, parent: document.body, caller: caller, render: function(opt) { var pre = document.createElement('pre'); pre.style.whiteSpace = 'pre-wrap'; pre.style.wordBreak = 'break-word'; pre.style.margin = '0'; if (isError) { pre.style.color = '#e57373'; } pre.textContent = text; opt.el.content.appendChild(pre); } }); }; fn.ajax({ method: data.method, url: data.url, data: data.body ? JSON.parse(data.body) : undefined }).then(function(result) { show('Response: ' + data.name, JSON.stringify(result, null, 2), false); }).catch(function(err) { show('Error: ' + data.name, err.message, true); }); }); return btn; }" } },
+                ]),
+            },
+        });
         fn.data.insert({
             key : '_resource',
             data : {
