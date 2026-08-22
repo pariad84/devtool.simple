@@ -457,7 +457,6 @@
                     borderRadius : '8px',
                     boxShadow : '0 8px 24px rgba(0, 0, 0, 0.45)',
                     font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-                    zIndex : '2147483000',
                     resize : 'both',
                     overflow : 'hidden',
                 },
@@ -475,6 +474,15 @@
                     borderBottom : '1px solid #3a3f4b',
                     cursor : 'move',
                 },
+            });
+
+            header.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('button, input, select, textarea')) {
+                    return;
+                }
+                setTimeout(function() {
+                    document.body.appendChild(popup);
+                }, 0);
             });
 
             fn.element.create({
