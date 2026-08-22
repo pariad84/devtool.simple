@@ -203,8 +203,10 @@
 
     fn.data.delete = function(opt = {}) {
         var rows = fn.data._.readTable({ key : opt.key });
+        var row = rows.find(function(row) { return row.id === opt.id; });
         fn.data._.writeTable({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.key, 'id=' + opt.id);
+        return row;
     };
 
     fn.ajax = async function(opt = {}) {
@@ -261,7 +263,7 @@
                         var listPopup = e.target.closest('.__popup');
                         fn.component.create({
                             name : 'popup',
-                            title : 'New',
+                            title : 'New ' + (listPopup._.title || ''),
                             parent : document.body,
                             caller : listPopup,
                             resource : listPopup._.resource,
@@ -523,6 +525,7 @@
             popup._.caller = opt.caller;
             popup._.resource = opt.resource;
             popup._.data = opt.data;
+            popup._.title = opt.title;
 
             var populate = function() {
                 if (popup._.data !== undefined) {
