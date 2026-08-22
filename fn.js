@@ -111,7 +111,7 @@
         }
         var el = layout(opt);
 
-        if (!el._.componentName) {
+        if (opt.name === 'popup' && !el._.componentName) {
             el._.componentName = opt.name;
 
             if (!this.data[opt.name]) {
@@ -530,11 +530,7 @@
 
             popup.refresh = function() {
                 Array.from(popup.content.children).forEach(function(child) {
-                    if (child._.componentName) {
-                        fn.component.remove(child);
-                    } else {
-                        child.remove();
-                    }
+                    child.remove();
                 });
                 render();
             };

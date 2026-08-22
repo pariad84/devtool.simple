@@ -47,11 +47,13 @@ backed by localStorage. See README.md for what it does and how to install the bo
   `form` → `list` → `menu` → `devtool` (always last — it's the most composed piece and the
   bookmarklet's entry point). New layouts should slot in based on what they depend on, not
   just appended at the end.
-- **Component lifecycle**: everything created via `fn.component.create` gets tracked in
-  `fn.component.data[name]` and must be torn down via `fn.component.remove`, not a raw
-  `el.remove()` — otherwise the tracking array leaks a stale reference. If a layout's
-  `value` function returns another component's element directly (e.g. `devtool` returning
-  a `popup`), that's fine — `fn.component.create` guards against double-registering it.
+- **Component lifecycle**: `popup` is the only layout tracked in `fn.component.data` and torn
+  down via `fn.component.remove` — it's the only unit ever independently created/removed (every
+  other component lives and dies with its enclosing popup, so `el.remove()`/`child.remove()`
+  cascading through the DOM is enough for them; tracking them individually only produced stale
+  entries once their popup closed without walking each descendant). If a layout's `value`
+  function returns another component's element directly (e.g. `devtool` returning a `popup`),
+  that's fine — `fn.component.create` guards against double-registering it.
 - **Logging**: call `fn.log(scope, action, ...details)` from `fn.data.*` and
   `fn.component.create`/`remove` so behavior is visible in the console while testing new
   features. Keep the `[fn.<scope>] <action>` shape.
