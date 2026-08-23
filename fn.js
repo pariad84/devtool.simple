@@ -263,6 +263,9 @@
         if (setting.opacity) {
             opt.el.style.opacity = setting.opacity;
         }
+        if (setting.zIndex) {
+            opt.el.style.zIndex = setting.zIndex;
+        }
     };
 
     fn.component._.applySettingAll = function() {
@@ -1333,6 +1336,7 @@
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'zIndex', label : 'Fixed z-index', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'export', label : 'Export', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1430,7 +1434,7 @@
         });
         fn.data.insert({
             key : '_setting',
-            data : { width : 'auto', height : 'auto', scale : '1', opacity : '1' },
+            data : { width : 'auto', height : 'auto', scale : '1', opacity : '1', zIndex : '' },
         });
 
         for (var i = 1; i <= 20; i++) {
