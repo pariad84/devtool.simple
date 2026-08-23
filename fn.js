@@ -945,7 +945,7 @@
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = !!opt.resource;
+                var clickable = !!opt.resource && !opt.readonly;
                 var row = fn.element.create({
                     tagName : 'tr',
                     style : clickable ? { cursor : 'pointer' } : {},
@@ -1337,6 +1337,53 @@
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
                     { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    { name : 'previewColumns', label : 'Columns View', form : { render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'View columns',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var caller = e.target.closest('.__popup');
+                                    var columns = JSON.parse(data.columns);
+                                    var previewDatas = columns.map(function(column, index) {
+                                        return {
+                                            id : index,
+                                            name : column.name,
+                                            label : column.label || '',
+                                            listWidth : column.list ? (column.list.width || '') : '',
+                                            formInput : column.form ? (column.form.inputType || (column.form.render ? 'custom render' : '')) : '',
+                                        };
+                                    });
+                                    fn.component.create({
+                                        name : 'popup',
+                                        title : 'Columns: ' + data.name,
+                                        parent : document.body,
+                                        caller : caller,
+                                        render : function(opt) {
+                                            fn.component.create({
+                                                name : 'list',
+                                                readonly : true,
+                                                resource : {
+                                                    key : '',
+                                                    columns : [
+                                                        { name : 'name', label : 'Field', list : { width : '140px' } },
+                                                        { name : 'label', label : 'Label', list : { width : '160px' } },
+                                                        { name : 'listWidth', label : 'List width', list : { width : '110px' } },
+                                                        { name : 'formInput', label : 'Form input', list : { width : '140px' } },
+                                                    ],
+                                                },
+                                                datas : previewDatas,
+                                                parent : opt.el.content,
+                                            });
+                                        },
+                                    });
+                                }
+                            }
+                        });
+                    }` } },
                     { name : 'viewData', label : 'Data', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
