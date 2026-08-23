@@ -1228,6 +1228,15 @@
                                             }
                                         });
                                     };
+                                    var saveHistory = function(ok, body) {
+                                        var row = fn.data.select({ key: 'request', id: data.id });
+                                        var history = row.data.history ? JSON.parse(row.data.history) : [];
+                                        history.push({ time: new Date().toISOString(), ok: ok, body: body });
+                                        if (history.length > 20) {
+                                            history = history.slice(history.length - 20);
+                                        }
+                                        fn.data.update({ key: 'request', id: data.id, data: Object.assign({}, row.data, { history: JSON.stringify(history) }) });
+                                    };
                                     var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
                                     fn.ajax({
                                         method: data.method,
@@ -1237,9 +1246,48 @@
                                         headers: data.headers ? JSON.parse(data.headers) : undefined,
                                         data: data.body ? JSON.parse(data.body) : undefined
                                     }).then(function(result) {
-                                        show('Response: ' + data.name, JSON.stringify(result, null, 2), false);
+                                        var text = JSON.stringify(result, null, 2);
+                                        show('Response: ' + data.name, text, false);
+                                        saveHistory(true, text);
                                     }).catch(function(err) {
                                         show('Error: ' + data.name, err.message, true);
+                                        saveHistory(false, err.message);
+                                    });
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'history', label : 'History', list : { width : '80px', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'History',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var caller = e.target.closest('.__popup');
+                                    var row = fn.data.select({ key : 'request', id : data.id });
+                                    var history = row.data.history ? JSON.parse(row.data.history) : [];
+                                    fn.component.create({
+                                        name : 'popup',
+                                        title : 'History: ' + data.name,
+                                        parent : document.body,
+                                        caller : caller,
+                                        render : function(opt) {
+                                            if (history.length === 0) {
+                                                fn.element.create({ tagName : 'div', text : 'No runs yet.', parent : opt.el.content });
+                                                return;
+                                            }
+                                            history.slice().reverse().forEach(function(entry) {
+                                                fn.element.create({
+                                                    tagName : 'pre',
+                                                    parent : opt.el.content,
+                                                    style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', borderBottom : '1px solid #3a3f4b', paddingBottom : '8px', marginBottom : '8px' }, entry.ok ? {} : { color : '#e57373' }),
+                                                    text : entry.time + ' - ' + (entry.ok ? 'OK' : 'Error') + '\\n' + entry.body,
+                                                });
+                                            });
+                                        },
                                     });
                                 }
                             }
