@@ -638,6 +638,10 @@
                         if (e.target.closest('button, input, select, textarea')) {
                             return;
                         }
+                        if (e.ctrlKey) {
+                            fn.log('popup', 'inspect', popup._.opt);
+                            return;
+                        }
                         setTimeout(function() {
                             document.body.appendChild(popup);
                         }, 0);
