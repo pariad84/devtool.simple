@@ -617,6 +617,7 @@
                     resize : 'both',
                     overflow : 'hidden',
                 },
+                caller : opt.caller,
             });
             fn.component._.applySetting({ el : popup });
 
@@ -679,7 +680,6 @@
             popup.buttons = buttons;
             popup.content = content;
             popup._.render = opt.render;
-            popup._.caller = opt.caller;
             popup._.resource = opt.resource;
             popup._.title = opt.title;
 
