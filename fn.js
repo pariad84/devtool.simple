@@ -1384,25 +1384,6 @@
                             }
                         });
                     }` } },
-                    { name : 'viewData', label : 'Data', form : { render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'View data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var caller = e.target.closest('.__popup');
-                                    fn.devtool.openResource({
-                                        resource : { key : data.key, type : data.type, columns : JSON.parse(data.columns) },
-                                        name : data.name,
-                                        caller : caller,
-                                    });
-                                }
-                            }
-                        });
-                    }` } },
                 ]),
             },
             {
