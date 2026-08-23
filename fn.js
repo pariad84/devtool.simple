@@ -971,10 +971,12 @@
                                         name : 'popup-save-btn',
                                         parent : opt.el.buttons,
                                     });
-                                    fn.component.create({
-                                        name : 'popup-delete-btn',
-                                        parent : opt.el.buttons,
-                                    });
+                                    if (!data.protected) {
+                                        fn.component.create({
+                                            name : 'popup-delete-btn',
+                                            parent : opt.el.buttons,
+                                        });
+                                    }
                                 },
                                 render : function(opt) {
                                     var row = fn.data.select({ key : resource.key, id : data.id });
@@ -1169,6 +1171,7 @@
                 name : 'Memo',
                 key : 'memo',
                 type : 'array',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
@@ -1178,6 +1181,7 @@
                 name : 'Bookmark',
                 key : 'bookmark',
                 type : 'array',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
@@ -1201,6 +1205,7 @@
                 name : 'Code',
                 key : 'code',
                 type : 'array',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'group', label : 'Group', list : { width : '140px' }, form : { inputType : 'text' } },
                     { name : 'code', label : 'Code', list : { width : '120px' }, form : { inputType : 'text' } },
@@ -1211,6 +1216,7 @@
                 name : 'Request',
                 key : 'request',
                 type : 'array',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'method', label : 'Method', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'method' } },
@@ -1317,6 +1323,7 @@
                 name : 'Resource',
                 key : '_resource',
                 type : 'array',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
@@ -1328,6 +1335,7 @@
                 name : 'Setting',
                 key : '_setting',
                 type : 'object',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
