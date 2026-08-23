@@ -1187,6 +1187,12 @@
                 data : { group : 'authType', code : authType.code, name : authType.name },
             });
         });
+        [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ].forEach(function(resourceType) {
+            fn.data.insert({
+                key : 'code',
+                data : { group : 'resourceType', code : resourceType.code, name : resourceType.name },
+            });
+        });
         fn.data.insert({
             key : '_resource',
             data : {
@@ -1305,7 +1311,7 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'text' } },
+                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                 ]),
             },
