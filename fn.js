@@ -9,6 +9,7 @@
     fn.component._ = {};
     fn.devtool = {};
     fn.devtool._ = {};
+    fn.devtool.data = {};
     fn.component.data = {};
     fn.component.layout = {};
     fn.component.layout._ = {};
@@ -1335,10 +1336,10 @@
     };
 
     fn.devtool.start = function() {
-        if (fn.devtool._.started) {
+        if (fn.devtool.data.started) {
             return;
         }
-        fn.devtool._.started = true;
+        fn.devtool.data.started = true;
 
         if (fn.data.select({ key : '_resource' }).length === 0) {
             fn.devtool._.seed();
