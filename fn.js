@@ -1155,28 +1155,17 @@
         });
     };
 
-    fn.devtool._.resourceDefinition = function() {
+    fn.devtool._.codeGroups = function() {
         return {
-            name : 'Resource',
-            key : '_resource',
-            type : 'array',
-            columns : JSON.stringify([
-                { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
-                { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-            ]),
+            method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
+            authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
+            resourceType : [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ],
         };
     };
 
-    fn.devtool._.settingDefault = function() {
-        return { width : 'auto', height : 'auto', scale : '1', opacity : '1' };
-    };
-
-    fn.devtool._.seed = function() {
-        fn.data.insert({
-            key : '_resource',
-            data : {
+    fn.devtool._.resourceDefinitions = function() {
+        return [
+            {
                 name : 'Memo',
                 key : 'memo',
                 type : 'array',
@@ -1185,10 +1174,7 @@
                     { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                 ]),
             },
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : {
+            {
                 name : 'Bookmark',
                 key : 'bookmark',
                 type : 'array',
@@ -1211,10 +1197,7 @@
                     }` } },
                 ]),
             },
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : {
+            {
                 name : 'Code',
                 key : 'code',
                 type : 'array',
@@ -1224,28 +1207,7 @@
                     { name : 'name', label : 'Name', list : { width : 'auto' }, form : { inputType : 'text' } },
                 ]),
             },
-        });
-        [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].forEach(function(method) {
-            fn.data.insert({
-                key : 'code',
-                data : { group : 'method', code : method, name : method },
-            });
-        });
-        [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ].forEach(function(authType) {
-            fn.data.insert({
-                key : 'code',
-                data : { group : 'authType', code : authType.code, name : authType.name },
-            });
-        });
-        [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ].forEach(function(resourceType) {
-            fn.data.insert({
-                key : 'code',
-                data : { group : 'resourceType', code : resourceType.code, name : resourceType.name },
-            });
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : {
+            {
                 name : 'Request',
                 key : 'request',
                 type : 'array',
@@ -1351,56 +1313,46 @@
                     }` } },
                 ]),
             },
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : fn.devtool._.resourceDefinition(),
-        });
-        fn.data.insert({
-            key : '_resource',
-            data : fn.devtool._.settingDefinition(),
-        });
-        fn.data.insert({
-            key : '_setting',
-            data : fn.devtool._.settingDefault(),
-        });
-
-        for (var i = 1; i <= 20; i++) {
-            fn.data.insert({
-                key : 'memo',
-                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
-            });
-            fn.data.insert({
-                key : 'bookmark',
-                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
-            });
-        }
-
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
-        });
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
-        });
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
-        });
-    };
-
-    fn.devtool._.settingDefinition = function() {
-        return {
-            name : 'Setting',
-            key : '_setting',
-            type : 'object',
-            columns : JSON.stringify([
-                { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'export', label : 'Export', form : { render : `function(data) {
+            {
+                name : 'Resource',
+                key : '_resource',
+                type : 'array',
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                ]),
+            },
+            {
+                name : 'Setting',
+                key : '_setting',
+                type : 'object',
+                columns : JSON.stringify([
+                    { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'testData', label : 'Test Data', form : { render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Generate test data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    fn.devtool._.generateSampleData();
+                                    var popup = e.target.closest('.__popup');
+                                    if (popup._.caller) {
+                                        popup._.caller.refresh();
+                                    }
+                                    popup.close();
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'export', label : 'Export', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1493,20 +1445,63 @@
                         });
                     }` } },
                 ]),
-        };
+            },
+        ];
+    };
+
+    fn.devtool._.generateSampleData = function() {
+        for (var i = 1; i <= 20; i++) {
+            fn.data.insert({
+                key : 'memo',
+                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
+            });
+            fn.data.insert({
+                key : 'bookmark',
+                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
+            });
+        }
+
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
+        });
     };
 
     fn.devtool._.ensureEssential = function() {
-        var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
-        if (keys.indexOf('_resource') === -1) {
-            fn.data.insert({ key : '_resource', data : fn.devtool._.resourceDefinition() });
-        }
-        if (keys.indexOf('_setting') === -1) {
-            fn.data.insert({ key : '_resource', data : fn.devtool._.settingDefinition() });
-        }
+        var existingKeys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
+        fn.devtool._.resourceDefinitions().forEach(function(definition) {
+            if (existingKeys.indexOf(definition.key) === -1) {
+                fn.data.insert({ key : '_resource', data : definition });
+            }
+        });
+
         if (fn.data.select({ key : '_setting' }).length === 0) {
-            fn.data.insert({ key : '_setting', data : fn.devtool._.settingDefault() });
+            fn.data.insert({ key : '_setting', data : { width : 'auto', height : 'auto', scale : '1', opacity : '1' } });
         }
+
+        var codeRows = fn.data.select({ key : 'code' });
+        var codeGroups = fn.devtool._.codeGroups();
+        Object.keys(codeGroups).forEach(function(group) {
+            var hasGroup = codeRows.some(function(row) { return row.data.group === group; });
+            if (!hasGroup) {
+                codeGroups[group].forEach(function(entry) {
+                    fn.data.insert({ key : 'code', data : { group : group, code : entry.code, name : entry.name } });
+                });
+            }
+        });
+    };
+
+    fn.devtool._.seed = function() {
+        fn.devtool._.ensureEssential();
+        fn.devtool._.generateSampleData();
     };
 
     fn.devtool._.reset = function() {
@@ -1559,10 +1554,11 @@
         }
         fn.devtool.data.started = true;
 
-        if (fn.data.select({ key : '_resource' }).length === 0) {
-            fn.devtool._.seed();
-        }
+        var isFirstRun = fn.data.select({ key : '_resource' }).length === 0;
         fn.devtool._.ensureEssential();
+        if (isFirstRun) {
+            fn.devtool._.generateSampleData();
+        }
 
         var button = fn.element.create({
             tagName : 'button',
