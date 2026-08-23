@@ -106,6 +106,21 @@
         });
     };
 
+    fn.element.maxZIndex = function(opt = {}) {
+        var exclude = opt.exclude || [];
+        var max = 0;
+        document.querySelectorAll('*').forEach(function(el) {
+            if (exclude.some(function(ex) { return ex === el || ex.contains(el); })) {
+                return;
+            }
+            var z = parseInt(getComputedStyle(el).zIndex, 10);
+            if (!isNaN(z) && z > max) {
+                max = z;
+            }
+        });
+        return max;
+    };
+
     fn.component.layout.set = function(opt = {}) {
         this.data[opt.name] = opt.layout;
     };
@@ -248,6 +263,18 @@
         return render(opt.data);
     };
 
+    fn.component._.applyZIndex = function(opt) {
+        var settingRows = fn.data.select({ key : '_setting' });
+        var setting = settingRows[0] ? settingRows[0].data : {};
+        var exclude = (fn.component.data.popup || []).slice();
+        if (fn.devtool.data.button) {
+            exclude.push(fn.devtool.data.button);
+        }
+        var auto = fn.element.maxZIndex({ exclude : exclude }) + 1;
+        var manual = setting.zIndex ? parseInt(setting.zIndex, 10) : 0;
+        opt.el.style.zIndex = Math.max(auto, manual, 1);
+    };
+
     fn.component._.applySetting = function(opt) {
         var settingRows = fn.data.select({ key : '_setting' });
         var setting = settingRows[0] ? settingRows[0].data : {};
@@ -263,9 +290,7 @@
         if (setting.opacity) {
             opt.el.style.opacity = setting.opacity;
         }
-        if (setting.zIndex) {
-            opt.el.style.zIndex = setting.zIndex;
-        }
+        fn.component._.applyZIndex({ el : opt.el });
     };
 
     fn.component._.applySettingAll = function() {
@@ -1336,7 +1361,7 @@
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'zIndex', label : 'Fixed z-index', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'zIndex', label : 'Manual z-index (optional floor)', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'export', label : 'Export', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1470,6 +1495,42 @@
         fn.devtool._.seed();
     };
 
+    fn.devtool._.watchZIndex = function() {
+        var reapply = function() {
+            if (fn.devtool.data.button) {
+                fn.component._.applyZIndex({ el : fn.devtool.data.button });
+            }
+            (fn.component.data.popup || []).forEach(function(popup) {
+                fn.component._.applyZIndex({ el : popup });
+            });
+        };
+
+        var ownElements = function() {
+            return (fn.component.data.popup || []).concat(fn.devtool.data.button ? [ fn.devtool.data.button ] : []);
+        };
+
+        var timer = null;
+        var observer = new MutationObserver(function(mutations) {
+            var own = ownElements();
+            var isExternal = mutations.some(function(mutation) {
+                return !own.some(function(el) { return el === mutation.target || el.contains(mutation.target); });
+            });
+            if (!isExternal) {
+                return;
+            }
+            clearTimeout(timer);
+            timer = setTimeout(reapply, 200);
+        });
+        observer.observe(document.body, {
+            childList : true,
+            subtree : true,
+            attributes : true,
+            attributeFilter : [ 'style', 'class' ],
+        });
+
+        reapply();
+    };
+
     fn.devtool.start = function() {
         if (fn.devtool.data.started) {
             return;
@@ -1480,7 +1541,7 @@
             fn.devtool._.seed();
         }
 
-        fn.element.create({
+        var button = fn.element.create({
             tagName : 'button',
             attribute : {
                 type : 'button',
@@ -1509,6 +1570,8 @@
             },
             parent : document.body,
         });
+        fn.devtool.data.button = button;
+        fn.devtool._.watchZIndex();
     };
 })(window);
 
