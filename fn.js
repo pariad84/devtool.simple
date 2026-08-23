@@ -1055,54 +1055,10 @@
                         event : {
                             click : function(opt){
                                 return function(e){
-                                    var isObject = opt.data.resource.type === 'object';
-                                    fn.component.create({
-                                        name : 'popup',
-                                        title : isObject ? ('Edit ' + opt.data.name) : opt.data.name,
-                                        parent : document.body,
-                                        caller : opt.caller,
+                                    fn.devtool.openResource({
                                         resource : opt.data.resource,
-                                        initialize : function(opt) {
-                                            fn.component.create({
-                                                name : isObject ? 'popup-save-btn' : 'popup-create-btn',
-                                                parent : opt.el.buttons,
-                                            });
-                                            if (!isObject) {
-                                                fn.component.create({
-                                                    name : 'popup-search-btn',
-                                                    parent : opt.el.buttons,
-                                                });
-                                            }
-                                        },
-                                        render : function(opt) {
-                                            var rows = fn.data.select({ key : data.resource.key });
-                                            if (isObject) {
-                                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
-                                                fn.component.create({
-                                                    name : 'form',
-                                                    resource : data.resource,
-                                                    data : formData,
-                                                    parent : opt.el.content,
-                                                });
-                                                return;
-                                            }
-                                            var search = (opt.el._.search || '').toLowerCase();
-                                            if (search) {
-                                                rows = rows.filter(function(row) {
-                                                    return JSON.stringify(row.data).toLowerCase().indexOf(search) !== -1;
-                                                });
-                                            }
-                                            var listDatas = rows.map(function(row) {
-                                                return Object.assign({ id : row.id }, row.data);
-                                            });
-                                            fn.component.create({
-                                                name : 'list',
-                                                title : data.name,
-                                                resource : data.resource,
-                                                datas : listDatas,
-                                                parent : opt.el.content,
-                                            });
-                                        },
+                                        name : opt.data.name,
+                                        caller : opt.caller,
                                     });
                                 }
                             }({caller : opt.caller, data : data}),
@@ -1154,6 +1110,58 @@
         fn.component.create({
             name : 'devtool',
             parent : document.body,
+        });
+    };
+
+    fn.devtool.openResource = function(opt = {}) {
+        var isObject = opt.resource.type === 'object';
+        fn.component.create({
+            name : 'popup',
+            title : isObject ? ('Edit ' + opt.name) : opt.name,
+            parent : document.body,
+            caller : opt.caller,
+            resource : opt.resource,
+            initialize : function(initOpt) {
+                fn.component.create({
+                    name : isObject ? 'popup-save-btn' : 'popup-create-btn',
+                    parent : initOpt.el.buttons,
+                });
+                if (!isObject) {
+                    fn.component.create({
+                        name : 'popup-search-btn',
+                        parent : initOpt.el.buttons,
+                    });
+                }
+            },
+            render : function(renderOpt) {
+                var rows = fn.data.select({ key : opt.resource.key });
+                if (isObject) {
+                    var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
+                    fn.component.create({
+                        name : 'form',
+                        resource : opt.resource,
+                        data : formData,
+                        parent : renderOpt.el.content,
+                    });
+                    return;
+                }
+                var search = (renderOpt.el._.search || '').toLowerCase();
+                if (search) {
+                    rows = rows.filter(function(row) {
+                        return JSON.stringify(row.data).toLowerCase().indexOf(search) !== -1;
+                    });
+                }
+                var listDatas = rows.map(function(row) {
+                    return Object.assign({ id : row.id }, row.data);
+                });
+                fn.component.create({
+                    name : 'list',
+                    title : opt.name,
+                    resource : opt.resource,
+                    datas : listDatas,
+                    parent : renderOpt.el.content,
+                });
+            },
         });
     };
 
@@ -1329,6 +1337,25 @@
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
                     { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    { name : 'viewData', label : 'Data', form : { render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'View data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var caller = e.target.closest('.__popup');
+                                    fn.devtool.openResource({
+                                        resource : { key : data.key, type : data.type, columns : JSON.parse(data.columns) },
+                                        name : data.name,
+                                        caller : caller,
+                                    });
+                                }
+                            }
+                        });
+                    }` } },
                 ]),
             },
             {
