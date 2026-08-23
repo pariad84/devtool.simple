@@ -933,10 +933,12 @@
                                     });
                                 },
                                 render : function(opt) {
+                                    var row = fn.data.select({ key : resource.key, id : data.id });
+                                    var formData = row ? Object.assign({ id : row.id }, row.data) : data;
                                     fn.component.create({
                                         name : 'form',
                                         resource : resource,
-                                        data : data,
+                                        data : formData,
                                         parent : opt.el.content,
                                     });
                                 },
