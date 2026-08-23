@@ -959,6 +959,10 @@
                                 fn.log('list', 'inspect', e.target.closest('tr')._.data);
                                 return;
                             }
+                            if (opt.onRowClick) {
+                                opt.onRowClick({ data : data, e : e });
+                                return;
+                            }
                             var resource = opt.resource;
                             fn.component.create({
                                 name : 'popup',
@@ -1165,6 +1169,61 @@
         });
     };
 
+    fn.devtool.openJsonValue = function(opt = {}) {
+        var flatten = function(column) {
+            return {
+                name : column.name,
+                label : column.label || '',
+                listWidth : column.list ? (column.list.width || '') : '',
+                formInput : column.form ? (column.form.inputType || (column.form.render ? 'custom render' : '')) : '',
+            };
+        };
+        var resource = {
+            key : '',
+            columns : [
+                { name : 'name', label : 'Field', list : { width : '140px' }, form : { inputType : 'text' } },
+                { name : 'label', label : 'Label', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { inputType : 'text' } },
+                { name : 'formInput', label : 'Form input', list : { width : '140px' }, form : { inputType : 'text' } },
+            ],
+        };
+
+        fn.component.create({
+            name : 'popup',
+            title : opt.title,
+            parent : document.body,
+            caller : opt.caller,
+            render : function(renderOpt) {
+                if (Array.isArray(opt.value)) {
+                    var datas = opt.value.map(function(column, index) {
+                        return Object.assign({ id : index }, flatten(column));
+                    });
+                    fn.component.create({
+                        name : 'list',
+                        resource : resource,
+                        datas : datas,
+                        onRowClick : function(clickOpt) {
+                            var column = opt.value[clickOpt.data.id];
+                            fn.devtool.openJsonValue({
+                                value : column,
+                                title : 'Column: ' + (column.name || clickOpt.data.id),
+                                caller : clickOpt.e.target.closest('.__popup'),
+                            });
+                        },
+                        parent : renderOpt.el.content,
+                    });
+                    return;
+                }
+                fn.component.create({
+                    name : 'form',
+                    resource : resource,
+                    data : flatten(opt.value),
+                    parent : renderOpt.el.content,
+                });
+            },
+        });
+    };
+
     fn.devtool._.codeGroups = function() {
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
@@ -1346,39 +1405,10 @@
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
-                                    var caller = e.target.closest('.__popup');
-                                    var columns = JSON.parse(data.columns);
-                                    var previewDatas = columns.map(function(column, index) {
-                                        return {
-                                            id : index,
-                                            name : column.name,
-                                            label : column.label || '',
-                                            listWidth : column.list ? (column.list.width || '') : '',
-                                            formInput : column.form ? (column.form.inputType || (column.form.render ? 'custom render' : '')) : '',
-                                        };
-                                    });
-                                    fn.component.create({
-                                        name : 'popup',
+                                    fn.devtool.openJsonValue({
+                                        value : JSON.parse(data.columns),
                                         title : 'Columns: ' + data.name,
-                                        parent : document.body,
-                                        caller : caller,
-                                        render : function(opt) {
-                                            fn.component.create({
-                                                name : 'list',
-                                                readonly : true,
-                                                resource : {
-                                                    key : '',
-                                                    columns : [
-                                                        { name : 'name', label : 'Field', list : { width : '140px' } },
-                                                        { name : 'label', label : 'Label', list : { width : '160px' } },
-                                                        { name : 'listWidth', label : 'List width', list : { width : '110px' } },
-                                                        { name : 'formInput', label : 'Form input', list : { width : '140px' } },
-                                                    ],
-                                                },
-                                                datas : previewDatas,
-                                                parent : opt.el.content,
-                                            });
-                                        },
+                                        caller : e.target.closest('.__popup'),
                                     });
                                 }
                             }
