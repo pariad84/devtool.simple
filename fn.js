@@ -915,6 +915,10 @@
                             if (!clickable) {
                                 return;
                             }
+                            if (e.ctrlKey) {
+                                fn.log('list', 'inspect', e.target.closest('tr')._.data);
+                                return;
+                            }
                             var resource = opt.resource;
                             fn.component.create({
                                 name : 'popup',
