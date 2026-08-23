@@ -248,6 +248,14 @@
         return render(opt.data);
     };
 
+    fn.component._.applyZIndex = function(opt) {
+        var settingRows = fn.data.select({ key : '_setting' });
+        var setting = settingRows[0] ? settingRows[0].data : {};
+        if (setting.zIndex) {
+            opt.el.style.zIndex = setting.zIndex;
+        }
+    };
+
     fn.component._.applySetting = function(opt) {
         var settingRows = fn.data.select({ key : '_setting' });
         var setting = settingRows[0] ? settingRows[0].data : {};
@@ -263,9 +271,7 @@
         if (setting.opacity) {
             opt.el.style.opacity = setting.opacity;
         }
-        if (setting.zIndex) {
-            opt.el.style.zIndex = setting.zIndex;
-        }
+        fn.component._.applyZIndex({ el : opt.el });
     };
 
     fn.component._.applySettingAll = function() {
@@ -1480,7 +1486,7 @@
             fn.devtool._.seed();
         }
 
-        fn.element.create({
+        var button = fn.element.create({
             tagName : 'button',
             attribute : {
                 type : 'button',
@@ -1509,6 +1515,7 @@
             },
             parent : document.body,
         });
+        fn.component._.applyZIndex({ el : button });
     };
 })(window);
 
