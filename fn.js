@@ -1422,7 +1422,7 @@
         });
         fn.data.insert({
             key : '_setting',
-            data : { width : '420px', height : '320px' },
+            data : { width : 'auto', height : 'auto' },
         });
 
         for (var i = 1; i <= 20; i++) {
