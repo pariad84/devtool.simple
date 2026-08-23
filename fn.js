@@ -264,15 +264,11 @@
     };
 
     fn.component._.applyZIndex = function(opt) {
-        var settingRows = fn.data.select({ key : '_setting' });
-        var setting = settingRows[0] ? settingRows[0].data : {};
         var exclude = (fn.component.data.popup || []).slice();
         if (fn.devtool.data.button) {
             exclude.push(fn.devtool.data.button);
         }
-        var auto = fn.element.maxZIndex({ exclude : exclude }) + 1;
-        var manual = setting.zIndex ? parseInt(setting.zIndex, 10) : 0;
-        opt.el.style.zIndex = Math.max(auto, manual, 1);
+        opt.el.style.zIndex = fn.element.maxZIndex({ exclude : exclude }) + 1;
     };
 
     fn.component._.applySetting = function(opt) {
@@ -570,6 +566,7 @@
                 event : {
                     click : function(e) {
                         var caller = e.target.closest('.__popup');
+                        fn.devtool._.ensureEssential();
                         var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
                             return row.data.key === '_setting';
                         });
@@ -1151,10 +1148,29 @@
     });
 
     fn.devtool.open = function() {
+        fn.devtool._.ensureEssential();
         fn.component.create({
             name : 'devtool',
             parent : document.body,
         });
+    };
+
+    fn.devtool._.resourceDefinition = function() {
+        return {
+            name : 'Resource',
+            key : '_resource',
+            type : 'array',
+            columns : JSON.stringify([
+                { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
+                { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
+                { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+            ]),
+        };
+    };
+
+    fn.devtool._.settingDefault = function() {
+        return { width : 'auto', height : 'auto', scale : '1', opacity : '1' };
     };
 
     fn.devtool._.seed = function() {
@@ -1338,31 +1354,53 @@
         });
         fn.data.insert({
             key : '_resource',
-            data : {
-                name : 'Resource',
-                key : '_resource',
-                type : 'array',
-                columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
-                ]),
-            },
+            data : fn.devtool._.resourceDefinition(),
         });
         fn.data.insert({
             key : '_resource',
-            data : {
-                name : 'Setting',
-                key : '_setting',
-                type : 'object',
-                columns : JSON.stringify([
-                    { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'zIndex', label : 'Manual z-index (optional floor)', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'export', label : 'Export', form : { render : `function(data) {
+            data : fn.devtool._.settingDefinition(),
+        });
+        fn.data.insert({
+            key : '_setting',
+            data : fn.devtool._.settingDefault(),
+        });
+
+        for (var i = 1; i <= 20; i++) {
+            fn.data.insert({
+                key : 'memo',
+                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
+            });
+            fn.data.insert({
+                key : 'bookmark',
+                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
+            });
+        }
+
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
+        });
+        fn.data.insert({
+            key : 'request',
+            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
+        });
+    };
+
+    fn.devtool._.settingDefinition = function() {
+        return {
+            name : 'Setting',
+            key : '_setting',
+            type : 'object',
+            columns : JSON.stringify([
+                { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
+                { name : 'export', label : 'Export', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1455,36 +1493,20 @@
                         });
                     }` } },
                 ]),
-            },
-        });
-        fn.data.insert({
-            key : '_setting',
-            data : { width : 'auto', height : 'auto', scale : '1', opacity : '1', zIndex : '' },
-        });
+        };
+    };
 
-        for (var i = 1; i <= 20; i++) {
-            fn.data.insert({
-                key : 'memo',
-                data : { name : 'Memo ' + i, content : 'Sample memo content #' + i },
-            });
-            fn.data.insert({
-                key : 'bookmark',
-                data : { name : 'Bookmark ' + i, url : 'https://example.com/' + i },
-            });
+    fn.devtool._.ensureEssential = function() {
+        var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
+        if (keys.indexOf('_resource') === -1) {
+            fn.data.insert({ key : '_resource', data : fn.devtool._.resourceDefinition() });
         }
-
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
-        });
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
-        });
-        fn.data.insert({
-            key : 'request',
-            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
-        });
+        if (keys.indexOf('_setting') === -1) {
+            fn.data.insert({ key : '_resource', data : fn.devtool._.settingDefinition() });
+        }
+        if (fn.data.select({ key : '_setting' }).length === 0) {
+            fn.data.insert({ key : '_setting', data : fn.devtool._.settingDefault() });
+        }
     };
 
     fn.devtool._.reset = function() {
@@ -1540,6 +1562,7 @@
         if (fn.data.select({ key : '_resource' }).length === 0) {
             fn.devtool._.seed();
         }
+        fn.devtool._.ensureEssential();
 
         var button = fn.element.create({
             tagName : 'button',
