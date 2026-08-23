@@ -1271,6 +1271,75 @@
                 columns : JSON.stringify([
                     { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'export', label : 'Export', form : { render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Export data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var backup = {};
+                                    fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; }).forEach(function(key) {
+                                        backup[key] = fn.data.select({ key : key });
+                                    });
+                                    var blob = new Blob([ JSON.stringify(backup, null, 2) ], { type : 'application/json' });
+                                    var url = URL.createObjectURL(blob);
+                                    var link = fn.element.create({
+                                        tagName : 'a',
+                                        attribute : { href : url, download : 'devtool-backup.json' },
+                                    });
+                                    link.click();
+                                    URL.revokeObjectURL(url);
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'import', label : 'Import', form : { render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Import data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var popup = e.target.closest('.__popup');
+                                    var input = fn.element.create({
+                                        tagName : 'input',
+                                        attribute : { type : 'file', accept : 'application/json' },
+                                        style : { display : 'none' },
+                                        event : {
+                                            change : function(changeEvent) {
+                                                var file = changeEvent.target.files[0];
+                                                if (!file) {
+                                                    return;
+                                                }
+                                                if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
+                                                    return;
+                                                }
+                                                var reader = new FileReader();
+                                                reader.onload = function() {
+                                                    var backup = JSON.parse(reader.result);
+                                                    Object.keys(backup).forEach(function(key) {
+                                                        fn.data._.writeTable({ key : key, rows : backup[key] });
+                                                    });
+                                                    fn.component._.applySettingAll();
+                                                    if (popup._.caller) {
+                                                        popup._.caller.refresh();
+                                                    }
+                                                    popup.close();
+                                                };
+                                                reader.readAsText(file);
+                                            },
+                                        },
+                                    });
+                                    input.click();
+                                }
+                            }
+                        });
+                    }` } },
                     { name : 'reset', label : 'Reset', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
