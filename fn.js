@@ -264,15 +264,11 @@
     };
 
     fn.component._.applyZIndex = function(opt) {
-        var settingRows = fn.data.select({ key : '_setting' });
-        var setting = settingRows[0] ? settingRows[0].data : {};
         var exclude = (fn.component.data.popup || []).slice();
         if (fn.devtool.data.button) {
             exclude.push(fn.devtool.data.button);
         }
-        var auto = fn.element.maxZIndex({ exclude : exclude }) + 1;
-        var manual = setting.zIndex ? parseInt(setting.zIndex, 10) : 0;
-        opt.el.style.zIndex = Math.max(auto, manual, 1);
+        opt.el.style.zIndex = fn.element.maxZIndex({ exclude : exclude }) + 1;
     };
 
     fn.component._.applySetting = function(opt) {
@@ -1361,7 +1357,6 @@
                     { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'zIndex', label : 'Manual z-index (optional floor)', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'export', label : 'Export', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1459,7 +1454,7 @@
         });
         fn.data.insert({
             key : '_setting',
-            data : { width : 'auto', height : 'auto', scale : '1', opacity : '1', zIndex : '' },
+            data : { width : 'auto', height : 'auto', scale : '1', opacity : '1' },
         });
 
         for (var i = 1; i <= 20; i++) {
