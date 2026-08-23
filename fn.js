@@ -106,7 +106,7 @@
     };
 
     fn.component.layout.set = function(opt = {}) {
-        this.data[opt.name] = opt.value;
+        this.data[opt.name] = opt.layout;
     };
 
     fn.component.layout.get = function(opt = {}) {
@@ -303,7 +303,7 @@
 
     fn.component.layout.set({
         name : 'popup-create-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -345,7 +345,7 @@
 
     fn.component.layout.set({
         name : 'popup-save-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -387,7 +387,7 @@
 
     fn.component.layout.set({
         name : 'popup-delete-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -420,7 +420,7 @@
 
     fn.component.layout.set({
         name : 'popup-refresh-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -441,7 +441,7 @@
 
     fn.component.layout.set({
         name : 'popup-close-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -462,7 +462,7 @@
 
     fn.component.layout.set({
         name : 'popup-search-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             var popup = opt.parent.closest('.__popup');
 
             var labels = popup._.resource.columns.filter(function(column) {
@@ -522,7 +522,7 @@
 
     fn.component.layout.set({
         name : 'popup-setting-btn',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'button',
                 attribute : {
@@ -570,7 +570,7 @@
 
     fn.component.layout.set({
         name : 'popup-buttons',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.element.create({
                 tagName : 'div',
                 style : {
@@ -584,7 +584,7 @@
 
     fn.component.layout.set({
         name : 'popup',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             var top = 50;
             var left = 50;
             var offset = 30;
@@ -741,7 +741,7 @@
 
     fn.component.layout.set({
         name : 'form',
-        value : function(opt = {resource : {key : '', columns : []}, data : {}}) {
+        layout : function(opt = {resource : {key : '', columns : []}, data : {}}) {
             var el = fn.element.create({
                 tagName : 'table',
                 attribute : {
@@ -872,7 +872,7 @@
 
     fn.component.layout.set({
         name : 'list',
-        value : function(opt = {resource : {key : '', columns : []}, datas : []}) {
+        layout : function(opt = {resource : {key : '', columns : []}, datas : []}) {
             var el = fn.element.create({
                 tagName : 'table',
                 style : fn.component.layout._.style.table,
@@ -994,7 +994,7 @@
 
     fn.component.layout.set({
         name : 'menu',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             var el = fn.element.create({
                 tagName : 'div',
                 style : {
@@ -1083,7 +1083,7 @@
 
     fn.component.layout.set({
         name : 'devtool',
-        value : function(opt = {}) {
+        layout : function(opt = {}) {
             return fn.component.create({
                 name : 'popup',
                 title : 'DevTool',
