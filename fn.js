@@ -105,6 +105,14 @@
         });
     };
 
+    fn.component.layout.set = function(opt = {}) {
+        this.data[opt.name] = opt.value;
+    };
+
+    fn.component.layout.get = function(opt = {}) {
+        return this.data[opt.name];
+    };
+
     fn.component.create = function(opt = {}) {
         var layout = this.layout.get(opt);
         if (!layout) {
@@ -116,14 +124,6 @@
             opt.parent.appendChild(el);
         }
         return el;
-    };
-
-    fn.component.layout.set = function(opt = {}) {
-        this.data[opt.name] = opt.value;
-    };
-
-    fn.component.layout.get = function(opt = {}) {
-        return this.data[opt.name];
     };
 
     fn.localStorage.get = function(opt = {}) {
