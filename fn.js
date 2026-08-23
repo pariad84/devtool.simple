@@ -154,6 +154,14 @@
         fn.localStorage.set({ key : opt.key, value : JSON.stringify(opt.rows) });
     };
 
+    fn.data._.toResource = function(opt = {}) {
+        return {
+            key : opt.row.data.key,
+            type : opt.row.data.type,
+            columns : JSON.parse(opt.row.data.columns),
+        };
+    };
+
     fn.data.select = function(opt = {}) {
         var rows = fn.data._.readTable({ key : opt.key });
         if (opt.id !== undefined) {
@@ -519,7 +527,7 @@
                 tagName : 'button',
                 attribute : {
                     type : 'button',
-                    title : 'Settings',
+                    title : 'Setting',
                 },
                 style : fn.component.layout._.style.popupBtn,
                 hoverStyle : fn.component.layout._.style.popupBtnHover,
@@ -530,11 +538,7 @@
                         var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
                             return row.data.key === '_setting';
                         });
-                        var resource = {
-                            key : resourceRow.data.key,
-                            type : resourceRow.data.type,
-                            columns : JSON.parse(resourceRow.data.columns),
-                        };
+                        var resource = fn.data._.toResource({ row : resourceRow });
                         fn.component.create({
                             name : 'popup',
                             title : 'Edit Setting',
@@ -1096,11 +1100,7 @@
                         return {
                             id : row.id,
                             name : row.data.name,
-                            resource : {
-                                key : row.data.key,
-                                type : row.data.type,
-                                columns : JSON.parse(row.data.columns),
-                            },
+                            resource : fn.data._.toResource({ row : row }),
                         };
                     });
 
