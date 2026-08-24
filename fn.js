@@ -841,7 +841,7 @@
                         inputStyle.width = column.form.width;
                     }
 
-                    if (column.form.inputType === 'select') {
+                    if (column.form.type === 'select') {
                         input = fn.element.create({
                             tagName : 'select',
                             attribute : { name : column.name },
@@ -859,7 +859,7 @@
                             });
                         });
                     } else {
-                        var isTextarea = column.form.inputType === 'textarea';
+                        var isTextarea = column.form.type === 'textarea';
                         if (isTextarea) {
                             inputStyle.resize = 'vertical';
                             inputStyle.minHeight = '60px';
@@ -867,7 +867,7 @@
 
                         input = fn.element.create({
                             tagName : isTextarea ? 'textarea' : 'input',
-                            attribute : isTextarea ? { name : column.name } : { type : column.form.inputType || 'text', name : column.name },
+                            attribute : isTextarea ? { name : column.name } : { type : column.form.type || 'text', name : column.name },
                             style : inputStyle,
                             parent : valueCell,
                         });
@@ -1176,7 +1176,7 @@
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
                 listRender : (column.list && column.list.render) || '',
-                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || 'text')) : 'none',
+                formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
                 render : (column.form && column.form.render) || '',
             };
         };
@@ -1189,15 +1189,15 @@
                     render : formData.listRender || undefined,
                 }) : undefined,
             });
-            if (formData.formInput === 'none') {
+            if (formData.formType === 'none') {
                 delete column.form;
             } else {
                 column.form = Object.assign({}, original.form);
-                if (formData.formInput === 'render') {
+                if (formData.formType === 'render') {
                     column.form.render = formData.render;
-                    delete column.form.inputType;
+                    delete column.form.type;
                 } else {
-                    column.form.inputType = formData.formInput;
+                    column.form.type = formData.formType;
                     delete column.form.render;
                 }
             }
@@ -1206,12 +1206,12 @@
         var resource = {
             key : '',
             columns : [
-                { name : 'name', label : 'Field', list : { width : '140px' }, form : { inputType : 'text' } },
-                { name : 'label', label : 'Label', list : { width : '160px' }, form : { inputType : 'text' } },
-                { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { inputType : 'text' } },
-                { name : 'listRender', label : 'List render (JS)', form : { inputType : 'textarea' } },
-                { name : 'formInput', label : 'Form input', list : { width : '140px' }, form : { inputType : 'select', codeGroup : 'formInputType' } },
-                { name : 'render', label : 'Form render (JS)', form : { inputType : 'textarea' } },
+                { name : 'name', label : 'Field', list : { width : '140px' }, form : { type : 'text' } },
+                { name : 'label', label : 'Label', list : { width : '160px' }, form : { type : 'text' } },
+                { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { type : 'text' } },
+                { name : 'listRender', label : 'List render (JS)', form : { type : 'textarea' } },
+                { name : 'formType', label : 'Form type', list : { width : '140px' }, form : { type : 'select', codeGroup : 'formType' } },
+                { name : 'render', label : 'Form render (JS)', form : { type : 'textarea' } },
             ],
         };
         var isArray = Array.isArray(opt.value);
@@ -1255,12 +1255,12 @@
                     return;
                 }
                 var formEl = fn.component.create({ name : 'form', resource : resource, data : flatten(opt.value), parent : renderOpt.el.content });
-                var formInputSelect = formEl._.inputs.formInput;
+                var formTypeSelect = formEl._.inputs.formType;
                 var renderRow = formEl._.inputs.render.closest('tr');
                 var syncRenderVisibility = function() {
-                    renderRow.style.display = formInputSelect.value === 'render' ? '' : 'none';
+                    renderRow.style.display = formTypeSelect.value === 'render' ? '' : 'none';
                 };
-                formInputSelect.addEventListener('change', syncRenderVisibility);
+                formTypeSelect.addEventListener('change', syncRenderVisibility);
                 syncRenderVisibility();
             },
         });
@@ -1270,7 +1270,7 @@
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
             authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
-            formInputType : [
+            formType : [
                 { code : 'none', name : 'None (no form field)' },
                 { code : 'text', name : 'Text' },
                 { code : 'textarea', name : 'Textarea' },
@@ -1287,8 +1287,8 @@
                 key : 'memo',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'content', label : 'Content', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'content', label : 'Content', list : { width : 'auto' }, form : { type : 'textarea' } },
                 ]),
             },
             {
@@ -1296,8 +1296,8 @@
                 key : 'bookmark',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1319,9 +1319,9 @@
                 key : 'code',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'group', label : 'Group', list : { width : '140px' }, form : { inputType : 'text' } },
-                    { name : 'code', label : 'Code', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'name', label : 'Name', list : { width : 'auto' }, form : { inputType : 'text' } },
+                    { name : 'group', label : 'Group', list : { width : '140px' }, form : { type : 'text' } },
+                    { name : 'code', label : 'Code', list : { width : '120px' }, form : { type : 'text' } },
+                    { name : 'name', label : 'Name', list : { width : 'auto' }, form : { type : 'text' } },
                 ]),
             },
             {
@@ -1329,14 +1329,14 @@
                 key : 'request',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'method', label : 'Method', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'method' } },
-                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { inputType : 'text' } },
-                    { name : 'params', label : 'Params (JSON)', form : { inputType : 'textarea' } },
-                    { name : 'authType', label : 'Auth Type', list : { width : '110px' }, form : { inputType : 'select', codeGroup : 'authType' } },
-                    { name : 'auth', label : 'Auth (JSON)', form : { inputType : 'textarea' } },
-                    { name : 'headers', label : 'Headers (JSON)', form : { inputType : 'textarea' } },
-                    { name : 'body', label : 'Body (JSON)', form : { inputType : 'textarea' } },
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'method', label : 'Method', list : { width : '90px' }, form : { type : 'select', codeGroup : 'method' } },
+                    { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
+                    { name : 'params', label : 'Params (JSON)', form : { type : 'textarea' } },
+                    { name : 'authType', label : 'Auth Type', list : { width : '110px' }, form : { type : 'select', codeGroup : 'authType' } },
+                    { name : 'auth', label : 'Auth (JSON)', form : { type : 'textarea' } },
+                    { name : 'headers', label : 'Headers (JSON)', form : { type : 'textarea' } },
+                    { name : 'body', label : 'Body (JSON)', form : { type : 'textarea' } },
                     { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1435,9 +1435,9 @@
                 key : '_resource',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
                     { name : 'previewColumns', label : 'Columns View', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
@@ -1469,8 +1469,8 @@
                 key : '_setting',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
+                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'testData', label : 'Test Data', form : { render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
