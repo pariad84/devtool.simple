@@ -854,13 +854,20 @@
                             style : inputStyle,
                             parent : valueCell,
                         });
-                        fn.data.select({ key : 'code' }).filter(function(row) {
-                            return row.data.group === column.form.codeGroup;
-                        }).forEach(function(row) {
+                        var options = column.form.resource
+                            ? fn.data.select({ key : column.form.resource.key }).map(function(row) {
+                                return { value : row.id, text : row.data[column.form.resource.label] };
+                            })
+                            : fn.data.select({ key : 'code' }).filter(function(row) {
+                                return row.data.group === column.form.codeGroup;
+                            }).map(function(row) {
+                                return { value : row.data.code, text : row.data.name };
+                            });
+                        options.forEach(function(option) {
                             fn.element.create({
                                 tagName : 'option',
-                                attribute : { value : row.data.code },
-                                text : row.data.name,
+                                attribute : { value : option.value },
+                                text : option.text,
                                 parent : input,
                             });
                         });
@@ -897,7 +904,7 @@
                     if (input.tagName === 'BUTTON') {
                         return;
                     }
-                    result[column.name] = input.value;
+                    result[column.name] = column.form.resource ? Number(input.value) : input.value;
                 });
                 return result;
             };
@@ -1456,6 +1463,14 @@
                             }
                         });
                     }` } },
+                ]),
+            },
+            {
+                name : 'History2',
+                key : 'history2',
+                columns : JSON.stringify([
+                    { name : 'requestId', label : 'Request', list : { width : '160px' }, form : { type : 'select', resource : { key : 'request', label : 'name' } } },
+                    { name : 'note', label : 'Note', list : { width : 'auto' }, form : { type : 'text' } },
                 ]),
             },
             {
