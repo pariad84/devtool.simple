@@ -173,7 +173,6 @@
     fn.data._.toResource = function(opt = {}) {
         return {
             key : opt.row.data.key,
-            type : opt.row.data.type,
             columns : JSON.parse(opt.row.data.columns),
         };
     };
@@ -1138,37 +1137,24 @@
     };
 
     fn.devtool.openResource = function(opt = {}) {
-        var isObject = opt.resource.type === 'object';
         fn.component.create({
             name : 'popup',
-            title : isObject ? ('Edit ' + opt.name) : opt.name,
+            title : opt.name,
             parent : document.body,
             caller : opt.caller,
             resource : opt.resource,
             initialize : function(initOpt) {
                 fn.component.create({
-                    name : isObject ? 'popup-save-btn' : 'popup-create-btn',
+                    name : 'popup-create-btn',
                     parent : initOpt.el.buttons,
                 });
-                if (!isObject) {
-                    fn.component.create({
-                        name : 'popup-search-btn',
-                        parent : initOpt.el.buttons,
-                    });
-                }
+                fn.component.create({
+                    name : 'popup-search-btn',
+                    parent : initOpt.el.buttons,
+                });
             },
             render : function(renderOpt) {
                 var rows = fn.data.select({ key : opt.resource.key });
-                if (isObject) {
-                    var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
-                    fn.component.create({
-                        name : 'form',
-                        resource : opt.resource,
-                        data : formData,
-                        parent : renderOpt.el.content,
-                    });
-                    return;
-                }
                 var search = (renderOpt.el._.search || '').toLowerCase();
                 if (search) {
                     rows = rows.filter(function(row) {
@@ -1196,7 +1182,7 @@
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
                 listRender : (column.list && column.list.render) || '',
-                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || '')) : 'none',
+                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || 'text')) : 'none',
                 render : (column.form && column.form.render) || '',
             };
         };
@@ -1290,7 +1276,6 @@
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
             authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
-            resourceType : [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ],
             formInputType : [
                 { code : 'none', name : 'None (no form field)' },
                 { code : 'text', name : 'Text' },
@@ -1306,7 +1291,6 @@
             {
                 name : 'Memo',
                 key : 'memo',
-                type : 'array',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
@@ -1316,7 +1300,6 @@
             {
                 name : 'Bookmark',
                 key : 'bookmark',
-                type : 'array',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
@@ -1340,7 +1323,6 @@
             {
                 name : 'Code',
                 key : 'code',
-                type : 'array',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'group', label : 'Group', list : { width : '140px' }, form : { inputType : 'text' } },
@@ -1351,7 +1333,6 @@
             {
                 name : 'Request',
                 key : 'request',
-                type : 'array',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
@@ -1458,12 +1439,10 @@
             {
                 name : 'Resource',
                 key : '_resource',
-                type : 'array',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { inputType : 'text' } },
-                    { name : 'type', label : 'Type', list : { width : '90px' }, form : { inputType : 'select', codeGroup : 'resourceType' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { inputType : 'textarea' } },
                     { name : 'previewColumns', label : 'Columns View', form : { render : `function(data) {
                         return fn.element.create({
@@ -1494,7 +1473,6 @@
             {
                 name : 'Setting',
                 key : '_setting',
-                type : 'object',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
