@@ -273,12 +273,6 @@
     fn.component._.applySetting = function(opt) {
         var settingRows = fn.data.select({ key : '_setting' });
         var setting = settingRows[0] ? settingRows[0].data : {};
-        if (setting.width) {
-            opt.el.style.width = setting.width;
-        }
-        if (setting.height) {
-            opt.el.style.height = setting.height;
-        }
         if (setting.scale) {
             opt.el.style.zoom = setting.scale;
         }
@@ -1475,8 +1469,6 @@
                 key : '_setting',
                 protected : true,
                 columns : JSON.stringify([
-                    { name : 'width', label : 'Default popup width', list : { width : '160px' }, form : { inputType : 'text' } },
-                    { name : 'height', label : 'Default popup height', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { inputType : 'text' } },
                     { name : 'testData', label : 'Test Data', form : { render : `function(data) {
@@ -1630,7 +1622,7 @@
         });
 
         if (fn.data.select({ key : '_setting' }).length === 0) {
-            fn.data.insert({ key : '_setting', data : { width : 'auto', height : 'auto', scale : '1', opacity : '1' } });
+            fn.data.insert({ key : '_setting', data : { scale : '1', opacity : '1' } });
         }
 
         var codeRows = fn.data.select({ key : 'code' });
