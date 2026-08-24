@@ -891,7 +891,7 @@
                     if (input.tagName === 'BUTTON') {
                         return;
                     }
-                    result[column.name] = column.form.dataType === 'number' ? Number(input.value) : input.value;
+                    result[column.name] = input.value;
                 });
                 return result;
             };
@@ -1438,7 +1438,7 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                    { name : 'previewColumns', label : 'Columns View', form : { type : 'render', render : `function(data) {
+                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
