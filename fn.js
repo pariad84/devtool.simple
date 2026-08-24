@@ -1182,49 +1182,51 @@
         });
     };
 
+    fn.devtool._.flattenColumn = function(column) {
+        return {
+            name : column.name,
+            label : column.label || '',
+            listWidth : column.list ? (column.list.width || '') : '',
+            listType : column.list ? (column.list.render ? 'render' : (column.list.type || 'text')) : 'none',
+            listRender : (column.list && column.list.render) || '',
+            formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
+            render : (column.form && column.form.render) || '',
+        };
+    };
+
+    fn.devtool._.unflattenColumn = function(original, formData) {
+        var column = Object.assign({}, original, {
+            name : formData.name,
+            label : formData.label,
+        });
+        if (formData.listType === 'none') {
+            delete column.list;
+        } else {
+            column.list = Object.assign({}, original.list, { width : formData.listWidth });
+            if (formData.listType === 'render') {
+                column.list.render = formData.listRender;
+                delete column.list.type;
+            } else {
+                column.list.type = formData.listType;
+                delete column.list.render;
+            }
+        }
+        if (formData.formType === 'none') {
+            delete column.form;
+        } else {
+            column.form = Object.assign({}, original.form);
+            if (formData.formType === 'render') {
+                column.form.render = formData.render;
+                delete column.form.type;
+            } else {
+                column.form.type = formData.formType;
+                delete column.form.render;
+            }
+        }
+        return column;
+    };
+
     fn.devtool.openJsonValue = function(opt = {}) {
-        var flatten = function(column) {
-            return {
-                name : column.name,
-                label : column.label || '',
-                listWidth : column.list ? (column.list.width || '') : '',
-                listType : column.list ? (column.list.render ? 'render' : (column.list.type || 'text')) : 'none',
-                listRender : (column.list && column.list.render) || '',
-                formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
-                render : (column.form && column.form.render) || '',
-            };
-        };
-        var unflatten = function(original, formData) {
-            var column = Object.assign({}, original, {
-                name : formData.name,
-                label : formData.label,
-            });
-            if (formData.listType === 'none') {
-                delete column.list;
-            } else {
-                column.list = Object.assign({}, original.list, { width : formData.listWidth });
-                if (formData.listType === 'render') {
-                    column.list.render = formData.listRender;
-                    delete column.list.type;
-                } else {
-                    column.list.type = formData.listType;
-                    delete column.list.render;
-                }
-            }
-            if (formData.formType === 'none') {
-                delete column.form;
-            } else {
-                column.form = Object.assign({}, original.form);
-                if (formData.formType === 'render') {
-                    column.form.render = formData.render;
-                    delete column.form.type;
-                } else {
-                    column.form.type = formData.formType;
-                    delete column.form.render;
-                }
-            }
-            return column;
-        };
         var resource = {
             key : '',
             columns : [
@@ -1245,7 +1247,7 @@
             parent : document.body,
             caller : opt.caller,
             onSave : (!isArray && opt.onSave) ? function(formData) {
-                opt.onSave(unflatten(opt.value, formData));
+                opt.onSave(fn.devtool._.unflattenColumn(opt.value, formData));
             } : undefined,
             initialize : function(initOpt) {
                 if (!isArray && opt.onSave) {
@@ -1255,7 +1257,7 @@
             render : function(renderOpt) {
                 if (isArray) {
                     var datas = opt.value.map(function(column, index) {
-                        return Object.assign({ id : index }, flatten(column));
+                        return Object.assign({ id : index }, fn.devtool._.flattenColumn(column));
                     });
                     fn.component.create({
                         name : 'list',
@@ -1277,7 +1279,7 @@
                     });
                     return;
                 }
-                var formEl = fn.component.create({ name : 'form', resource : resource, data : flatten(opt.value), parent : renderOpt.el.content });
+                var formEl = fn.component.create({ name : 'form', resource : resource, data : fn.devtool._.flattenColumn(opt.value), parent : renderOpt.el.content });
                 var listTypeSelect = formEl._.inputs.listType;
                 var listRenderRow = formEl._.inputs.listRender.closest('tr');
                 var syncListRenderVisibility = function() {
