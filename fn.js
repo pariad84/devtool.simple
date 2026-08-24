@@ -1438,7 +1438,7 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                    { name : 'previewColumns', label : 'Columns View', form : { render : `function(data) {
+                    { name : 'previewColumns', label : 'Columns View', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1471,7 +1471,7 @@
                 columns : JSON.stringify([
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'testData', label : 'Test Data', form : { render : `function(data) {
+                    { name : 'testData', label : 'Test Data', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1490,7 +1490,7 @@
                             }
                         });
                     }` } },
-                    { name : 'export', label : 'Export', form : { render : `function(data) {
+                    { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1515,7 +1515,7 @@
                             }
                         });
                     }` } },
-                    { name : 'import', label : 'Import', form : { render : `function(data) {
+                    { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1559,7 +1559,7 @@
                             }
                         });
                     }` } },
-                    { name : 'reset', label : 'Reset', form : { render : `function(data) {
+                    { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
