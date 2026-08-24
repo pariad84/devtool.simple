@@ -1196,7 +1196,7 @@
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
                 listRender : (column.list && column.list.render) || '',
-                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || '')) : 'none',
+                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || 'text')) : 'none',
                 render : (column.form && column.form.render) || '',
             };
         };
