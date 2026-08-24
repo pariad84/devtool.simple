@@ -1195,7 +1195,8 @@
                 name : column.name,
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
-                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || '')) : '',
+                listRender : (column.list && column.list.render) || '',
+                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || '')) : 'none',
                 render : (column.form && column.form.render) || '',
             };
         };
@@ -1203,15 +1204,22 @@
             var column = Object.assign({}, original, {
                 name : formData.name,
                 label : formData.label,
-                list : original.list ? Object.assign({}, original.list, { width : formData.listWidth }) : undefined,
-                form : Object.assign({}, original.form),
+                list : original.list ? Object.assign({}, original.list, {
+                    width : formData.listWidth,
+                    render : formData.listRender || undefined,
+                }) : undefined,
             });
-            if (formData.formInput === 'render') {
-                column.form.render = formData.render;
-                delete column.form.inputType;
+            if (formData.formInput === 'none') {
+                delete column.form;
             } else {
-                column.form.inputType = formData.formInput;
-                delete column.form.render;
+                column.form = Object.assign({}, original.form);
+                if (formData.formInput === 'render') {
+                    column.form.render = formData.render;
+                    delete column.form.inputType;
+                } else {
+                    column.form.inputType = formData.formInput;
+                    delete column.form.render;
+                }
             }
             return column;
         };
@@ -1221,8 +1229,9 @@
                 { name : 'name', label : 'Field', list : { width : '140px' }, form : { inputType : 'text' } },
                 { name : 'label', label : 'Label', list : { width : '160px' }, form : { inputType : 'text' } },
                 { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { inputType : 'text' } },
+                { name : 'listRender', label : 'List render (JS)', form : { inputType : 'textarea' } },
                 { name : 'formInput', label : 'Form input', list : { width : '140px' }, form : { inputType : 'select', codeGroup : 'formInputType' } },
-                { name : 'render', label : 'Render (JS)', form : { inputType : 'textarea' } },
+                { name : 'render', label : 'Form render (JS)', form : { inputType : 'textarea' } },
             ],
         };
         var isArray = Array.isArray(opt.value);
@@ -1283,6 +1292,7 @@
             authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
             resourceType : [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ],
             formInputType : [
+                { code : 'none', name : 'None (no form field)' },
                 { code : 'text', name : 'Text' },
                 { code : 'textarea', name : 'Textarea' },
                 { code : 'select', name : 'Select' },
