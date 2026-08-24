@@ -1,8 +1,12 @@
 # devtool.simple
 
-A single-file bookmarklet devtool. `fn.js` is the entire project — a tiny component/layout
-framework plus the actual DevTool UI (popups, forms, lists, menus) built on top of it,
-backed by localStorage. See README.md for what it does and how to install the bookmarklet.
+A single-file bookmarklet devtool. `fn.js` is the entire project: a tiny, devtool-agnostic
+component/layout framework (`frameworkCore` + `frameworkLayouts`), with the actual DevTool UI
+(`devtoolExampleApp`) built on top of it as an example application, backed by localStorage.
+The framework doesn't know DevTool exists — `popup`/`form`/`list`/the button family work for
+any `resource : { key, columns }` + `data`/`datas` shape. Everything DevTool-specific (the
+`_resource`/`_setting`/`code` keys, `menu`, the gear button) lives in `devtoolExampleApp`
+alone. See README.md for what it does and how to install the bookmarklet.
 
 ## The three things that matter most
 
@@ -43,12 +47,16 @@ backed by localStorage. See README.md for what it does and how to install the bo
   (`popup.refresh()`, `popup.close()`) are named after the header button that triggers them
   ("Refresh", "Close"), not the CRUD set — they're UI actions on one instance, not table
   operations.
-- **File order**: within each IIFE, order definitions from most foundational to most
-  composed. Core IIFE: `fn.log` → `fn.element.*` → `fn.component.*` → `fn.localStorage.*` /
-  `fn.data.*` → `fn.ajax`. Layouts IIFE: leaf button layouts → `popup-buttons` → `popup` →
-  `form` → `list` → `menu` → `devtool` (always last — it's the most composed piece and the
-  bookmarklet's entry point). New layouts should slot in based on what they depend on, not
-  just appended at the end.
+- **File order**: three IIFEs, each named for what it is, ordered most foundational to most
+  composed both across and within them. `frameworkCore`: `fn.log` → `fn.element.*` →
+  `fn.component.*` → `fn.localStorage.*` / `fn.data.*` → `fn.ajax`. `frameworkLayouts`
+  (devtool-agnostic UI primitives): leaf button layouts → `popup-buttons` → `popup` → `form`
+  → `list`. `devtoolExampleApp` (everything that actually knows about DevTool): `popup-setting-btn`
+  → `menu` → `devtool` → `fn.devtool.*` (always last — `fn.devtool.start()` is the bookmarklet's
+  entry point, called at the very bottom of the file). New framework layouts belong in
+  `frameworkLayouts` and must not reference `fn.devtool.*`; anything that needs to know about
+  DevTool's specific resources/keys belongs in `devtoolExampleApp`. New layouts should slot in
+  based on what they depend on, not just appended at the end.
 - **Component lifecycle**: `popup` is the only layout tracked in `fn.component.data` and torn
   down via its own `popup.close()` — it's the only unit ever independently created/removed (every
   other component lives and dies with its enclosing popup, so `el.remove()`/`child.remove()`

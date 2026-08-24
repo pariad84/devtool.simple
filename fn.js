@@ -1,4 +1,4 @@
-(function(global) {
+(function frameworkCore(global) {
     const fn = {};
 
     fn.localStorage = {};
@@ -254,7 +254,7 @@
 })(window);
 
 
-(function(global) {
+(function frameworkLayouts(global) {
     var fn = global.fn;
 
     fn.component._.renderColumn = function(opt) {
@@ -562,6 +562,12 @@
             });
         }
     });
+
+})(window);
+
+
+(function devtoolExampleApp(global) {
+    var fn = global.fn;
 
     fn.component.layout.set({
         name : 'popup-setting-btn',
