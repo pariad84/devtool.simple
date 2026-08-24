@@ -36,7 +36,7 @@ Every popup can be dragged by its header and resized from its corner. List popup
 
 Memo, Bookmark, Code, Request, Resource, and Setting are built in and can't be deleted from the Resource list (no Delete button when editing them) — they self-heal even if removed some other way (e.g. an Import that omits them). Resources you create yourself stay freely deletable.
 
-The ⚙ button in the DevTool popup's own header opens **Setting**: default popup scale/opacity (popups always size to their content), Generate test data (repopulate the sample Memo/Bookmark/Request rows on demand), Export (download all data as JSON) / Import (restore from a JSON file, overwriting everything) for backups, and Reset (wipe all data back to the seeded samples).
+The ⚙ button in the DevTool popup's own header opens **Setting**: default popup scale/opacity (popups always size to their content), Generate sample data (repopulate the sample Memo/Bookmark/Request rows on demand), Export (download all data as JSON) / Import (restore from a JSON file, overwriting everything) for backups, and Reset (wipe all data back to the seeded samples).
 
 ### Debugging
 

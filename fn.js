@@ -1471,11 +1471,11 @@
                 columns : JSON.stringify([
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'testData', label : 'Test Data', form : { type : 'render', render : `function(data) {
+                    { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
-                            text : 'Generate test data',
+                            text : 'Generate sample data',
                             style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
