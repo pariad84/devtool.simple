@@ -891,7 +891,7 @@
                     if (input.tagName === 'BUTTON') {
                         return;
                     }
-                    result[column.name] = column.form.dataType === 'number' ? Number(input.value) : input.value;
+                    result[column.name] = input.value;
                 });
                 return result;
             };
@@ -1438,7 +1438,7 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
                     { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                    { name : 'previewColumns', label : 'Columns View', form : { render : `function(data) {
+                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1471,11 +1471,11 @@
                 columns : JSON.stringify([
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'testData', label : 'Test Data', form : { render : `function(data) {
+                    { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
-                            text : 'Generate test data',
+                            text : 'Generate sample data',
                             style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
@@ -1490,7 +1490,7 @@
                             }
                         });
                     }` } },
-                    { name : 'export', label : 'Export', form : { render : `function(data) {
+                    { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1515,7 +1515,7 @@
                             }
                         });
                     }` } },
-                    { name : 'import', label : 'Import', form : { render : `function(data) {
+                    { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1559,7 +1559,7 @@
                             }
                         });
                     }` } },
-                    { name : 'reset', label : 'Reset', form : { render : `function(data) {
+                    { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
