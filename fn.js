@@ -295,6 +295,14 @@
         });
     };
 
+    fn.component._.refreshRoot = function(opt = {}) {
+        var root = opt.popup;
+        while (root._.caller) {
+            root = root._.caller;
+        }
+        root.refresh();
+    };
+
     fn.component.layout._.style = {
         popupBtn : {
             width : '26px',
@@ -413,6 +421,9 @@
                         }
                         if (form._.resource.key === '_setting') {
                             fn.component._.applySettingAll();
+                        }
+                        if (form._.resource.key === '_resource') {
+                            fn.component._.refreshRoot({ popup : popup });
                         }
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -1461,6 +1472,7 @@
                                         onSave : function(updatedColumns) {
                                             fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
                                             popup.refresh();
+                                            fn.component._.refreshRoot({ popup : popup });
                                         },
                                     });
                                 }
