@@ -1399,13 +1399,11 @@
                                         });
                                     };
                                     var saveHistory = function(ok, body) {
-                                        var row = fn.data.select({ key: 'request', id: data.id });
-                                        var history = row.data.history ? JSON.parse(row.data.history) : [];
-                                        history.push({ time: new Date().toISOString(), ok: ok, body: body });
-                                        if (history.length > 20) {
-                                            history = history.slice(history.length - 20);
+                                        fn.data.insert({ key: 'history', data: { requestId: data.id, time: new Date().toISOString(), ok: ok, body: body } });
+                                        var historyRows = fn.data.select({ key: 'history' }).filter(function(row) { return row.data.requestId === data.id; });
+                                        if (historyRows.length > 20) {
+                                            fn.data.delete({ key: 'history', id: historyRows[0].id });
                                         }
-                                        fn.data.update({ key: 'request', id: data.id, data: Object.assign({}, row.data, { history: JSON.stringify(history) }) });
                                     };
                                     var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
                                     fn.ajax({
@@ -1437,8 +1435,7 @@
                                 click : function(e) {
                                     e.stopPropagation();
                                     var caller = e.target.closest('.__popup');
-                                    var row = fn.data.select({ key : 'request', id : data.id });
-                                    var history = row.data.history ? JSON.parse(row.data.history) : [];
+                                    var history = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; }).map(function(row) { return row.data; });
                                     fn.component.create({
                                         name : 'popup',
                                         title : 'History: ' + data.name,
@@ -1466,11 +1463,14 @@
                 ]),
             },
             {
-                name : 'History2',
-                key : 'history2',
+                name : 'History',
+                key : 'history',
+                protected : true,
                 columns : JSON.stringify([
                     { name : 'requestId', label : 'Request', list : { width : '160px' }, form : { type : 'select', resource : { key : 'request', label : 'name' } } },
-                    { name : 'note', label : 'Note', list : { width : 'auto' }, form : { type : 'text' } },
+                    { name : 'time', label : 'Time', list : { width : '180px' }, form : { type : 'text' } },
+                    { name : 'ok', label : 'OK', list : { width : '60px' }, form : { type : 'text' } },
+                    { name : 'body', label : 'Body', list : { width : 'auto' }, form : { type : 'textarea' } },
                 ]),
             },
             {
