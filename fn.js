@@ -1175,6 +1175,7 @@
                 name : column.name,
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
+                listType : column.list ? (column.list.render ? 'render' : (column.list.type || 'text')) : 'none',
                 listRender : (column.list && column.list.render) || '',
                 formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
                 render : (column.form && column.form.render) || '',
@@ -1184,11 +1185,19 @@
             var column = Object.assign({}, original, {
                 name : formData.name,
                 label : formData.label,
-                list : original.list ? Object.assign({}, original.list, {
-                    width : formData.listWidth,
-                    render : formData.listRender || undefined,
-                }) : undefined,
             });
+            if (formData.listType === 'none') {
+                delete column.list;
+            } else {
+                column.list = Object.assign({}, original.list, { width : formData.listWidth });
+                if (formData.listType === 'render') {
+                    column.list.render = formData.listRender;
+                    delete column.list.type;
+                } else {
+                    column.list.type = formData.listType;
+                    delete column.list.render;
+                }
+            }
             if (formData.formType === 'none') {
                 delete column.form;
             } else {
@@ -1209,6 +1218,7 @@
                 { name : 'name', label : 'Field', list : { width : '140px' }, form : { type : 'text' } },
                 { name : 'label', label : 'Label', list : { width : '160px' }, form : { type : 'text' } },
                 { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { type : 'text' } },
+                { name : 'listType', label : 'List type', list : { width : '110px' }, form : { type : 'select', codeGroup : 'listType' } },
                 { name : 'listRender', label : 'List render (JS)', form : { type : 'textarea' } },
                 { name : 'formType', label : 'Form type', list : { width : '140px' }, form : { type : 'select', codeGroup : 'formType' } },
                 { name : 'render', label : 'Form render (JS)', form : { type : 'textarea' } },
@@ -1255,6 +1265,14 @@
                     return;
                 }
                 var formEl = fn.component.create({ name : 'form', resource : resource, data : flatten(opt.value), parent : renderOpt.el.content });
+                var listTypeSelect = formEl._.inputs.listType;
+                var listRenderRow = formEl._.inputs.listRender.closest('tr');
+                var syncListRenderVisibility = function() {
+                    listRenderRow.style.display = listTypeSelect.value === 'render' ? '' : 'none';
+                };
+                listTypeSelect.addEventListener('change', syncListRenderVisibility);
+                syncListRenderVisibility();
+
                 var formTypeSelect = formEl._.inputs.formType;
                 var renderRow = formEl._.inputs.render.closest('tr');
                 var syncRenderVisibility = function() {
@@ -1275,6 +1293,10 @@
                 { code : 'text', name : 'Text' },
                 { code : 'textarea', name : 'Textarea' },
                 { code : 'select', name : 'Select' },
+                { code : 'render', name : 'Render (custom JS)' },
+            ],
+            listType : [
+                { code : 'text', name : 'Text' },
                 { code : 'render', name : 'Render (custom JS)' },
             ],
         };
@@ -1298,7 +1320,7 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
-                    { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
+                    { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1337,7 +1359,7 @@
                     { name : 'auth', label : 'Auth (JSON)', form : { type : 'textarea' } },
                     { name : 'headers', label : 'Headers (JSON)', form : { type : 'textarea' } },
                     { name : 'body', label : 'Body (JSON)', form : { type : 'textarea' } },
-                    { name : 'run', label : 'Run', list : { width : '70px', render : `function(data) {
+                    { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
@@ -1392,7 +1414,7 @@
                             }
                         });
                     }` } },
-                    { name : 'history', label : 'History', list : { width : '80px', render : `function(data) {
+                    { name : 'history', label : 'History', list : { width : '80px', type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
                             attribute : { type : 'button' },
