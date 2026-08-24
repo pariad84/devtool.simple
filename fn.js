@@ -1046,6 +1046,9 @@
                         } else {
                             cell.textContent = rendered;
                         }
+                    } else if (column.form && column.form.resource && data[column.name] !== undefined) {
+                        var referencedRow = fn.data.select({ key : column.form.resource.key, id : data[column.name] });
+                        cell.textContent = referencedRow ? referencedRow.data[column.form.resource.label] : data[column.name];
                     } else {
                         cell.textContent = data[column.name] !== undefined ? data[column.name] : '';
                     }
