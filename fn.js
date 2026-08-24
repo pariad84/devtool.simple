@@ -391,6 +391,14 @@
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
                         var data = form.getData();
+                        if (popup._.onSave) {
+                            popup._.onSave(data);
+                            if (popup._.caller) {
+                                popup._.caller.refresh();
+                            }
+                            popup.close();
+                            return;
+                        }
                         if (form._.data.id !== undefined) {
                             fn.data.update({
                                 key : form._.resource.key,
@@ -722,6 +730,7 @@
             popup._.render = opt.render;
             popup._.resource = opt.resource;
             popup._.title = opt.title;
+            popup._.onSave = opt.onSave;
 
             if (opt.initialize) {
                 opt.initialize({ el : popup });
@@ -1175,8 +1184,25 @@
                 name : column.name,
                 label : column.label || '',
                 listWidth : column.list ? (column.list.width || '') : '',
-                formInput : column.form ? (column.form.inputType || (column.form.render ? 'custom render' : '')) : '',
+                formInput : column.form ? (column.form.render ? 'render' : (column.form.inputType || '')) : '',
+                render : (column.form && column.form.render) || '',
             };
+        };
+        var unflatten = function(original, formData) {
+            var column = Object.assign({}, original, {
+                name : formData.name,
+                label : formData.label,
+                list : original.list ? Object.assign({}, original.list, { width : formData.listWidth }) : undefined,
+                form : Object.assign({}, original.form),
+            });
+            if (formData.formInput === 'render') {
+                column.form.render = formData.render;
+                delete column.form.inputType;
+            } else {
+                column.form.inputType = formData.formInput;
+                delete column.form.render;
+            }
+            return column;
         };
         var resource = {
             key : '',
@@ -1184,17 +1210,27 @@
                 { name : 'name', label : 'Field', list : { width : '140px' }, form : { inputType : 'text' } },
                 { name : 'label', label : 'Label', list : { width : '160px' }, form : { inputType : 'text' } },
                 { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { inputType : 'text' } },
-                { name : 'formInput', label : 'Form input', list : { width : '140px' }, form : { inputType : 'text' } },
+                { name : 'formInput', label : 'Form input', list : { width : '140px' }, form : { inputType : 'select', codeGroup : 'formInputType' } },
+                { name : 'render', label : 'Render (JS)', form : { inputType : 'textarea' } },
             ],
         };
+        var isArray = Array.isArray(opt.value);
 
         fn.component.create({
             name : 'popup',
             title : opt.title,
             parent : document.body,
             caller : opt.caller,
+            onSave : (!isArray && opt.onSave) ? function(formData) {
+                opt.onSave(unflatten(opt.value, formData));
+            } : undefined,
+            initialize : function(initOpt) {
+                if (!isArray && opt.onSave) {
+                    fn.component.create({ name : 'popup-save-btn', parent : initOpt.el.buttons });
+                }
+            },
             render : function(renderOpt) {
-                if (Array.isArray(opt.value)) {
+                if (isArray) {
                     var datas = opt.value.map(function(column, index) {
                         return Object.assign({ id : index }, flatten(column));
                     });
@@ -1208,18 +1244,24 @@
                                 value : column,
                                 title : 'Column: ' + (column.name || clickOpt.data.id),
                                 caller : clickOpt.e.target.closest('.__popup'),
+                                onSave : opt.onSave ? function(updatedColumn) {
+                                    opt.value[clickOpt.data.id] = updatedColumn;
+                                    opt.onSave(opt.value);
+                                } : undefined,
                             });
                         },
                         parent : renderOpt.el.content,
                     });
                     return;
                 }
-                fn.component.create({
-                    name : 'form',
-                    resource : resource,
-                    data : flatten(opt.value),
-                    parent : renderOpt.el.content,
-                });
+                var formEl = fn.component.create({ name : 'form', resource : resource, data : flatten(opt.value), parent : renderOpt.el.content });
+                var formInputSelect = formEl._.inputs.formInput;
+                var renderRow = formEl._.inputs.render.closest('tr');
+                var syncRenderVisibility = function() {
+                    renderRow.style.display = formInputSelect.value === 'render' ? '' : 'none';
+                };
+                formInputSelect.addEventListener('change', syncRenderVisibility);
+                syncRenderVisibility();
             },
         });
     };
@@ -1229,6 +1271,12 @@
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
             authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
             resourceType : [ { code : 'array', name : 'Array' }, { code : 'object', name : 'Object' } ],
+            formInputType : [
+                { code : 'text', name : 'Text' },
+                { code : 'textarea', name : 'Textarea' },
+                { code : 'select', name : 'Select' },
+                { code : 'render', name : 'Render (custom JS)' },
+            ],
         };
     };
 
@@ -1405,10 +1453,15 @@
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
+                                    var popup = e.target.closest('.__popup');
                                     fn.devtool.openJsonValue({
                                         value : JSON.parse(data.columns),
                                         title : 'Columns: ' + data.name,
-                                        caller : e.target.closest('.__popup'),
+                                        caller : popup,
+                                        onSave : function(updatedColumns) {
+                                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
+                                            popup.refresh();
+                                        },
                                     });
                                 }
                             }
