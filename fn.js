@@ -85,8 +85,9 @@
         var startX, startY, startLeft, startTop;
 
         function onPointerMove(e) {
-            el.style.left = (startLeft + (e.clientX - startX)) + 'px';
-            el.style.top = (startTop + (e.clientY - startY)) + 'px';
+            var scale = parseFloat(el.style.zoom) || 1;
+            el.style.left = (startLeft + (e.clientX - startX) / scale) + 'px';
+            el.style.top = (startTop + (e.clientY - startY) / scale) + 'px';
         }
 
         function onPointerUp() {
@@ -102,9 +103,8 @@
             e.preventDefault();
             startX = e.clientX;
             startY = e.clientY;
-            var rect = el.getBoundingClientRect();
-            startLeft = rect.left;
-            startTop = rect.top;
+            startLeft = parseFloat(el.style.left) || 0;
+            startTop = parseFloat(el.style.top) || 0;
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
         });
