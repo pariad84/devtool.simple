@@ -1519,6 +1519,21 @@
                             }
                         });
                     }` } },
+                    { name : 'manageSetting', label : 'Setting', form : { type : 'render', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Manage setting',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var row = fn.data.select({ key : '_resource' }).find(function(row) { return row.data.key === '_setting'; });
+                                    fn.devtool.openResource({ resource : fn.data._.toResource({ row : row }), name : row.data.name, caller : e.target.closest('.__popup') });
+                                }
+                            }
+                        });
+                    }` } },
                     { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
