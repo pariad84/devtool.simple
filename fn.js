@@ -4,6 +4,7 @@
     fn.localStorage = {};
     fn.element = {};
     fn.ui = {};
+    fn.util = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -109,7 +110,7 @@
         });
     };
 
-    fn.element.maxZIndex = function(opt = {}) {
+    fn.util.maxZIndex = function(opt = {}) {
         var exclude = opt.exclude || [];
         var max = 0;
         document.querySelectorAll('*').forEach(function(el) {
@@ -260,12 +261,16 @@
 (function frameworkLayouts(global) {
     var fn = global.fn;
 
-    fn.component._.applyZIndex = function(opt) {
+    fn.component._.zIndexAbove = function() {
         var exclude = (fn.component.data.popup || []).slice();
         if (fn.devtool.data.button) {
             exclude.push(fn.devtool.data.button);
         }
-        opt.el.style.zIndex = fn.element.maxZIndex({ exclude : exclude }) + 1;
+        return fn.util.maxZIndex({ exclude : exclude }) + 1;
+    };
+
+    fn.component._.applyZIndex = function(opt) {
+        opt.el.style.zIndex = opt.zIndex !== undefined ? opt.zIndex : fn.component._.zIndexAbove();
     };
 
     fn.component._.applySetting = function(opt) {
@@ -277,12 +282,13 @@
         if (setting.opacity) {
             opt.el.style.opacity = setting.opacity;
         }
-        fn.component._.applyZIndex({ el : opt.el });
+        fn.component._.applyZIndex({ el : opt.el, zIndex : opt.zIndex });
     };
 
     fn.component._.applySettingAll = function() {
+        var zIndex = fn.component._.zIndexAbove();
         fn.component.data.popup.forEach(function(el) {
-            fn.component._.applySetting({ el : el });
+            fn.component._.applySetting({ el : el, zIndex : zIndex });
         });
     };
 
@@ -1758,11 +1764,12 @@
 
     fn.devtool._.watchZIndex = function() {
         var reapply = function() {
+            var zIndex = fn.component._.zIndexAbove();
             if (fn.devtool.data.button) {
-                fn.component._.applyZIndex({ el : fn.devtool.data.button });
+                fn.component._.applyZIndex({ el : fn.devtool.data.button, zIndex : zIndex });
             }
             (fn.component.data.popup || []).forEach(function(popup) {
-                fn.component._.applyZIndex({ el : popup });
+                fn.component._.applyZIndex({ el : popup, zIndex : zIndex });
             });
         };
 
