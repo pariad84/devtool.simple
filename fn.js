@@ -3,6 +3,7 @@
 
     fn.localStorage = {};
     fn.element = {};
+    fn.ui = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -75,7 +76,7 @@
         return el;
     };
 
-    fn.element.draggable = function(opt = {}) {
+    fn.ui.draggable = function(opt = {}) {
         var el = opt.el;
         var handle = opt.handle || el;
         var startX, startY, startLeft, startTop;
@@ -674,7 +675,7 @@
                 },
             });
 
-            fn.element.draggable({
+            fn.ui.draggable({
                 el : popup,
                 handle : header,
             });
