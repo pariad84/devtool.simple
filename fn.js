@@ -262,11 +262,14 @@
     var fn = global.fn;
 
     fn.component._.zIndexAbove = function() {
-        var exclude = (fn.component.data.popup || []).slice();
-        if (fn.devtool.data.button) {
-            exclude.push(fn.devtool.data.button);
+        if (fn.component._.zIndex === undefined) {
+            var exclude = (fn.component.data.popup || []).slice();
+            if (fn.devtool.data.button) {
+                exclude.push(fn.devtool.data.button);
+            }
+            fn.component._.zIndex = fn.util.maxZIndex({ exclude : exclude }) + 1;
         }
-        return fn.util.maxZIndex({ exclude : exclude }) + 1;
+        return fn.component._.zIndex;
     };
 
     fn.component._.applyZIndex = function(opt) {
@@ -1764,43 +1767,6 @@
         fn.devtool._.seed();
     };
 
-    fn.devtool._.watchZIndex = function() {
-        var reapply = function() {
-            var zIndex = fn.component._.zIndexAbove();
-            if (fn.devtool.data.button) {
-                fn.component._.applyZIndex({ el : fn.devtool.data.button, zIndex : zIndex });
-            }
-            (fn.component.data.popup || []).forEach(function(popup) {
-                fn.component._.applyZIndex({ el : popup, zIndex : zIndex });
-            });
-        };
-
-        var ownElements = function() {
-            return (fn.component.data.popup || []).concat(fn.devtool.data.button ? [ fn.devtool.data.button ] : []);
-        };
-
-        var timer = null;
-        var observer = new MutationObserver(function(mutations) {
-            var own = ownElements();
-            var isExternal = mutations.some(function(mutation) {
-                return !own.some(function(el) { return el === mutation.target || el.contains(mutation.target); });
-            });
-            if (!isExternal) {
-                return;
-            }
-            clearTimeout(timer);
-            timer = setTimeout(reapply, 200);
-        });
-        observer.observe(document.body, {
-            childList : true,
-            subtree : true,
-            attributes : true,
-            attributeFilter : [ 'style', 'class' ],
-        });
-
-        reapply();
-    };
-
     fn.devtool.start = function() {
         if (fn.devtool.data.started) {
             return;
@@ -1843,7 +1809,7 @@
             parent : document.body,
         });
         fn.devtool.data.button = button;
-        fn.devtool._.watchZIndex();
+        fn.component._.applyZIndex({ el : button });
     };
 })(window);
 
