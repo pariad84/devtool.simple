@@ -3,6 +3,7 @@
 
     fn.localStorage = {};
     fn.element = {};
+    fn.ui = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -17,6 +18,11 @@
 
     fn.log = function(scope, action, ...args) {
         console.log('[fn.' + scope + ']', action, ...args);
+    };
+
+    fn.render = function(opt = {}) {
+        var render = new Function('return (' + opt.source + ')')();
+        return render(opt.data);
     };
 
     fn.element.create = function(opt = {}) {
@@ -75,7 +81,7 @@
         return el;
     };
 
-    fn.element.draggable = function(opt = {}) {
+    fn.ui.draggable = function(opt = {}) {
         var el = opt.el;
         var handle = opt.handle || el;
         var startX, startY, startLeft, startTop;
@@ -161,12 +167,12 @@
         }
     };
 
-    fn.data._.readTable = function(opt = {}) {
+    fn.data._.read = function(opt = {}) {
         var raw = fn.localStorage.get({ key : opt.key });
         return raw ? JSON.parse(raw) : [];
     };
 
-    fn.data._.writeTable = function(opt = {}) {
+    fn.data._.write = function(opt = {}) {
         fn.localStorage.set({ key : opt.key, value : JSON.stringify(opt.rows) });
     };
 
@@ -178,7 +184,7 @@
     };
 
     fn.data.select = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         if (opt.id !== undefined) {
             var row = rows.find(function(row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.key, 'id=' + opt.id, row);
@@ -189,30 +195,30 @@
     };
 
     fn.data.insert = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var nextId = rows.reduce(function(max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id : nextId, data : opt.data };
         rows.push(row);
-        fn.data._.writeTable({ key : opt.key, rows : rows });
+        fn.data._.write({ key : opt.key, rows : rows });
         fn.log('data', 'insert', opt.key, row);
         return row;
     };
 
     fn.data.update = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var row = rows.find(function(r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._.writeTable({ key : opt.key, rows : rows });
+            fn.data._.write({ key : opt.key, rows : rows });
         }
         fn.log('data', 'update', opt.key, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.delete = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var row = rows.find(function(row) { return row.id === opt.id; });
-        fn.data._.writeTable({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
+        fn.data._.write({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.key, 'id=' + opt.id);
         return row;
     };
@@ -256,11 +262,6 @@
 
 (function frameworkLayouts(global) {
     var fn = global.fn;
-
-    fn.component._.renderColumn = function(opt) {
-        var render = new Function('return (' + opt.source + ')')();
-        return render(opt.data);
-    };
 
     fn.component._.applyZIndex = function(opt) {
         var exclude = (fn.component.data.popup || []).slice();
@@ -674,7 +675,7 @@
                 },
             });
 
-            fn.element.draggable({
+            fn.ui.draggable({
                 el : popup,
                 handle : header,
             });
@@ -784,7 +785,7 @@
 
                 var input;
                 if (column.form.render) {
-                    input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
+                    input = fn.render({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
                     var inputStyle = Object.assign({}, fn.component.layout._.style.input);
@@ -985,7 +986,7 @@
                         parent : row,
                     });
                     if (column.list.render) {
-                        var rendered = fn.component._.renderColumn({ source : column.list.render, data : data });
+                        var rendered = fn.render({ source : column.list.render, data : data });
                         if (rendered instanceof HTMLElement) {
                             cell.appendChild(rendered);
                         } else {
@@ -1646,7 +1647,7 @@
                                                 reader.onload = function() {
                                                     var backup = JSON.parse(reader.result);
                                                     Object.keys(backup).forEach(function(key) {
-                                                        fn.data._.writeTable({ key : key, rows : backup[key] });
+                                                        fn.data._.write({ key : key, rows : backup[key] });
                                                     });
                                                     fn.component._.applySettingAll();
                                                     if (popup._.caller) {
