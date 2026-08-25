@@ -827,7 +827,7 @@
                         var isTextarea = column.form.type === 'textarea';
                         if (isTextarea) {
                             inputStyle.resize = 'vertical';
-                            inputStyle.minHeight = '60px';
+                            inputStyle.minHeight = column.form.height || '60px';
                         }
 
                         input = fn.element.create({
@@ -1296,49 +1296,6 @@
         return column;
     };
 
-    fn.devtool.openJsonValue = function(opt = {}) {
-        var resource = {
-            key : '',
-            columns : [
-                { name : 'name', label : 'Field', list : { width : '140px' }, form : { type : 'text' } },
-                { name : 'label', label : 'Label', list : { width : '160px' }, form : { type : 'text' } },
-                { name : 'listWidth', label : 'List width', list : { width : '110px' }, form : { type : 'text' } },
-                { name : 'listType', label : 'List type', list : { width : '110px' }, form : { type : 'select', codeGroup : 'listType' } },
-                { name : 'listRender', label : 'List render (JS)', form : { type : 'textarea' } },
-                { name : 'formType', label : 'Form type', list : { width : '140px' }, form : { type : 'select', codeGroup : 'formType' } },
-                { name : 'render', label : 'Form render (JS)', form : { type : 'textarea' } },
-            ],
-        };
-
-        fn.component._.openValue({
-            resource : resource,
-            value : opt.value,
-            title : opt.title,
-            caller : opt.caller,
-            onSave : opt.onSave,
-            flatten : fn.devtool._.flattenColumn,
-            unflatten : fn.devtool._.unflattenColumn,
-            rowTitle : function(column, index) { return 'Column: ' + (column.name || index); },
-            onFormRender : function(formEl) {
-                var listTypeSelect = formEl._.inputs.listType;
-                var listRenderRow = formEl._.inputs.listRender.closest('tr');
-                var syncListRenderVisibility = function() {
-                    listRenderRow.style.display = listTypeSelect.value === 'render' ? '' : 'none';
-                };
-                listTypeSelect.addEventListener('change', syncListRenderVisibility);
-                syncListRenderVisibility();
-
-                var formTypeSelect = formEl._.inputs.formType;
-                var renderRow = formEl._.inputs.render.closest('tr');
-                var syncRenderVisibility = function() {
-                    renderRow.style.display = formTypeSelect.value === 'render' ? '' : 'none';
-                };
-                formTypeSelect.addEventListener('change', syncRenderVisibility);
-                syncRenderVisibility();
-            },
-        });
-    };
-
     fn.devtool._.codeGroups = function() {
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
@@ -1355,31 +1312,6 @@
                 { code : 'render', name : 'Render (custom JS)' },
             ],
         };
-    };
-
-    fn.devtool._.viewColumnsButton = function(data) {
-        return fn.element.create({
-            tagName : 'button',
-            attribute : { type : 'button' },
-            text : 'View columns',
-            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-            event : {
-                click : function(e) {
-                    e.stopPropagation();
-                    var popup = e.target.closest('.__popup');
-                    fn.devtool.openJsonValue({
-                        value : JSON.parse(data.columns),
-                        title : 'Columns: ' + data.name,
-                        caller : popup,
-                        onSave : function(updatedColumns) {
-                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
-                            popup.refresh();
-                            fn.component._.refreshRoot({ popup : popup });
-                        },
-                    });
-                }
-            }
-        });
     };
 
     fn.devtool._.resourceDefinitions = function() {
@@ -1547,8 +1479,7 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : '120px', type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' }, form : { type : 'textarea' } },
-                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea', height : '260px' } },
                 ]),
             },
             {
