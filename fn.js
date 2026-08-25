@@ -8,9 +8,6 @@
     fn.data._ = {};
     fn.component = {};
     fn.component._ = {};
-    fn.devtool = {};
-    fn.devtool._ = {};
-    fn.devtool.data = {};
     fn.component.data = {};
     fn.component.layout = {};
     fn.component.layout._ = {};
@@ -1065,6 +1062,10 @@
 
 (function devtoolExampleApp(global) {
     var fn = global.fn;
+
+    fn.devtool = {};
+    fn.devtool._ = {};
+    fn.devtool.data = {};
 
     fn.component.layout.set({
         name : 'popup-setting-btn',
