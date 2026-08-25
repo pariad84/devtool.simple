@@ -262,11 +262,14 @@
     var fn = global.fn;
 
     fn.component._.zIndexAbove = function() {
-        var exclude = (fn.component.data.popup || []).slice();
-        if (fn.devtool.data.button) {
-            exclude.push(fn.devtool.data.button);
+        if (fn.component._.zIndex === undefined) {
+            var exclude = (fn.component.data.popup || []).slice();
+            if (fn.devtool.data.button) {
+                exclude.push(fn.devtool.data.button);
+            }
+            fn.component._.zIndex = fn.util.maxZIndex({ exclude : exclude }) + 1;
         }
-        return fn.util.maxZIndex({ exclude : exclude }) + 1;
+        return fn.component._.zIndex;
     };
 
     fn.component._.applyZIndex = function(opt) {
@@ -1354,6 +1357,31 @@
         };
     };
 
+    fn.devtool._.viewColumnsButton = function(data) {
+        return fn.element.create({
+            tagName : 'button',
+            attribute : { type : 'button' },
+            text : 'View columns',
+            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+            event : {
+                click : function(e) {
+                    e.stopPropagation();
+                    var popup = e.target.closest('.__popup');
+                    fn.devtool.openJsonValue({
+                        value : JSON.parse(data.columns),
+                        title : 'Columns: ' + data.name,
+                        caller : popup,
+                        onSave : function(updatedColumns) {
+                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
+                            popup.refresh();
+                            fn.component._.refreshRoot({ popup : popup });
+                        },
+                    });
+                }
+            }
+        });
+    };
+
     fn.devtool._.resourceDefinitions = function() {
         return [
             {
@@ -1519,31 +1547,8 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'View columns',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var popup = e.target.closest('.__popup');
-                                    fn.devtool.openJsonValue({
-                                        value : JSON.parse(data.columns),
-                                        title : 'Columns: ' + data.name,
-                                        caller : popup,
-                                        onSave : function(updatedColumns) {
-                                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
-                                            popup.refresh();
-                                            fn.component._.refreshRoot({ popup : popup });
-                                        },
-                                    });
-                                }
-                            }
-                        });
-                    }` } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : '120px', type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' }, form : { type : 'textarea' } },
+                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' } },
                 ]),
             },
             {
@@ -1762,43 +1767,6 @@
         fn.devtool._.seed();
     };
 
-    fn.devtool._.watchZIndex = function() {
-        var reapply = function() {
-            var zIndex = fn.component._.zIndexAbove();
-            if (fn.devtool.data.button) {
-                fn.component._.applyZIndex({ el : fn.devtool.data.button, zIndex : zIndex });
-            }
-            (fn.component.data.popup || []).forEach(function(popup) {
-                fn.component._.applyZIndex({ el : popup, zIndex : zIndex });
-            });
-        };
-
-        var ownElements = function() {
-            return (fn.component.data.popup || []).concat(fn.devtool.data.button ? [ fn.devtool.data.button ] : []);
-        };
-
-        var timer = null;
-        var observer = new MutationObserver(function(mutations) {
-            var own = ownElements();
-            var isExternal = mutations.some(function(mutation) {
-                return !own.some(function(el) { return el === mutation.target || el.contains(mutation.target); });
-            });
-            if (!isExternal) {
-                return;
-            }
-            clearTimeout(timer);
-            timer = setTimeout(reapply, 200);
-        });
-        observer.observe(document.body, {
-            childList : true,
-            subtree : true,
-            attributes : true,
-            attributeFilter : [ 'style', 'class' ],
-        });
-
-        reapply();
-    };
-
     fn.devtool.start = function() {
         if (fn.devtool.data.started) {
             return;
@@ -1841,7 +1809,7 @@
             parent : document.body,
         });
         fn.devtool.data.button = button;
-        fn.devtool._.watchZIndex();
+        fn.component._.applyZIndex({ el : button });
     };
 })(window);
 
