@@ -1004,6 +1004,62 @@
         }
     });
 
+    fn.component._.openValue = function(opt = {}) {
+        var isArray = Array.isArray(opt.value);
+        var flatten = opt.flatten || function(value) { return value; };
+        var unflatten = opt.unflatten || function(original, formData) { return formData; };
+
+        fn.component.create({
+            name : 'popup',
+            title : opt.title,
+            parent : document.body,
+            caller : opt.caller,
+            onSave : (!isArray && opt.onSave) ? function(formData) {
+                opt.onSave(unflatten(opt.value, formData));
+            } : undefined,
+            initialize : function(initOpt) {
+                if (!isArray && opt.onSave) {
+                    fn.component.create({ name : 'popup-save-btn', parent : initOpt.el.buttons });
+                }
+            },
+            render : function(renderOpt) {
+                if (isArray) {
+                    var datas = opt.value.map(function(item, index) {
+                        return Object.assign({ id : index }, flatten(item));
+                    });
+                    fn.component.create({
+                        name : 'list',
+                        resource : opt.resource,
+                        datas : datas,
+                        onRowClick : function(clickOpt) {
+                            var item = opt.value[clickOpt.data.id];
+                            fn.component._.openValue({
+                                resource : opt.resource,
+                                value : item,
+                                title : opt.rowTitle ? opt.rowTitle(item, clickOpt.data.id) : String(clickOpt.data.id),
+                                caller : clickOpt.e.target.closest('.__popup'),
+                                flatten : flatten,
+                                unflatten : unflatten,
+                                rowTitle : opt.rowTitle,
+                                onFormRender : opt.onFormRender,
+                                onSave : opt.onSave ? function(updatedItem) {
+                                    opt.value[clickOpt.data.id] = updatedItem;
+                                    opt.onSave(opt.value);
+                                } : undefined,
+                            });
+                        },
+                        parent : renderOpt.el.content,
+                    });
+                    return;
+                }
+                var formEl = fn.component.create({ name : 'form', resource : opt.resource, data : flatten(opt.value), parent : renderOpt.el.content });
+                if (opt.onFormRender) {
+                    opt.onFormRender(formEl);
+                }
+            },
+        });
+    };
+
 })(window);
 
 (function devtoolExampleApp(global) {
@@ -1242,47 +1298,17 @@
                 { name : 'render', label : 'Form render (JS)', form : { type : 'textarea' } },
             ],
         };
-        var isArray = Array.isArray(opt.value);
 
-        fn.component.create({
-            name : 'popup',
+        fn.component._.openValue({
+            resource : resource,
+            value : opt.value,
             title : opt.title,
-            parent : document.body,
             caller : opt.caller,
-            onSave : (!isArray && opt.onSave) ? function(formData) {
-                opt.onSave(fn.devtool._.unflattenColumn(opt.value, formData));
-            } : undefined,
-            initialize : function(initOpt) {
-                if (!isArray && opt.onSave) {
-                    fn.component.create({ name : 'popup-save-btn', parent : initOpt.el.buttons });
-                }
-            },
-            render : function(renderOpt) {
-                if (isArray) {
-                    var datas = opt.value.map(function(column, index) {
-                        return Object.assign({ id : index }, fn.devtool._.flattenColumn(column));
-                    });
-                    fn.component.create({
-                        name : 'list',
-                        resource : resource,
-                        datas : datas,
-                        onRowClick : function(clickOpt) {
-                            var column = opt.value[clickOpt.data.id];
-                            fn.devtool.openJsonValue({
-                                value : column,
-                                title : 'Column: ' + (column.name || clickOpt.data.id),
-                                caller : clickOpt.e.target.closest('.__popup'),
-                                onSave : opt.onSave ? function(updatedColumn) {
-                                    opt.value[clickOpt.data.id] = updatedColumn;
-                                    opt.onSave(opt.value);
-                                } : undefined,
-                            });
-                        },
-                        parent : renderOpt.el.content,
-                    });
-                    return;
-                }
-                var formEl = fn.component.create({ name : 'form', resource : resource, data : fn.devtool._.flattenColumn(opt.value), parent : renderOpt.el.content });
+            onSave : opt.onSave,
+            flatten : fn.devtool._.flattenColumn,
+            unflatten : fn.devtool._.unflattenColumn,
+            rowTitle : function(column, index) { return 'Column: ' + (column.name || index); },
+            onFormRender : function(formEl) {
                 var listTypeSelect = formEl._.inputs.listType;
                 var listRenderRow = formEl._.inputs.listRender.closest('tr');
                 var syncListRenderVisibility = function() {
