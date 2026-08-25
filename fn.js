@@ -20,6 +20,11 @@
         console.log('[fn.' + scope + ']', action, ...args);
     };
 
+    fn.render = function(opt = {}) {
+        var render = new Function('return (' + opt.source + ')')();
+        return render(opt.data);
+    };
+
     fn.element.create = function(opt = {}) {
         var el = document.createElement(opt.tagName);
         el._ = {};
@@ -257,11 +262,6 @@
 
 (function frameworkLayouts(global) {
     var fn = global.fn;
-
-    fn.component._.renderColumn = function(opt) {
-        var render = new Function('return (' + opt.source + ')')();
-        return render(opt.data);
-    };
 
     fn.component._.applyZIndex = function(opt) {
         var exclude = (fn.component.data.popup || []).slice();
@@ -785,7 +785,7 @@
 
                 var input;
                 if (column.form.render) {
-                    input = fn.component._.renderColumn({ source : column.form.render, data : opt.data });
+                    input = fn.render({ source : column.form.render, data : opt.data });
                     valueCell.appendChild(input);
                 } else {
                     var inputStyle = Object.assign({}, fn.component.layout._.style.input);
@@ -986,7 +986,7 @@
                         parent : row,
                     });
                     if (column.list.render) {
-                        var rendered = fn.component._.renderColumn({ source : column.list.render, data : data });
+                        var rendered = fn.render({ source : column.list.render, data : data });
                         if (rendered instanceof HTMLElement) {
                             cell.appendChild(rendered);
                         } else {
