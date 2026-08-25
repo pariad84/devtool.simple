@@ -563,61 +563,6 @@
         }
     });
 
-})(window);
-
-
-(function devtoolExampleApp(global) {
-    var fn = global.fn;
-
-    fn.component.layout.set({
-        name : 'popup-setting-btn',
-        layout : function(opt = {}) {
-            return fn.element.create({
-                tagName : 'button',
-                attribute : {
-                    type : 'button',
-                    title : 'Setting',
-                },
-                style : fn.component.layout._.style.popupBtn,
-                hoverStyle : fn.component.layout._.style.popupBtnHover,
-                text : '⚙',
-                event : {
-                    click : function(e) {
-                        var caller = e.target.closest('.__popup');
-                        fn.devtool._.ensureEssential();
-                        var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
-                            return row.data.key === '_setting';
-                        });
-                        var resource = fn.data._.toResource({ row : resourceRow });
-                        fn.component.create({
-                            name : 'popup',
-                            title : 'Edit Setting',
-                            parent : document.body,
-                            caller : caller,
-                            resource : resource,
-                            initialize : function(opt) {
-                                fn.component.create({
-                                    name : 'popup-save-btn',
-                                    parent : opt.el.buttons,
-                                });
-                            },
-                            render : function(opt) {
-                                var rows = fn.data.select({ key : resource.key });
-                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
-                                fn.component.create({
-                                    name : 'form',
-                                    resource : resource,
-                                    data : formData,
-                                    parent : opt.el.content,
-                                });
-                            },
-                        });
-                    }
-                },
-            });
-        }
-    });
-
     fn.component.layout.set({
         name : 'popup-buttons',
         layout : function(opt = {}) {
@@ -1056,6 +1001,60 @@
             });
 
             return el;
+        }
+    });
+
+})(window);
+
+(function devtoolExampleApp(global) {
+    var fn = global.fn;
+
+    fn.component.layout.set({
+        name : 'popup-setting-btn',
+        layout : function(opt = {}) {
+            return fn.element.create({
+                tagName : 'button',
+                attribute : {
+                    type : 'button',
+                    title : 'Setting',
+                },
+                style : fn.component.layout._.style.popupBtn,
+                hoverStyle : fn.component.layout._.style.popupBtnHover,
+                text : '⚙',
+                event : {
+                    click : function(e) {
+                        var caller = e.target.closest('.__popup');
+                        fn.devtool._.ensureEssential();
+                        var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
+                            return row.data.key === '_setting';
+                        });
+                        var resource = fn.data._.toResource({ row : resourceRow });
+                        fn.component.create({
+                            name : 'popup',
+                            title : 'Edit Setting',
+                            parent : document.body,
+                            caller : caller,
+                            resource : resource,
+                            initialize : function(opt) {
+                                fn.component.create({
+                                    name : 'popup-save-btn',
+                                    parent : opt.el.buttons,
+                                });
+                            },
+                            render : function(opt) {
+                                var rows = fn.data.select({ key : resource.key });
+                                var formData = rows[0] ? Object.assign({ id : rows[0].id }, rows[0].data) : {};
+                                fn.component.create({
+                                    name : 'form',
+                                    resource : resource,
+                                    data : formData,
+                                    parent : opt.el.content,
+                                });
+                            },
+                        });
+                    }
+                },
+            });
         }
     });
 
