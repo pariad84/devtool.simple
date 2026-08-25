@@ -1354,6 +1354,31 @@
         };
     };
 
+    fn.devtool._.viewColumnsButton = function(data) {
+        return fn.element.create({
+            tagName : 'button',
+            attribute : { type : 'button' },
+            text : 'View columns',
+            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+            event : {
+                click : function(e) {
+                    e.stopPropagation();
+                    var popup = e.target.closest('.__popup');
+                    fn.devtool.openJsonValue({
+                        value : JSON.parse(data.columns),
+                        title : 'Columns: ' + data.name,
+                        caller : popup,
+                        onSave : function(updatedColumns) {
+                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
+                            popup.refresh();
+                            fn.component._.refreshRoot({ popup : popup });
+                        },
+                    });
+                }
+            }
+        });
+    };
+
     fn.devtool._.resourceDefinitions = function() {
         return [
             {
@@ -1519,31 +1544,8 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'View columns',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var popup = e.target.closest('.__popup');
-                                    fn.devtool.openJsonValue({
-                                        value : JSON.parse(data.columns),
-                                        title : 'Columns: ' + data.name,
-                                        caller : popup,
-                                        onSave : function(updatedColumns) {
-                                            fn.data.update({ key : '_resource', id : data.id, data : Object.assign({}, data, { columns : JSON.stringify(updatedColumns) }) });
-                                            popup.refresh();
-                                            fn.component._.refreshRoot({ popup : popup });
-                                        },
-                                    });
-                                }
-                            }
-                        });
-                    }` } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : '120px', type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' }, form : { type : 'textarea' } },
+                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' } },
                 ]),
             },
             {
