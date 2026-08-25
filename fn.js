@@ -1547,8 +1547,7 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-                    { name : 'columns', label : 'Columns (JSON)', list : { width : '120px', type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' }, form : { type : 'textarea' } },
-                    { name : 'viewColumns', label : 'View Columns', form : { type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : '120px', type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' }, form : { type : 'render', render : 'function(data) { return fn.devtool._.viewColumnsButton(data); }' } },
                 ]),
             },
             {
