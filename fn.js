@@ -1232,6 +1232,9 @@
             },
             render : function(renderOpt) {
                 var rows = fn.data.select({ key : opt.resource.key });
+                if (opt.filter) {
+                    rows = rows.filter(opt.filter);
+                }
                 var search = (renderOpt.el._.search || '').toLowerCase();
                 if (search) {
                     rows = rows.filter(function(row) {
@@ -1312,6 +1315,27 @@
                 { code : 'render', name : 'Render (custom JS)' },
             ],
         };
+    };
+
+    fn.devtool._.manageResourceButton = function(opt) {
+        return fn.element.create({
+            tagName : 'button',
+            attribute : { type : 'button' },
+            text : opt.text,
+            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+            event : {
+                click : function(e) {
+                    e.stopPropagation();
+                    var schemaRow = fn.data.select({ key : '_resource' }).find(function(row) { return row.data.key === opt.key; });
+                    fn.devtool.openResource({
+                        resource : fn.data._.toResource({ row : schemaRow }),
+                        name : opt.name || schemaRow.data.name,
+                        caller : e.target.closest('.__popup'),
+                        filter : opt.filter,
+                    });
+                }
+            }
+        });
     };
 
     fn.devtool._.resourceDefinitions = function() {
@@ -1489,36 +1513,9 @@
                 columns : JSON.stringify([
                     { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'manageResources', label : 'Resources', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Manage resources',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var row = fn.data.select({ key : '_resource' }).find(function(row) { return row.data.key === '_resource'; });
-                                    fn.devtool.openResource({ resource : fn.data._.toResource({ row : row }), name : row.data.name, caller : e.target.closest('.__popup') });
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Manage codes',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var row = fn.data.select({ key : '_resource' }).find(function(row) { return row.data.key === 'code'; });
-                                    fn.devtool.openResource({ resource : fn.data._.toResource({ row : row }), name : row.data.name, caller : e.target.closest('.__popup') });
-                                }
-                            }
-                        });
-                    }` } },
+                    { name : 'manageResources', label : 'Resources', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", text: "Manage resources" }); }' } },
+                    { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "code", text: "Manage codes" }); }' } },
+                    { name : 'manageResourceSetting', label : 'Resource / Setting', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", name: "Resource / Setting", text: "Manage resource / setting", filter: function(row) { return row.data.key === "_resource" || row.data.key === "_setting"; } }); }' } },
                     { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
                         return fn.element.create({
                             tagName : 'button',
