@@ -60,9 +60,6 @@
                 el.addEventListener(eventType, eventHandler);
             }
         }
-        if (opt.complete) {
-            opt.complete({el : el});
-        }
         el._.opt = opt;
         if (opt.datas) {
             el._.datas = opt.datas || [];
