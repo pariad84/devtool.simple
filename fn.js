@@ -402,10 +402,12 @@
                             return;
                         }
                         if (form._.data.id !== undefined) {
+                            var merged = Object.assign({}, form._.data, data);
+                            delete merged.id;
                             fn.data.update({
                                 key : form._.resource.key,
                                 id : form._.data.id,
-                                data : data,
+                                data : merged,
                             });
                         } else {
                             fn.data.insert({
