@@ -742,6 +742,43 @@
         }
     });
 
+    fn.component._.jsonPreview = function(value) {
+        if (Array.isArray(value)) {
+            var keys = [];
+            value.forEach(function(item) {
+                if (item && typeof item === 'object' && !Array.isArray(item)) {
+                    Object.keys(item).forEach(function(key) {
+                        if (keys.indexOf(key) === -1) {
+                            keys.push(key);
+                        }
+                    });
+                }
+            });
+            var columns = keys.length
+                ? keys.map(function(key) { return { name : key, label : key, list : {} }; })
+                : [ { name : 'value', label : 'Value', list : {} } ];
+            var datas = value.map(function(item, index) {
+                if (item && typeof item === 'object' && !Array.isArray(item)) {
+                    var row = { id : index };
+                    keys.forEach(function(key) {
+                        var v = item[key];
+                        row[key] = (v && typeof v === 'object') ? JSON.stringify(v) : v;
+                    });
+                    return row;
+                }
+                return { id : index, value : item };
+            });
+            return { columns : columns, datas : datas };
+        }
+        return {
+            columns : [ { name : 'key', label : 'Key', list : {} }, { name : 'value', label : 'Value', list : {} } ],
+            datas : Object.keys(value).map(function(key) {
+                var v = value[key];
+                return { id : key, key : key, value : (v && typeof v === 'object') ? JSON.stringify(v) : v };
+            }),
+        };
+    };
+
     fn.component.layout.set({
         name : 'form',
         layout : function(opt = {resource : {key : '', columns : []}, data : {}}) {
@@ -836,6 +873,25 @@
                             style : inputStyle,
                             parent : valueCell,
                         });
+
+                        if (isTextarea) {
+                            var parsed;
+                            try {
+                                parsed = JSON.parse(opt.data[column.name]);
+                            } catch (e) {
+                                parsed = undefined;
+                            }
+                            if (parsed !== undefined && parsed !== null && typeof parsed === 'object') {
+                                var preview = fn.component._.jsonPreview(parsed);
+                                fn.component.create({
+                                    name : 'list',
+                                    resource : { key : '', columns : preview.columns },
+                                    datas : preview.datas,
+                                    readonly : true,
+                                    parent : valueCell,
+                                });
+                            }
+                        }
                     }
                 }
 
