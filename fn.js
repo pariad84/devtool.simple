@@ -52,9 +52,6 @@
         if (opt.parent) {
             opt.parent.appendChild(el);
         }
-        if (opt.html) {
-            el.innerHTML = opt.html;
-        }
         if (opt.text) {
             el.textContent = opt.text;
         }
