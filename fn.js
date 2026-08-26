@@ -1373,18 +1373,17 @@
         };
     };
 
-    fn.devtool._.resourceSchema = {
-        key : '_resource',
-        columns : [
-            { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
-            { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea', height : '260px' } },
-        ],
-    };
-
-    fn.devtool._.schemaFor = function(key) {
+    fn.devtool._.resourceFor = function(key) {
         if (key === '_resource') {
-            return { resource : fn.devtool._.resourceSchema, name : 'Resource' };
+            var resource = {
+                key : '_resource',
+                columns : [
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea', height : '260px' } },
+                ],
+            };
+            return { resource : resource, name : 'Resource' };
         }
         var row = fn.data.select({ key : '_resource' }).find(function(r) { return r.data.key === key; });
         return { resource : fn.data._.toResource({ row : row }), name : row.data.name };
@@ -1399,10 +1398,10 @@
             event : {
                 click : function(e) {
                     e.stopPropagation();
-                    var schema = fn.devtool._.schemaFor(opt.key);
+                    var resourceInfo = fn.devtool._.resourceFor(opt.key);
                     fn.devtool.openResource({
-                        resource : schema.resource,
-                        name : opt.name || schema.name,
+                        resource : resourceInfo.resource,
+                        name : opt.name || resourceInfo.name,
                         caller : e.target.closest('.__popup'),
                         filter : opt.filter,
                     });
