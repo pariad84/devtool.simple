@@ -4,7 +4,6 @@
     fn.localStorage = {};
     fn.element = {};
     fn.ui = {};
-    fn.util = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -102,21 +101,6 @@
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
         });
-    };
-
-    fn.util.maxZIndex = function(opt = {}) {
-        var exclude = opt.exclude || [];
-        var max = 0;
-        document.querySelectorAll('*').forEach(function(el) {
-            if (exclude.some(function(ex) { return ex === el || ex.contains(el); })) {
-                return;
-            }
-            var z = parseInt(getComputedStyle(el).zIndex, 10);
-            if (!isNaN(z) && z > max) {
-                max = z;
-            }
-        });
-        return max;
     };
 
     fn.component.layout.set = function(opt = {}) {
@@ -255,13 +239,28 @@
 (function frameworkLayouts(global) {
     var fn = global.fn;
 
+    fn.component._.maxZIndex = function(opt = {}) {
+        var exclude = opt.exclude || [];
+        var max = 0;
+        document.querySelectorAll('*').forEach(function(el) {
+            if (exclude.some(function(ex) { return ex === el || ex.contains(el); })) {
+                return;
+            }
+            var z = parseInt(getComputedStyle(el).zIndex, 10);
+            if (!isNaN(z) && z > max) {
+                max = z;
+            }
+        });
+        return max;
+    };
+
     fn.component._.zIndexAbove = function() {
         if (fn.component._.zIndex === undefined) {
             var exclude = (fn.component.data.popup || []).slice();
             if (fn.devtool.data.button) {
                 exclude.push(fn.devtool.data.button);
             }
-            fn.component._.zIndex = fn.util.maxZIndex({ exclude : exclude }) + 1;
+            fn.component._.zIndex = fn.component._.maxZIndex({ exclude : exclude }) + 1;
         }
         return fn.component._.zIndex;
     };
