@@ -1303,50 +1303,6 @@
         });
     };
 
-    fn.devtool._.flattenColumn = function(column) {
-        return {
-            name : column.name,
-            label : column.label || '',
-            listWidth : column.list ? (column.list.width || '') : '',
-            listType : column.list ? (column.list.render ? 'render' : (column.list.type || 'text')) : 'none',
-            listRender : (column.list && column.list.render) || '',
-            formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
-            render : (column.form && column.form.render) || '',
-        };
-    };
-
-    fn.devtool._.unflattenColumn = function(original, formData) {
-        var column = Object.assign({}, original, {
-            name : formData.name,
-            label : formData.label,
-        });
-        if (formData.listType === 'none') {
-            delete column.list;
-        } else {
-            column.list = Object.assign({}, original.list, { width : formData.listWidth });
-            if (formData.listType === 'render') {
-                column.list.render = formData.listRender;
-                delete column.list.type;
-            } else {
-                column.list.type = formData.listType;
-                delete column.list.render;
-            }
-        }
-        if (formData.formType === 'none') {
-            delete column.form;
-        } else {
-            column.form = Object.assign({}, original.form);
-            if (formData.formType === 'render') {
-                column.form.render = formData.render;
-                delete column.form.type;
-            } else {
-                column.form.type = formData.formType;
-                delete column.form.render;
-            }
-        }
-        return column;
-    };
-
     fn.devtool._.codeGroups = function() {
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
