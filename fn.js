@@ -1201,6 +1201,15 @@
         });
     };
 
+    fn.devtool.toggle = function() {
+        var open = (fn.component.data.popup || []).find(function(popup) { return popup._.title === 'DevTool'; });
+        if (open) {
+            open.close();
+        } else {
+            fn.devtool.open();
+        }
+    };
+
     fn.devtool.openResource = function(opt = {}) {
         fn.component.create({
             name : 'popup',
@@ -1677,6 +1686,13 @@
 
         fn.devtool._.checkReminders();
         setInterval(fn.devtool._.checkReminders, 15000);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.code === 'Backquote') {
+                e.preventDefault();
+                fn.devtool.toggle();
+            }
+        });
 
         var button = fn.element.create({
             tagName : 'button',
