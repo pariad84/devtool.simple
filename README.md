@@ -24,16 +24,17 @@ The `?t=...` cache-busting query param means each click always fetches the lates
 
 ## Usage
 
-Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it to open the DevTool popup, which lists your data resources:
+Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it, or press **Ctrl+`**, to open the DevTool popup, which lists your data resources. Press **Escape** to close the frontmost popup (press it repeatedly to close several):
 
 - **Memo** — free-form notes (name + content).
 - **Bookmark** — saved links with a Run button that opens the URL in a new tab.
 - **Reminder** — a title and a date/time; once that time passes, a browser notification fires. This only works while the tab the devtool is running in stays open (no service worker or background process), and the notification permission/data are both scoped to whatever site you're on when you create the reminder, same as every other resource here.
+- **Capture** — press **Alt+1** to enter capture mode: hover the host page to highlight elements, click one to grab every `input`/`textarea`/`select` inside it (by `name`, falling back to `id`) as a `key: value` snapshot, saved as a new Capture row. Escape cancels capture mode without saving. Clicking directly on a single field widens the search to its closest `<form>` (or parent) so you still get its siblings, not just that one field.
 - **Request** — a small Postman-style API client: method, URL, query params, headers, and bearer/basic auth, all as JSON fields. Run executes the request and shows the response in a popup, recording it into the separate **History** resource (each row references its Request by id); History keeps the last 20 runs (success/error) per request, and the History button shows just that request's runs, newest-first.
 
 Every popup can be dragged by its header and resized from its corner. List popups with a 🔍 button support a text search that filters visible rows. The gear button and every popup auto-detect the host page's highest z-index once, when the devtool starts, so they float above whatever the host page had at that point.
 
-Memo, Bookmark, Reminder, Code, Request, and History are built in and can't be deleted from the Resource list (no Delete button when editing them) — they self-heal even if removed some other way (e.g. an Import that omits them). Resource and Setting's own shapes aren't stored as data at all — they're fixed in code, so there's nothing to delete or heal there, and neither appears as a row in the Resource list. Resources you create yourself stay freely deletable.
+Memo, Bookmark, Reminder, Capture, Code, Request, and History are built in and can't be deleted from the Resource list (no Delete button when editing them) — they self-heal even if removed some other way (e.g. an Import that omits them). Resource and Setting's own shapes aren't stored as data at all — they're fixed in code, so there's nothing to delete or heal there, and neither appears as a row in the Resource list. Resources you create yourself stay freely deletable.
 
 The ⚙ button in the DevTool popup's own header opens **Setting**: default popup scale/opacity (popups always size to their content), Resources (define your own data types — a name, storage key, and a JSON column spec; every resource opens as a list, and Columns can supply custom render functions for list cells or form fields, or reference another resource's rows by id) and Codes (lookup values like HTTP methods and auth types that populate select inputs elsewhere) for schema management, Generate sample data (repopulate the sample Memo/Bookmark/Request rows on demand), Export (download all data as JSON) / Import (restore from a JSON file, overwriting everything) for backups, and Reset (wipe all data back to the seeded samples).
 

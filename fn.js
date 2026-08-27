@@ -1453,6 +1453,15 @@
                 ]),
             },
             {
+                name : 'Capture',
+                key : 'capture',
+                protected : true,
+                columns : JSON.stringify([
+                    { name : 'label', label : 'Label', list : { width : '260px' }, form : { type : 'text' } },
+                    { name : 'data', label : 'Data (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
+                ]),
+            },
+            {
                 name : 'Code',
                 key : 'code',
                 protected : true,
@@ -1644,6 +1653,81 @@
         });
     };
 
+    fn.devtool._.startCapture = function() {
+        var highlighted = null;
+        var previousOutline = '';
+
+        function setHighlight(el) {
+            if (highlighted === el) {
+                return;
+            }
+            if (highlighted) {
+                highlighted.style.outline = previousOutline;
+            }
+            highlighted = el;
+            previousOutline = el ? el.style.outline : '';
+            if (el) {
+                el.style.outline = '2px solid #4f8cff';
+            }
+        }
+
+        function stop() {
+            setHighlight(null);
+            document.removeEventListener('mousemove', onMouseMove, true);
+            document.removeEventListener('click', onClick, true);
+            document.removeEventListener('keydown', onKeydown, true);
+        }
+
+        function onMouseMove(e) {
+            setHighlight(e.target.closest('.__popup') ? null : e.target);
+        }
+
+        function onClick(e) {
+            if (e.target.closest('.__popup')) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            var el = e.target;
+            stop();
+
+            var container = el;
+            if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) {
+                container = el.closest('form') || el.parentElement || el;
+            }
+            var fields = Array.from(container.querySelectorAll('input, textarea, select'));
+            if (/^(INPUT|TEXTAREA|SELECT)$/.test(container.tagName)) {
+                fields.unshift(container);
+            }
+
+            var values = {};
+            fields.forEach(function(input, index) {
+                var key = input.name || input.id || ('field' + index);
+                values[key] = (input.type === 'checkbox' || input.type === 'radio') ? input.checked : input.value;
+            });
+
+            var row = fn.data.insert({
+                key : 'capture',
+                data : {
+                    label : location.hostname + ' - ' + new Date().toLocaleString(),
+                    data : JSON.stringify(values, null, 2),
+                },
+            });
+            fn.log('devtool', 'capture', row.data.label, values);
+        }
+
+        function onKeydown(e) {
+            if (e.key === 'Escape') {
+                e.stopImmediatePropagation();
+                stop();
+            }
+        }
+
+        document.addEventListener('mousemove', onMouseMove, true);
+        document.addEventListener('click', onClick, true);
+        document.addEventListener('keydown', onKeydown, true);
+    };
+
     fn.devtool._.seed = function() {
         fn.devtool._.ensureEssential();
         fn.devtool._.generateSampleData();
@@ -1677,6 +1761,23 @@
 
         fn.devtool._.checkReminders();
         setInterval(fn.devtool._.checkReminders, 15000);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.code === 'Backquote') {
+                e.preventDefault();
+                fn.devtool.open();
+            }
+            if (e.altKey && e.code === 'Digit1') {
+                e.preventDefault();
+                fn.devtool._.startCapture();
+            }
+            if (e.key === 'Escape') {
+                var popups = document.querySelectorAll('.__popup');
+                if (popups.length) {
+                    popups[popups.length - 1].close();
+                }
+            }
+        });
 
         var button = fn.element.create({
             tagName : 'button',
