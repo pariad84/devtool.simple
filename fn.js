@@ -4,6 +4,7 @@
     fn.localStorage = {};
     fn.element = {};
     fn.ui = {};
+    fn.util = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -100,6 +101,27 @@
             startTop = parseFloat(el.style.top) || 0;
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
+        });
+    };
+
+    fn.util.download = function(opt = {}) {
+        var blob = new Blob([ opt.content ], { type : opt.type || 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var link = fn.element.create({
+            tagName : 'a',
+            attribute : { href : url, download : opt.filename },
+        });
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    fn.util.readFileAsText = function(opt = {}) {
+        return new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                resolve(reader.result);
+            };
+            reader.readAsText(opt.file);
         });
     };
 
@@ -1380,14 +1402,11 @@
                                     keys.forEach(function(key) {
                                         backup[key] = fn.data.select({ key : key });
                                     });
-                                    var blob = new Blob([ JSON.stringify(backup, null, 2) ], { type : 'application/json' });
-                                    var url = URL.createObjectURL(blob);
-                                    var link = fn.element.create({
-                                        tagName : 'a',
-                                        attribute : { href : url, download : 'devtool-backup.json' },
+                                    fn.util.download({
+                                        content : JSON.stringify(backup, null, 2),
+                                        type : 'application/json',
+                                        filename : 'devtool-backup.json',
                                     });
-                                    link.click();
-                                    URL.revokeObjectURL(url);
                                 }
                             }
                         });
@@ -1415,9 +1434,8 @@
                                                 if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
                                                     return;
                                                 }
-                                                var reader = new FileReader();
-                                                reader.onload = function() {
-                                                    var backup = JSON.parse(reader.result);
+                                                fn.util.readFileAsText({ file : file }).then(function(text) {
+                                                    var backup = JSON.parse(text);
                                                     Object.keys(backup).forEach(function(key) {
                                                         fn.data._.write({ key : key, rows : backup[key] });
                                                     });
@@ -1426,8 +1444,7 @@
                                                         popup._.caller.refresh();
                                                     }
                                                     popup.close();
-                                                };
-                                                reader.readAsText(file);
+                                                });
                                             },
                                         },
                                     });
