@@ -1432,7 +1432,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1481,7 +1481,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1534,7 +1534,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'History',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
