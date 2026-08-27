@@ -115,6 +115,16 @@
         URL.revokeObjectURL(url);
     };
 
+    fn.util.readFileAsText = function(opt = {}) {
+        return new Promise(function(resolve) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                resolve(reader.result);
+            };
+            reader.readAsText(opt.file);
+        });
+    };
+
     fn.component.layout.set = function(opt = {}) {
         this.data[opt.name] = opt.layout;
     };
@@ -1424,9 +1434,8 @@
                                                 if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
                                                     return;
                                                 }
-                                                var reader = new FileReader();
-                                                reader.onload = function() {
-                                                    var backup = JSON.parse(reader.result);
+                                                fn.util.readFileAsText({ file : file }).then(function(text) {
+                                                    var backup = JSON.parse(text);
                                                     Object.keys(backup).forEach(function(key) {
                                                         fn.data._.write({ key : key, rows : backup[key] });
                                                     });
@@ -1435,8 +1444,7 @@
                                                         popup._.caller.refresh();
                                                     }
                                                     popup.close();
-                                                };
-                                                reader.readAsText(file);
+                                                });
                                             },
                                         },
                                     });
