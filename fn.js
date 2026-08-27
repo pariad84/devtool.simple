@@ -4,7 +4,6 @@
     fn.localStorage = {};
     fn.element = {};
     fn.ui = {};
-    fn.util = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -102,21 +101,6 @@
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
         });
-    };
-
-    fn.util.maxZIndex = function(opt = {}) {
-        var exclude = opt.exclude || [];
-        var max = 0;
-        document.querySelectorAll('*').forEach(function(el) {
-            if (exclude.some(function(ex) { return ex === el || ex.contains(el); })) {
-                return;
-            }
-            var z = parseInt(getComputedStyle(el).zIndex, 10);
-            if (!isNaN(z) && z > max) {
-                max = z;
-            }
-        });
-        return max;
     };
 
     fn.component.layout.set = function(opt = {}) {
@@ -255,13 +239,28 @@
 (function frameworkLayouts(global) {
     var fn = global.fn;
 
+    fn.component._.maxZIndex = function(opt = {}) {
+        var exclude = opt.exclude || [];
+        var max = 0;
+        document.querySelectorAll('*').forEach(function(el) {
+            if (exclude.some(function(ex) { return ex === el || ex.contains(el); })) {
+                return;
+            }
+            var z = parseInt(getComputedStyle(el).zIndex, 10);
+            if (!isNaN(z) && z > max) {
+                max = z;
+            }
+        });
+        return max;
+    };
+
     fn.component._.zIndexAbove = function() {
         if (fn.component._.zIndex === undefined) {
             var exclude = (fn.component.data.popup || []).slice();
             if (fn.devtool.data.button) {
                 exclude.push(fn.devtool.data.button);
             }
-            fn.component._.zIndex = fn.util.maxZIndex({ exclude : exclude }) + 1;
+            fn.component._.zIndex = fn.component._.maxZIndex({ exclude : exclude }) + 1;
         }
         return fn.component._.zIndex;
     };
@@ -1302,50 +1301,6 @@
                 });
             },
         });
-    };
-
-    fn.devtool._.flattenColumn = function(column) {
-        return {
-            name : column.name,
-            label : column.label || '',
-            listWidth : column.list ? (column.list.width || '') : '',
-            listType : column.list ? (column.list.render ? 'render' : (column.list.type || 'text')) : 'none',
-            listRender : (column.list && column.list.render) || '',
-            formType : column.form ? (column.form.render ? 'render' : (column.form.type || 'text')) : 'none',
-            render : (column.form && column.form.render) || '',
-        };
-    };
-
-    fn.devtool._.unflattenColumn = function(original, formData) {
-        var column = Object.assign({}, original, {
-            name : formData.name,
-            label : formData.label,
-        });
-        if (formData.listType === 'none') {
-            delete column.list;
-        } else {
-            column.list = Object.assign({}, original.list, { width : formData.listWidth });
-            if (formData.listType === 'render') {
-                column.list.render = formData.listRender;
-                delete column.list.type;
-            } else {
-                column.list.type = formData.listType;
-                delete column.list.render;
-            }
-        }
-        if (formData.formType === 'none') {
-            delete column.form;
-        } else {
-            column.form = Object.assign({}, original.form);
-            if (formData.formType === 'render') {
-                column.form.render = formData.render;
-                delete column.form.type;
-            } else {
-                column.form.type = formData.formType;
-                delete column.form.render;
-            }
-        }
-        return column;
     };
 
     fn.devtool._.codeGroups = function() {
