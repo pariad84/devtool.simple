@@ -414,14 +414,6 @@
                         var popup = e.target.closest('.__popup');
                         var form = popup.querySelector('.__form');
                         var data = form.getData();
-                        if (popup._.onSave) {
-                            popup._.onSave(data);
-                            if (popup._.caller) {
-                                popup._.caller.refresh();
-                            }
-                            popup.close();
-                            return;
-                        }
                         if (form._.data.id !== undefined) {
                             var merged = Object.assign({}, form._.data, data);
                             delete merged.id;
@@ -712,7 +704,6 @@
             popup._.render = opt.render;
             popup._.resource = opt.resource;
             popup._.title = opt.title;
-            popup._.onSave = opt.onSave;
 
             if (opt.initialize) {
                 opt.initialize({ el : popup });
@@ -937,21 +928,6 @@
                 return result;
             };
 
-            el.setData = function(newData) {
-                opt.resource.columns.forEach(function(column) {
-                    if (!column.form) {
-                        return;
-                    }
-                    var input = el._.inputs[column.name];
-                    if (input.tagName === 'BUTTON') {
-                        return;
-                    }
-                    if (newData[column.name] !== undefined) {
-                        input.value = newData[column.name];
-                    }
-                });
-            };
-
             return el;
         }
     });
@@ -1011,10 +987,6 @@
                             }
                             if (e.ctrlKey) {
                                 fn.log('list', 'inspect', e.target.closest('tr')._.data);
-                                return;
-                            }
-                            if (opt.onRowClick) {
-                                opt.onRowClick({ data : data, e : e });
                                 return;
                             }
                             var resource = opt.resource;
@@ -1086,62 +1058,6 @@
             return el;
         }
     });
-
-    fn.component._.openValue = function(opt = {}) {
-        var isArray = Array.isArray(opt.value);
-        var flatten = opt.flatten || function(value) { return value; };
-        var unflatten = opt.unflatten || function(original, formData) { return formData; };
-
-        fn.component.create({
-            name : 'popup',
-            title : opt.title,
-            parent : document.body,
-            caller : opt.caller,
-            onSave : (!isArray && opt.onSave) ? function(formData) {
-                opt.onSave(unflatten(opt.value, formData));
-            } : undefined,
-            initialize : function(initOpt) {
-                if (!isArray && opt.onSave) {
-                    fn.component.create({ name : 'popup-save-btn', parent : initOpt.el.buttons });
-                }
-            },
-            render : function(renderOpt) {
-                if (isArray) {
-                    var datas = opt.value.map(function(item, index) {
-                        return Object.assign({ id : index }, flatten(item));
-                    });
-                    fn.component.create({
-                        name : 'list',
-                        resource : opt.resource,
-                        datas : datas,
-                        onRowClick : function(clickOpt) {
-                            var item = opt.value[clickOpt.data.id];
-                            fn.component._.openValue({
-                                resource : opt.resource,
-                                value : item,
-                                title : opt.rowTitle ? opt.rowTitle(item, clickOpt.data.id) : String(clickOpt.data.id),
-                                caller : clickOpt.e.target.closest('.__popup'),
-                                flatten : flatten,
-                                unflatten : unflatten,
-                                rowTitle : opt.rowTitle,
-                                onFormRender : opt.onFormRender,
-                                onSave : opt.onSave ? function(updatedItem) {
-                                    opt.value[clickOpt.data.id] = updatedItem;
-                                    opt.onSave(opt.value);
-                                } : undefined,
-                            });
-                        },
-                        parent : renderOpt.el.content,
-                    });
-                    return;
-                }
-                var formEl = fn.component.create({ name : 'form', resource : opt.resource, data : flatten(opt.value), parent : renderOpt.el.content });
-                if (opt.onFormRender) {
-                    opt.onFormRender(formEl);
-                }
-            },
-        });
-    };
 
 })(window);
 
@@ -1329,17 +1245,6 @@
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
             authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
-            formType : [
-                { code : 'none', name : 'None (no form field)' },
-                { code : 'text', name : 'Text' },
-                { code : 'textarea', name : 'Textarea' },
-                { code : 'select', name : 'Select' },
-                { code : 'render', name : 'Render (custom JS)' },
-            ],
-            listType : [
-                { code : 'text', name : 'Text' },
-                { code : 'render', name : 'Render (custom JS)' },
-            ],
         };
     };
 
