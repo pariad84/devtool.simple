@@ -4,6 +4,7 @@
     fn.localStorage = {};
     fn.element = {};
     fn.ui = {};
+    fn.util = {};
     fn.data = {};
     fn.data._ = {};
     fn.component = {};
@@ -101,6 +102,17 @@
             document.addEventListener('pointermove', onPointerMove);
             document.addEventListener('pointerup', onPointerUp);
         });
+    };
+
+    fn.util.download = function(opt = {}) {
+        var blob = new Blob([ opt.content ], { type : opt.type || 'text/plain' });
+        var url = URL.createObjectURL(blob);
+        var link = fn.element.create({
+            tagName : 'a',
+            attribute : { href : url, download : opt.filename },
+        });
+        link.click();
+        URL.revokeObjectURL(url);
     };
 
     fn.component.layout.set = function(opt = {}) {
@@ -1380,14 +1392,11 @@
                                     keys.forEach(function(key) {
                                         backup[key] = fn.data.select({ key : key });
                                     });
-                                    var blob = new Blob([ JSON.stringify(backup, null, 2) ], { type : 'application/json' });
-                                    var url = URL.createObjectURL(blob);
-                                    var link = fn.element.create({
-                                        tagName : 'a',
-                                        attribute : { href : url, download : 'devtool-backup.json' },
+                                    fn.util.download({
+                                        content : JSON.stringify(backup, null, 2),
+                                        type : 'application/json',
+                                        filename : 'devtool-backup.json',
                                     });
-                                    link.click();
-                                    URL.revokeObjectURL(url);
                                 }
                             }
                         });
