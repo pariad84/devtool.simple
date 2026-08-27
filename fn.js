@@ -1147,10 +1147,7 @@
                     click : function(e) {
                         var caller = e.target.closest('.__popup');
                         fn.devtool._.ensureEssential();
-                        var resourceRow = fn.data.select({ key : '_resource' }).find(function(row) {
-                            return row.data.key === '_setting';
-                        });
-                        var resource = fn.data._.toResource({ row : resourceRow });
+                        var resource = fn.devtool._.resourceFor('_setting').resource;
                         fn.component.create({
                             name : 'popup',
                             title : 'Edit Setting',
@@ -1287,9 +1284,6 @@
             },
             render : function(renderOpt) {
                 var rows = fn.data.select({ key : opt.resource.key });
-                if (opt.filter) {
-                    rows = rows.filter(opt.filter);
-                }
                 var search = (renderOpt.el._.search || '').toLowerCase();
                 if (search) {
                     rows = rows.filter(function(row) {
@@ -1384,6 +1378,136 @@
             };
             return { resource : resource, name : 'Resource' };
         }
+        if (key === '_setting') {
+            var resource = {
+                key : '_setting',
+                columns : [
+                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'manageResources', label : 'Resources', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", text: "Manage resources" }); }' } },
+                    { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "code", text: "Manage codes" }); }' } },
+                    { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Generate sample data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    fn.devtool._.generateSampleData();
+                                    var popup = e.target.closest('.__popup');
+                                    if (popup._.caller) {
+                                        popup._.caller.refresh();
+                                    }
+                                    popup.close();
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Export data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var backup = {};
+                                    var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
+                                    if (keys.indexOf('_resource') === -1) {
+                                        keys.push('_resource');
+                                    }
+                                    if (keys.indexOf('_setting') === -1) {
+                                        keys.push('_setting');
+                                    }
+                                    keys.forEach(function(key) {
+                                        backup[key] = fn.data.select({ key : key });
+                                    });
+                                    var blob = new Blob([ JSON.stringify(backup, null, 2) ], { type : 'application/json' });
+                                    var url = URL.createObjectURL(blob);
+                                    var link = fn.element.create({
+                                        tagName : 'a',
+                                        attribute : { href : url, download : 'devtool-backup.json' },
+                                    });
+                                    link.click();
+                                    URL.revokeObjectURL(url);
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Import data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    var popup = e.target.closest('.__popup');
+                                    var input = fn.element.create({
+                                        tagName : 'input',
+                                        attribute : { type : 'file', accept : 'application/json' },
+                                        style : { display : 'none' },
+                                        event : {
+                                            change : function(changeEvent) {
+                                                var file = changeEvent.target.files[0];
+                                                if (!file) {
+                                                    return;
+                                                }
+                                                if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
+                                                    return;
+                                                }
+                                                var reader = new FileReader();
+                                                reader.onload = function() {
+                                                    var backup = JSON.parse(reader.result);
+                                                    Object.keys(backup).forEach(function(key) {
+                                                        fn.data._.write({ key : key, rows : backup[key] });
+                                                    });
+                                                    fn.component._.applySettingAll();
+                                                    if (popup._.caller) {
+                                                        popup._.caller.refresh();
+                                                    }
+                                                    popup.close();
+                                                };
+                                                reader.readAsText(file);
+                                            },
+                                        },
+                                    });
+                                    input.click();
+                                }
+                            }
+                        });
+                    }` } },
+                    { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
+                        return fn.element.create({
+                            tagName : 'button',
+                            attribute : { type : 'button' },
+                            text : 'Reset all data',
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
+                                        return;
+                                    }
+                                    fn.devtool._.reset();
+                                    fn.component._.applySettingAll();
+                                    var popup = e.target.closest('.__popup');
+                                    if (popup._.caller) {
+                                        popup._.caller.refresh();
+                                    }
+                                    popup.close();
+                                }
+                            }
+                        });
+                    }` } },
+                ],
+            };
+            return { resource : resource, name : 'Setting' };
+        }
         var row = fn.data.select({ key : '_resource' }).find(function(r) { return r.data.key === key; });
         return { resource : fn.data._.toResource({ row : row }), name : row.data.name };
     };
@@ -1400,9 +1524,8 @@
                     var resourceInfo = fn.devtool._.resourceFor(opt.key);
                     fn.devtool.openResource({
                         resource : resourceInfo.resource,
-                        name : opt.name || resourceInfo.name,
+                        name : resourceInfo.name,
                         caller : e.target.closest('.__popup'),
-                        filter : opt.filter,
                     });
                 }
             }
@@ -1577,133 +1700,6 @@
                     { name : 'body', label : 'Body', list : { width : 'auto' }, form : { type : 'textarea' } },
                 ]),
             },
-            {
-                name : 'Setting',
-                key : '_setting',
-                protected : true,
-                columns : JSON.stringify([
-                    { name : 'scale', label : 'Default popup scale', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'manageResources', label : 'Resources', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", text: "Manage resources" }); }' } },
-                    { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "code", text: "Manage codes" }); }' } },
-                    { name : 'manageResourceSetting', label : 'Resource / Setting', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", name: "Resource / Setting", text: "Manage resource / setting", filter: function(row) { return row.data.key === "_setting"; } }); }' } },
-                    { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Generate sample data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    fn.devtool._.generateSampleData();
-                                    var popup = e.target.closest('.__popup');
-                                    if (popup._.caller) {
-                                        popup._.caller.refresh();
-                                    }
-                                    popup.close();
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Export data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var backup = {};
-                                    var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
-                                    if (keys.indexOf('_resource') === -1) {
-                                        keys.push('_resource');
-                                    }
-                                    keys.forEach(function(key) {
-                                        backup[key] = fn.data.select({ key : key });
-                                    });
-                                    var blob = new Blob([ JSON.stringify(backup, null, 2) ], { type : 'application/json' });
-                                    var url = URL.createObjectURL(blob);
-                                    var link = fn.element.create({
-                                        tagName : 'a',
-                                        attribute : { href : url, download : 'devtool-backup.json' },
-                                    });
-                                    link.click();
-                                    URL.revokeObjectURL(url);
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Import data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var popup = e.target.closest('.__popup');
-                                    var input = fn.element.create({
-                                        tagName : 'input',
-                                        attribute : { type : 'file', accept : 'application/json' },
-                                        style : { display : 'none' },
-                                        event : {
-                                            change : function(changeEvent) {
-                                                var file = changeEvent.target.files[0];
-                                                if (!file) {
-                                                    return;
-                                                }
-                                                if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
-                                                    return;
-                                                }
-                                                var reader = new FileReader();
-                                                reader.onload = function() {
-                                                    var backup = JSON.parse(reader.result);
-                                                    Object.keys(backup).forEach(function(key) {
-                                                        fn.data._.write({ key : key, rows : backup[key] });
-                                                    });
-                                                    fn.component._.applySettingAll();
-                                                    if (popup._.caller) {
-                                                        popup._.caller.refresh();
-                                                    }
-                                                    popup.close();
-                                                };
-                                                reader.readAsText(file);
-                                            },
-                                        },
-                                    });
-                                    input.click();
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
-                            text : 'Reset all data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
-                                        return;
-                                    }
-                                    fn.devtool._.reset();
-                                    fn.component._.applySettingAll();
-                                    var popup = e.target.closest('.__popup');
-                                    if (popup._.caller) {
-                                        popup._.caller.refresh();
-                                    }
-                                    popup.close();
-                                }
-                            }
-                        });
-                    }` } },
-                ]),
-            },
         ];
     };
 
@@ -1781,6 +1777,9 @@
         var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
         if (keys.indexOf('_resource') === -1) {
             keys.push('_resource');
+        }
+        if (keys.indexOf('_setting') === -1) {
+            keys.push('_setting');
         }
         keys.forEach(function(key) {
             fn.localStorage.remove({ key : key });
