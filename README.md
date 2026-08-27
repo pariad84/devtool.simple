@@ -24,7 +24,7 @@ The `?t=...` cache-busting query param means each click always fetches the lates
 
 ## Usage
 
-Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it, or press **Ctrl+`**, to open the DevTool popup. It lists your data resources:
+Once started, a gear button (⚙) appears in the bottom-right corner of the page. Click it, or press **Ctrl+`**, to open the DevTool popup, which lists your data resources. Press **Escape** to close the frontmost popup (press it repeatedly to close several):
 
 - **Memo** — free-form notes (name + content).
 - **Bookmark** — saved links with a Run button that opens the URL in a new tab.

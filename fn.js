@@ -1683,6 +1683,12 @@
                 e.preventDefault();
                 fn.devtool.open();
             }
+            if (e.key === 'Escape') {
+                var popups = document.querySelectorAll('.__popup');
+                if (popups.length) {
+                    popups[popups.length - 1].close();
+                }
+            }
         });
 
         var button = fn.element.create({
