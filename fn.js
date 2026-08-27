@@ -52,9 +52,6 @@
         if (opt.parent) {
             opt.parent.appendChild(el);
         }
-        if (opt.html) {
-            el.innerHTML = opt.html;
-        }
         if (opt.text) {
             el.textContent = opt.text;
         }
@@ -62,9 +59,6 @@
             for (const [eventType, eventHandler] of Object.entries(opt.event)) {
                 el.addEventListener(eventType, eventHandler);
             }
-        }
-        if (opt.complete) {
-            opt.complete({el : el});
         }
         el._.opt = opt;
         if (opt.datas) {
@@ -408,10 +402,12 @@
                             return;
                         }
                         if (form._.data.id !== undefined) {
+                            var merged = Object.assign({}, form._.data, data);
+                            delete merged.id;
                             fn.data.update({
                                 key : form._.resource.key,
                                 id : form._.data.id,
-                                data : data,
+                                data : merged,
                             });
                         } else {
                             fn.data.insert({
@@ -424,6 +420,9 @@
                         }
                         if (form._.resource.key === '_resource') {
                             fn.component._.refreshRoot({ popup : popup });
+                        }
+                        if (form._.resource.key === 'reminder' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                            Notification.requestPermission();
                         }
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -1373,18 +1372,17 @@
         };
     };
 
-    fn.devtool._.resourceSchema = {
-        key : '_resource',
-        columns : [
-            { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
-            { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
-            { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea', height : '260px' } },
-        ],
-    };
-
-    fn.devtool._.schemaFor = function(key) {
+    fn.devtool._.resourceFor = function(key) {
         if (key === '_resource') {
-            return { resource : fn.devtool._.resourceSchema, name : 'Resource' };
+            var resource = {
+                key : '_resource',
+                columns : [
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'key', label : 'Key', list : { width : '120px' }, form : { type : 'text' } },
+                    { name : 'columns', label : 'Columns (JSON)', list : { width : 'auto' }, form : { type : 'textarea', height : '260px' } },
+                ],
+            };
+            return { resource : resource, name : 'Resource' };
         }
         var row = fn.data.select({ key : '_resource' }).find(function(r) { return r.data.key === key; });
         return { resource : fn.data._.toResource({ row : row }), name : row.data.name };
@@ -1399,10 +1397,10 @@
             event : {
                 click : function(e) {
                     e.stopPropagation();
-                    var schema = fn.devtool._.schemaFor(opt.key);
+                    var resourceInfo = fn.devtool._.resourceFor(opt.key);
                     fn.devtool.openResource({
-                        resource : schema.resource,
-                        name : opt.name || schema.name,
+                        resource : resourceInfo.resource,
+                        name : opt.name || resourceInfo.name,
                         caller : e.target.closest('.__popup'),
                         filter : opt.filter,
                     });
@@ -1434,7 +1432,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1443,6 +1441,16 @@
                             }
                         });
                     }` } },
+                ]),
+            },
+            {
+                name : 'Reminder',
+                key : 'reminder',
+                protected : true,
+                columns : JSON.stringify([
+                    { name : 'title', label : 'Title', list : { width : '200px' }, form : { type : 'text' } },
+                    { name : 'datetime', label : 'When', list : { width : '180px' }, form : { type : 'datetime-local' } },
+                    { name : 'notified', label : 'Status', list : { width : '90px', type : 'render', render : 'function(data) { return data.notified ? "Sent" : "Pending"; }' } },
                 ]),
             },
             {
@@ -1473,7 +1481,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1526,7 +1534,7 @@
                             tagName : 'button',
                             attribute : { type : 'button' },
                             text : 'History',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', background : 'transparent' }),
+                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1749,6 +1757,21 @@
         });
     };
 
+    fn.devtool._.checkReminders = function() {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+            return;
+        }
+        var now = new Date();
+        fn.data.select({ key : 'reminder' }).forEach(function(row) {
+            if (row.data.notified || !row.data.datetime || new Date(row.data.datetime) > now) {
+                return;
+            }
+            new Notification(row.data.title || 'Reminder');
+            fn.data.update({ key : 'reminder', id : row.id, data : Object.assign({}, row.data, { notified : true }) });
+            fn.log('devtool', 'reminder notified', row.data.title);
+        });
+    };
+
     fn.devtool._.seed = function() {
         fn.devtool._.ensureEssential();
         fn.devtool._.generateSampleData();
@@ -1776,6 +1799,9 @@
         if (isFirstRun) {
             fn.devtool._.generateSampleData();
         }
+
+        fn.devtool._.checkReminders();
+        setInterval(fn.devtool._.checkReminders, 15000);
 
         var button = fn.element.create({
             tagName : 'button',
