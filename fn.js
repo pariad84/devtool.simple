@@ -3,7 +3,6 @@
 
     fn.localStorage = {};
     fn.element = {};
-    fn.ui = {};
     fn.util = {};
     fn.data = {};
     fn.data._ = {};
@@ -73,7 +72,7 @@
         return el;
     };
 
-    fn.ui.draggable = function(opt = {}) {
+    fn.util.draggable = function(opt = {}) {
         var el = opt.el;
         var handle = opt.handle || el;
         var startX, startY, startLeft, startTop;
@@ -693,7 +692,7 @@
                 },
             });
 
-            fn.ui.draggable({
+            fn.util.draggable({
                 el : popup,
                 handle : header,
             });
@@ -975,7 +974,7 @@
             });
 
             opt.datas.forEach(function(data) {
-                var clickable = !!opt.resource && !opt.readonly;
+                var clickable = !!opt.resource.key && !opt.readonly;
                 var row = fn.element.create({
                     tagName : 'tr',
                     style : clickable ? { cursor : 'pointer' } : {},
@@ -1488,35 +1487,35 @@
                                     var caller = e.target.closest('.__popup');
                                     var show = function(title, text, isError) {
                                         fn.component.create({
-                                            name: 'popup',
-                                            title: title,
-                                            parent: document.body,
-                                            caller: caller,
-                                            render: function(opt) {
+                                            name : 'popup',
+                                            title : title,
+                                            parent : document.body,
+                                            caller : caller,
+                                            render : function(opt) {
                                                 fn.element.create({
-                                                    tagName: 'pre',
-                                                    parent: opt.el.content,
-                                                    style: Object.assign({ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '0' }, isError ? { color: '#e57373' } : {}),
-                                                    text: text,
+                                                    tagName : 'pre',
+                                                    parent : opt.el.content,
+                                                    style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', margin : '0' }, isError ? { color : '#e57373' } : {}),
+                                                    text : text,
                                                 });
                                             }
                                         });
                                     };
                                     var saveHistory = function(ok, body) {
-                                        fn.data.insert({ key: 'history', data: { requestId: data.id, time: new Date().toISOString(), ok: ok, body: body } });
-                                        var historyRows = fn.data.select({ key: 'history' }).filter(function(row) { return row.data.requestId === data.id; });
+                                        fn.data.insert({ key : 'history', data : { requestId : data.id, time : new Date().toISOString(), ok : ok, body : body } });
+                                        var historyRows = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; });
                                         if (historyRows.length > 20) {
-                                            fn.data.delete({ key: 'history', id: historyRows[0].id });
+                                            fn.data.delete({ key : 'history', id : historyRows[0].id });
                                         }
                                     };
-                                    var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type: data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
+                                    var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
                                     fn.ajax({
-                                        method: data.method,
-                                        url: data.url,
-                                        params: data.params ? JSON.parse(data.params) : undefined,
-                                        auth: auth,
-                                        headers: data.headers ? JSON.parse(data.headers) : undefined,
-                                        data: data.body ? JSON.parse(data.body) : undefined
+                                        method : data.method,
+                                        url : data.url,
+                                        params : data.params ? JSON.parse(data.params) : undefined,
+                                        auth : auth,
+                                        headers : data.headers ? JSON.parse(data.headers) : undefined,
+                                        data : data.body ? JSON.parse(data.body) : undefined
                                     }).then(function(result) {
                                         var text = JSON.stringify(result, null, 2);
                                         show('Response: ' + data.name, text, false);

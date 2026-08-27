@@ -48,8 +48,8 @@ alone. See README.md for what it does and how to install the bookmarklet.
   ("Refresh", "Close"), not the CRUD set — they're UI actions on one instance, not table
   operations.
 - **File order**: three IIFEs, each named for what it is, ordered most foundational to most
-  composed both across and within them. `frameworkCore`: `fn.log` → `fn.element.*` →
-  `fn.component.*` → `fn.localStorage.*` / `fn.data.*` → `fn.ajax`. `frameworkLayouts`
+  composed both across and within them. `frameworkCore`: `fn.log` → `fn.render` → `fn.element.*`
+  → `fn.util.*` → `fn.component.*` → `fn.localStorage.*` / `fn.data.*` → `fn.ajax`. `frameworkLayouts`
   (devtool-agnostic UI primitives): leaf button layouts → `popup-buttons` → `popup` → `form`
   → `list`. `devtoolExampleApp` (everything that actually knows about DevTool): `popup-setting-btn`
   → `menu` → `devtool` → `fn.devtool.*` (always last — `fn.devtool.start()` is the bookmarklet's
