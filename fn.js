@@ -421,6 +421,9 @@
                         if (form._.resource.key === '_resource') {
                             fn.component._.refreshRoot({ popup : popup });
                         }
+                        if (form._.resource.key === 'reminder' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+                            Notification.requestPermission();
+                        }
                         if (popup._.caller) {
                             popup._.caller.refresh();
                         }
@@ -1441,6 +1444,16 @@
                 ]),
             },
             {
+                name : 'Reminder',
+                key : 'reminder',
+                protected : true,
+                columns : JSON.stringify([
+                    { name : 'title', label : 'Title', list : { width : '200px' }, form : { type : 'text' } },
+                    { name : 'datetime', label : 'When', list : { width : '180px' }, form : { type : 'datetime-local' } },
+                    { name : 'notified', label : 'Status', list : { width : '90px', type : 'render', render : 'function(data) { return data.notified ? "Sent" : "Pending"; }' } },
+                ]),
+            },
+            {
                 name : 'Code',
                 key : 'code',
                 protected : true,
@@ -1744,6 +1757,21 @@
         });
     };
 
+    fn.devtool._.checkReminders = function() {
+        if (typeof Notification === 'undefined' || Notification.permission !== 'granted') {
+            return;
+        }
+        var now = new Date();
+        fn.data.select({ key : 'reminder' }).forEach(function(row) {
+            if (row.data.notified || !row.data.datetime || new Date(row.data.datetime) > now) {
+                return;
+            }
+            new Notification(row.data.title || 'Reminder');
+            fn.data.update({ key : 'reminder', id : row.id, data : Object.assign({}, row.data, { notified : true }) });
+            fn.log('devtool', 'reminder notified', row.data.title);
+        });
+    };
+
     fn.devtool._.seed = function() {
         fn.devtool._.ensureEssential();
         fn.devtool._.generateSampleData();
@@ -1771,6 +1799,9 @@
         if (isFirstRun) {
             fn.devtool._.generateSampleData();
         }
+
+        fn.devtool._.checkReminders();
+        setInterval(fn.devtool._.checkReminders, 15000);
 
         var button = fn.element.create({
             tagName : 'button',
