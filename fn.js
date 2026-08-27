@@ -1653,7 +1653,7 @@
         });
     };
 
-    fn.devtool._.startCapture = function() {
+    fn.devtool._.startInspectMode = function(onSelect) {
         var highlighted = null;
         var previousOutline = '';
 
@@ -1700,6 +1700,23 @@
                 fields.unshift(container);
             }
 
+            onSelect(fields);
+        }
+
+        function onKeydown(e) {
+            if (e.key === 'Escape') {
+                e.stopImmediatePropagation();
+                stop();
+            }
+        }
+
+        document.addEventListener('mousemove', onMouseMove, true);
+        document.addEventListener('click', onClick, true);
+        document.addEventListener('keydown', onKeydown, true);
+    };
+
+    fn.devtool._.startCapture = function() {
+        fn.devtool._.startInspectMode(function(fields) {
             var values = {};
             fields.forEach(function(input, index) {
                 var key = input.name || input.id || ('field' + index);
@@ -1714,18 +1731,32 @@
                 },
             });
             fn.log('devtool', 'capture', row.data.label, values);
-        }
+        });
+    };
 
-        function onKeydown(e) {
-            if (e.key === 'Escape') {
-                e.stopImmediatePropagation();
-                stop();
-            }
+    fn.devtool._.startPaste = function() {
+        var rows = fn.data.select({ key : 'capture' });
+        if (rows.length === 0) {
+            fn.log('devtool', 'paste', 'no captures saved yet');
+            return;
         }
+        var latest = rows[rows.length - 1];
+        var values = JSON.parse(latest.data.data);
 
-        document.addEventListener('mousemove', onMouseMove, true);
-        document.addEventListener('click', onClick, true);
-        document.addEventListener('keydown', onKeydown, true);
+        fn.devtool._.startInspectMode(function(fields) {
+            fields.forEach(function(input) {
+                var key = input.name || input.id;
+                if (!(key in values)) {
+                    return;
+                }
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    input.checked = !!values[key];
+                } else {
+                    input.value = values[key];
+                }
+            });
+            fn.log('devtool', 'paste', latest.data.label, values);
+        });
     };
 
     fn.devtool._.seed = function() {
@@ -1770,6 +1801,10 @@
             if (e.altKey && e.code === 'Digit1') {
                 e.preventDefault();
                 fn.devtool._.startCapture();
+            }
+            if (e.altKey && e.code === 'Digit2') {
+                e.preventDefault();
+                fn.devtool._.startPaste();
             }
             if (e.key === 'Escape') {
                 var popups = document.querySelectorAll('.__popup');
