@@ -1171,7 +1171,7 @@
                     });
                 },
                 render : function(opt) {
-                    var hiddenKeys = [ '_setting', '_resource', 'code' ];
+                    var hiddenKeys = [ '_setting', '_resource', 'code', 'history' ];
                     var datas = fn.data.select({ key : '_resource' }).filter(function(row) {
                         return hiddenKeys.indexOf(row.data.key) === -1;
                     }).map(function(row) {
