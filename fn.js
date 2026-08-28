@@ -1717,10 +1717,8 @@
 
     fn.devtool._.startCapture = function() {
         fn.devtool._.startInspectMode(function(fields) {
-            var values = {};
-            fields.forEach(function(input, index) {
-                var key = input.name || input.id || ('field' + index);
-                values[key] = (input.type === 'checkbox' || input.type === 'radio') ? input.checked : input.value;
+            var values = fields.map(function(input) {
+                return (input.type === 'checkbox' || input.type === 'radio') ? input.checked : input.value;
             });
 
             var row = fn.data.insert({
@@ -1744,15 +1742,14 @@
         var values = JSON.parse(latest.data.data);
 
         fn.devtool._.startInspectMode(function(fields) {
-            fields.forEach(function(input) {
-                var key = input.name || input.id;
-                if (!(key in values)) {
+            fields.forEach(function(input, index) {
+                if (index >= values.length) {
                     return;
                 }
                 if (input.type === 'checkbox' || input.type === 'radio') {
-                    input.checked = !!values[key];
+                    input.checked = !!values[index];
                 } else {
-                    input.value = values[key];
+                    input.value = values[index];
                 }
             });
             fn.log('devtool', 'paste', latest.data.label, values);
@@ -1794,7 +1791,7 @@
         setInterval(fn.devtool._.checkReminders, 15000);
 
         document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.code === 'Backquote') {
+            if (e.altKey && e.code === 'Backquote') {
                 e.preventDefault();
                 fn.devtool.open();
             }
