@@ -1408,14 +1408,14 @@
         });
     };
 
-    fn.devtool._.gridEditor = function(rowData) {
+    fn.devtool._.sheetEditor = function(rowData) {
         var initial;
         try {
             initial = JSON.parse(rowData.data);
         } catch (e) {
             initial = undefined;
         }
-        var grid = (Array.isArray(initial) && initial.length) ? initial : [ [ '', '', '' ], [ '', '', '' ], [ '', '', '' ] ];
+        var sheet = (Array.isArray(initial) && initial.length) ? initial : [ [ '', '', '' ], [ '', '', '' ], [ '', '', '' ] ];
         var selection = null;
         var dragging = false;
 
@@ -1440,12 +1440,12 @@
         }
 
         function sync() {
-            container.value = JSON.stringify(grid);
+            container.value = JSON.stringify(sheet);
         }
 
         function render() {
             Array.from(table.children).forEach(function(child) { child.remove(); });
-            grid.forEach(function(row, r) {
+            sheet.forEach(function(row, r) {
                 var tr = fn.element.create({ tagName : 'tr', parent : table });
                 row.forEach(function(value, c) {
                     var td = fn.element.create({
@@ -1461,7 +1461,7 @@
                     });
                     cellInput.value = value;
                     cellInput.addEventListener('input', function() {
-                        grid[r][c] = cellInput.value;
+                        sheet[r][c] = cellInput.value;
                         sync();
                     });
                     cellInput.addEventListener('mousedown', function() {
@@ -1496,7 +1496,7 @@
             for (var r = n.r1; r <= n.r2; r++) {
                 var cells = [];
                 for (var c = n.c1; c <= n.c2; c++) {
-                    cells.push(grid[r][c] || '');
+                    cells.push(sheet[r][c] || '');
                 }
                 lines.push(cells.join('\t'));
             }
@@ -1518,10 +1518,10 @@
 
             var neededRows = n.r1 + pasted.length;
             var neededCols = n.c1 + Math.max.apply(null, pasted.map(function(row) { return row.length; }));
-            while (grid.length < neededRows) {
-                grid.push(new Array(grid[0] ? grid[0].length : neededCols).fill(''));
+            while (sheet.length < neededRows) {
+                sheet.push(new Array(sheet[0] ? sheet[0].length : neededCols).fill(''));
             }
-            grid.forEach(function(row) {
+            sheet.forEach(function(row) {
                 while (row.length < neededCols) {
                     row.push('');
                 }
@@ -1529,7 +1529,7 @@
 
             pasted.forEach(function(row, ri) {
                 row.forEach(function(value, ci) {
-                    grid[n.r1 + ri][n.c1 + ci] = value;
+                    sheet[n.r1 + ri][n.c1 + ci] = value;
                 });
             });
 
@@ -1554,12 +1554,12 @@
                 ]),
             },
             {
-                name : 'Grid',
-                key : 'grid',
+                name : 'Sheet',
+                key : 'sheet',
                 protected : true,
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
-                    { name : 'data', label : 'Grid', form : { type : 'render', render : 'function(data) { return fn.devtool._.gridEditor(data); }' } },
+                    { name : 'data', label : 'Sheet', form : { type : 'render', render : 'function(data) { return fn.devtool._.sheetEditor(data); }' } },
                 ]),
             },
             {
