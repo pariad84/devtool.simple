@@ -1408,6 +1408,140 @@
         });
     };
 
+    fn.devtool._.gridEditor = function(rowData) {
+        var initial;
+        try {
+            initial = JSON.parse(rowData.data);
+        } catch (e) {
+            initial = undefined;
+        }
+        var grid = (Array.isArray(initial) && initial.length) ? initial : [ [ '', '', '' ], [ '', '', '' ], [ '', '', '' ] ];
+        var selection = null;
+        var dragging = false;
+
+        var container = fn.element.create({ tagName : 'div', style : { overflow : 'auto', maxWidth : '100%' } });
+        var table = fn.element.create({ tagName : 'table', parent : container, style : { borderCollapse : 'collapse' } });
+
+        function normalize(sel) {
+            return {
+                r1 : Math.min(sel.r1, sel.r2),
+                r2 : Math.max(sel.r1, sel.r2),
+                c1 : Math.min(sel.c1, sel.c2),
+                c2 : Math.max(sel.c1, sel.c2),
+            };
+        }
+
+        function inSelection(r, c) {
+            if (!selection) {
+                return false;
+            }
+            var n = normalize(selection);
+            return r >= n.r1 && r <= n.r2 && c >= n.c1 && c <= n.c2;
+        }
+
+        function sync() {
+            container.value = JSON.stringify(grid);
+        }
+
+        function render() {
+            Array.from(table.children).forEach(function(child) { child.remove(); });
+            grid.forEach(function(row, r) {
+                var tr = fn.element.create({ tagName : 'tr', parent : table });
+                row.forEach(function(value, c) {
+                    var td = fn.element.create({
+                        tagName : 'td',
+                        parent : tr,
+                        style : { border : '1px solid #3a3f4b', padding : '0', background : inSelection(r, c) ? '#2b3f5c' : 'transparent' },
+                    });
+                    var cellInput = fn.element.create({
+                        tagName : 'input',
+                        attribute : { type : 'text' },
+                        style : { border : 'none', background : 'transparent', color : '#e8eaed', width : '80px', padding : '4px 6px', outline : 'none' },
+                        parent : td,
+                    });
+                    cellInput.value = value;
+                    cellInput.addEventListener('input', function() {
+                        grid[r][c] = cellInput.value;
+                        sync();
+                    });
+                    cellInput.addEventListener('mousedown', function() {
+                        dragging = true;
+                        selection = { r1 : r, c1 : c, r2 : r, c2 : c };
+                        render();
+                        cellInput.focus();
+                    });
+                    cellInput.addEventListener('mouseenter', function() {
+                        if (dragging && selection) {
+                            selection.r2 = r;
+                            selection.c2 = c;
+                            render();
+                            cellInput.focus();
+                        }
+                    });
+                });
+            });
+            sync();
+        }
+
+        document.addEventListener('mouseup', function() {
+            dragging = false;
+        });
+
+        container.addEventListener('copy', function(e) {
+            if (!selection) {
+                return;
+            }
+            var n = normalize(selection);
+            var lines = [];
+            for (var r = n.r1; r <= n.r2; r++) {
+                var cells = [];
+                for (var c = n.c1; c <= n.c2; c++) {
+                    cells.push(grid[r][c] || '');
+                }
+                lines.push(cells.join('\t'));
+            }
+            e.clipboardData.setData('text/plain', lines.join('\n'));
+            e.preventDefault();
+        });
+
+        container.addEventListener('paste', function(e) {
+            if (!selection) {
+                return;
+            }
+            var n = normalize(selection);
+            var text = e.clipboardData.getData('text/plain');
+            var rows = text.replace(/\r/g, '').split('\n');
+            if (rows[rows.length - 1] === '') {
+                rows.pop();
+            }
+            var pasted = rows.map(function(row) { return row.split('\t'); });
+
+            var neededRows = n.r1 + pasted.length;
+            var neededCols = n.c1 + Math.max.apply(null, pasted.map(function(row) { return row.length; }));
+            while (grid.length < neededRows) {
+                grid.push(new Array(grid[0] ? grid[0].length : neededCols).fill(''));
+            }
+            grid.forEach(function(row) {
+                while (row.length < neededCols) {
+                    row.push('');
+                }
+            });
+
+            pasted.forEach(function(row, ri) {
+                row.forEach(function(value, ci) {
+                    grid[n.r1 + ri][n.c1 + ci] = value;
+                });
+            });
+
+            selection = { r1 : n.r1, c1 : n.c1, r2 : n.r1 + pasted.length - 1, c2 : n.c1 + pasted[0].length - 1 };
+            render();
+            e.preventDefault();
+        });
+
+        render();
+        return container;
+    };
+
     fn.devtool._.resourceDefinitions = function() {
         return [
             {
@@ -1417,6 +1551,15 @@
                 columns : JSON.stringify([
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'content', label : 'Content', list : { width : 'auto' }, form : { type : 'textarea' } },
+                ]),
+            },
+            {
+                name : 'Grid',
+                key : 'grid',
+                protected : true,
+                columns : JSON.stringify([
+                    { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
+                    { name : 'data', label : 'Grid', form : { type : 'render', render : 'function(data) { return fn.devtool._.gridEditor(data); }' } },
                 ]),
             },
             {
