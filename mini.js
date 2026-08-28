@@ -72,19 +72,19 @@
     // 3. fn.data.select/insert/update/delete -- CRUD abstraction. Every layout below only ever
     // talks to these four functions, so swapping localStorage for a real backend later only
     // means rewriting this block, not any layout.
-    fn.data._.readTable = function(opt = {}) {
+    fn.data._.read = function(opt = {}) {
         var raw = typeof(Storage) !== "undefined" ? localStorage.getItem(opt.key) : null;
         return raw ? JSON.parse(raw) : [];
     };
 
-    fn.data._.writeTable = function(opt = {}) {
+    fn.data._.write = function(opt = {}) {
         if (typeof(Storage) !== "undefined") {
             localStorage.setItem(opt.key, JSON.stringify(opt.rows));
         }
     };
 
     fn.data.select = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         if (opt.id !== undefined) {
             var row = rows.find(function(row) { return row.id === opt.id; });
             fn.log('data', 'select', opt.key, 'id=' + opt.id, row);
@@ -95,30 +95,30 @@
     };
 
     fn.data.insert = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var nextId = rows.reduce(function(max, row) { return Math.max(max, row.id); }, 0) + 1;
         var row = { id : nextId, data : opt.data };
         rows.push(row);
-        fn.data._.writeTable({ key : opt.key, rows : rows });
+        fn.data._.write({ key : opt.key, rows : rows });
         fn.log('data', 'insert', opt.key, row);
         return row;
     };
 
     fn.data.update = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var row = rows.find(function(r) { return r.id === opt.id; });
         if (row) {
             row.data = opt.data;
-            fn.data._.writeTable({ key : opt.key, rows : rows });
+            fn.data._.write({ key : opt.key, rows : rows });
         }
         fn.log('data', 'update', opt.key, 'id=' + opt.id, row);
         return row;
     };
 
     fn.data.delete = function(opt = {}) {
-        var rows = fn.data._.readTable({ key : opt.key });
+        var rows = fn.data._.read({ key : opt.key });
         var row = rows.find(function(row) { return row.id === opt.id; });
-        fn.data._.writeTable({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
+        fn.data._.write({ key : opt.key, rows : rows.filter(function(row) { return row.id !== opt.id; }) });
         fn.log('data', 'delete', opt.key, 'id=' + opt.id);
         return row;
     };
@@ -207,10 +207,24 @@
             popup._.resource = opt.resource;
             popup._.data = opt.data;
             popup._.caller = opt.caller;
+            popup._.render = opt.render;
 
-            if (opt.render) {
-                opt.render(popup);
-            }
+            var render = function() {
+                if (popup._.render) {
+                    popup._.render(popup);
+                }
+            };
+
+            popup.refresh = function() {
+                Array.from(popup.content.children).forEach(function(child) { child.remove(); });
+                render();
+            };
+
+            popup.close = function() {
+                popup.remove();
+            };
+
+            render();
 
             document.body.appendChild(popup);
             return popup;
@@ -224,7 +238,7 @@
                 tagName : 'button',
                 attribute : { type : 'button', title : 'Close' },
                 text : '✕',
-                event : { click : function(e) { e.target.closest('.__popup').remove(); } },
+                event : { click : function(e) { e.target.closest('.__popup').close(); } },
             });
         }
     });
@@ -249,7 +263,7 @@
                         if (popup._.caller) {
                             popup._.caller.refresh();
                         }
-                        popup.remove();
+                        popup.close();
                     }
                 },
             });
@@ -431,10 +445,6 @@ if (typeof document !== 'undefined') {
                     datas : itemDatas(),
                     parent : popupEl.content,
                 });
-                popupEl.refresh = function() {
-                    Array.from(popupEl.content.children).forEach(function(c) { c.remove(); });
-                    fn.component.create({ name : 'list', resource : itemResource, datas : itemDatas(), parent : popupEl.content });
-                };
             },
         });
 
