@@ -1653,6 +1653,22 @@
         });
     };
 
+    fn.devtool._.isField = function(el) {
+        return /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName);
+    };
+
+    fn.devtool._.getFieldValue = function(input) {
+        return (input.type === 'checkbox' || input.type === 'radio') ? input.checked : input.value;
+    };
+
+    fn.devtool._.setFieldValue = function(input, value) {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+            input.checked = !!value;
+        } else {
+            input.value = value;
+        }
+    };
+
     fn.devtool._.startInspectMode = function(onSelect) {
         var highlighted = null;
         var previousOutline = '';
@@ -1692,11 +1708,11 @@
             stop();
 
             var container = el;
-            if (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) {
+            if (fn.devtool._.isField(el)) {
                 container = el.closest('form') || el.parentElement || el;
             }
             var fields = Array.from(container.querySelectorAll('input, textarea, select'));
-            if (/^(INPUT|TEXTAREA|SELECT)$/.test(container.tagName)) {
+            if (fn.devtool._.isField(container)) {
                 fields.unshift(container);
             }
 
@@ -1717,9 +1733,7 @@
 
     fn.devtool._.startCapture = function() {
         fn.devtool._.startInspectMode(function(fields) {
-            var values = fields.map(function(input) {
-                return (input.type === 'checkbox' || input.type === 'radio') ? input.checked : input.value;
-            });
+            var values = fields.map(fn.devtool._.getFieldValue);
 
             var row = fn.data.insert({
                 key : 'capture',
@@ -1746,11 +1760,7 @@
                 if (index >= values.length) {
                     return;
                 }
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    input.checked = !!values[index];
-                } else {
-                    input.value = values[index];
-                }
+                fn.devtool._.setFieldValue(input, values[index]);
             });
             fn.log('devtool', 'paste', latest.data.label, values);
         });
