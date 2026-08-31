@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>devtool.simple test page</title>
+<style>
+    body { font: 14px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; }
+    fieldset { margin-bottom: 24px; }
+    label { display: block; margin: 8px 0 2px; }
+    input, select, textarea { width: 100%; box-sizing: border-box; padding: 4px; }
+    .decoy { position: fixed; top: 8px; right: 8px; z-index: 999999; background: #333; color: #fff; padding: 4px 8px; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<h1>devtool.simple test page</h1>
+<p>
+    Loads <code>fn.js</code> directly (no bookmarklet needed) — the gear button
+    should appear bottom-right. Press <kbd>Alt+`</kbd> or click it to open DevTool.
+</p>
+
+<div class="decoy">decoy: z-index 999999</div>
+
+<fieldset>
+    <legend>Form A (source for Alt+1 Capture)</legend>
+    <label>Name <input type="text" name="name" value="Ada Lovelace"></label>
+    <label>Bio <textarea name="bio" rows="3">First programmer.</textarea></label>
+    <label>Role
+        <select name="role">
+            <option value="dev" selected>Developer</option>
+            <option value="pm">PM</option>
+            <option value="design">Design</option>
+        </select>
+    </label>
+    <label><input type="checkbox" name="active" checked style="width:auto"> Active</label>
+</fieldset>
+
+<fieldset>
+    <legend>Form B (target for Alt+2 Paste)</legend>
+    <label>Name <input type="text" name="name" value=""></label>
+    <label>Bio <textarea name="bio" rows="3"></textarea></label>
+    <label>Role
+        <select name="role">
+            <option value="dev">Developer</option>
+            <option value="pm">PM</option>
+            <option value="design" selected>Design</option>
+        </select>
+    </label>
+    <label><input type="checkbox" name="active" style="width:auto"> Active</label>
+</fieldset>
+
+<p>Standalone field, not inside a &lt;form&gt; or &lt;fieldset&gt;: <input type="text" name="standalone" value="widen-to-parent test"></p>
+
+<script src="fn.js"></script>
+</body>
+</html>
