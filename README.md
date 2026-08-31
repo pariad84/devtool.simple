@@ -4,7 +4,7 @@ A single-file bookmarklet devtool (`fn.js`) that adds a floating popup UI to any
 
 ## Setup
 
-Serve `fn.js` from a local server, e.g. with a static file server at `http://127.0.0.1:5500/`.
+Serve `fn.js` from a local server, e.g. with a static file server at `http://127.0.0.1:5500/`. `index.html` is a small test page that loads `fn.js` directly (no bookmarklet needed) and has two sample forms for exercising Capture/Paste — open it from that same server to try the devtool locally.
 
 ## Install the bookmarklet
 
