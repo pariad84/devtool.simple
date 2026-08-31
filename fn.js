@@ -1443,6 +1443,14 @@
             container.value = JSON.stringify(sheet);
         }
 
+        function paintSelection() {
+            Array.from(table.rows).forEach(function(tr, r) {
+                Array.from(tr.cells).forEach(function(td, c) {
+                    td.style.background = inSelection(r, c) ? '#2b3f5c' : 'transparent';
+                });
+            });
+        }
+
         function render() {
             Array.from(table.children).forEach(function(child) { child.remove(); });
             sheet.forEach(function(row, r) {
@@ -1467,14 +1475,13 @@
                     cellInput.addEventListener('mousedown', function() {
                         dragging = true;
                         selection = { r1 : r, c1 : c, r2 : r, c2 : c };
-                        render();
-                        cellInput.focus();
+                        paintSelection();
                     });
                     cellInput.addEventListener('mouseenter', function() {
                         if (dragging && selection) {
                             selection.r2 = r;
                             selection.c2 = c;
-                            render();
+                            paintSelection();
                             cellInput.focus();
                         }
                     });
