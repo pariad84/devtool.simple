@@ -1000,12 +1000,10 @@
                                         name : 'popup-save-btn',
                                         parent : opt.el.buttons,
                                     });
-                                    if (!data.protected) {
-                                        fn.component.create({
-                                            name : 'popup-delete-btn',
-                                            parent : opt.el.buttons,
-                                        });
-                                    }
+                                    fn.component.create({
+                                        name : 'popup-delete-btn',
+                                        parent : opt.el.buttons,
+                                    });
                                 },
                                 render : function(opt) {
                                     var row = fn.data.select({ key : resource.key, id : data.id });
@@ -1171,16 +1169,24 @@
                     });
                 },
                 render : function(opt) {
-                    var hiddenKeys = [ '_setting', '_resource', 'code', 'history' ];
-                    var datas = fn.data.select({ key : '_resource' }).filter(function(row) {
-                        return hiddenKeys.indexOf(row.data.key) === -1;
-                    }).map(function(row) {
+                    var hiddenKeys = [ 'code', 'history' ];
+                    var builtinDatas = fn.devtool._.builtinResources().filter(function(def) {
+                        return hiddenKeys.indexOf(def.key) === -1;
+                    }).map(function(def) {
+                        return {
+                            id : def.key,
+                            name : def.name,
+                            resource : { key : def.key, columns : def.columns },
+                        };
+                    });
+                    var customDatas = fn.data.select({ key : '_resource' }).map(function(row) {
                         return {
                             id : row.id,
                             name : row.data.name,
                             resource : fn.data._.toResource({ row : row }),
                         };
                     });
+                    var datas = builtinDatas.concat(customDatas);
 
                     fn.component.create({
                         name : 'menu',
@@ -1296,14 +1302,7 @@
                                 click : function(e) {
                                     e.stopPropagation();
                                     var backup = {};
-                                    var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
-                                    if (keys.indexOf('_resource') === -1) {
-                                        keys.push('_resource');
-                                    }
-                                    if (keys.indexOf('_setting') === -1) {
-                                        keys.push('_setting');
-                                    }
-                                    keys.forEach(function(key) {
+                                    fn.devtool._.allDataKeys().forEach(function(key) {
                                         backup[key] = fn.data.select({ key : key });
                                     });
                                     fn.util.download({
@@ -1383,6 +1382,10 @@
                 ],
             };
             return { resource : resource, name : 'Setting' };
+        }
+        var builtin = fn.devtool._.builtinResources().find(function(def) { return def.key === key; });
+        if (builtin) {
+            return { resource : { key : builtin.key, columns : builtin.columns }, name : builtin.name };
         }
         var row = fn.data.select({ key : '_resource' }).find(function(r) { return r.data.key === key; });
         return { resource : fn.data._.toResource({ row : row }), name : row.data.name };
@@ -1634,31 +1637,28 @@
         return container;
     };
 
-    fn.devtool._.resourceDefinitions = function() {
+    fn.devtool._.builtinResources = function() {
         return [
             {
                 name : 'Memo',
                 key : 'memo',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'content', label : 'Content', list : { width : 'auto' }, form : { type : 'textarea' } },
-                ]),
+                ],
             },
             {
                 name : 'Sheet',
                 key : 'sheet',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'data', label : 'Sheet', form : { type : 'render', render : 'function(data) { return fn.devtool._.sheetEditor(data); }' } },
-                ]),
+                ],
             },
             {
                 name : 'Bookmark',
                 key : 'bookmark',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
@@ -1675,42 +1675,38 @@
                             }
                         });
                     }` } },
-                ]),
+                ],
             },
             {
                 name : 'Reminder',
                 key : 'reminder',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'title', label : 'Title', list : { width : '200px' }, form : { type : 'text' } },
                     { name : 'datetime', label : 'When', list : { width : '180px' }, form : { type : 'datetime-local' } },
                     { name : 'notified', label : 'Status', list : { width : '90px', type : 'render', render : 'function(data) { return data.notified ? "Sent" : "Pending"; }' } },
-                ]),
+                ],
             },
             {
                 name : 'Capture',
                 key : 'capture',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'label', label : 'Label', list : { width : '260px' }, form : { type : 'text' } },
                     { name : 'data', label : 'Data (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
-                ]),
+                ],
             },
             {
                 name : 'Code',
                 key : 'code',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'group', label : 'Group', list : { width : '140px' }, form : { type : 'text' } },
                     { name : 'code', label : 'Code', list : { width : '120px' }, form : { type : 'text' } },
                     { name : 'name', label : 'Name', list : { width : 'auto' }, form : { type : 'text' } },
-                ]),
+                ],
             },
             {
                 name : 'Request',
                 key : 'request',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'method', label : 'Method', list : { width : '90px' }, form : { type : 'select', codeGroup : 'method' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
@@ -1807,18 +1803,17 @@
                             }
                         });
                     }` } },
-                ]),
+                ],
             },
             {
                 name : 'History',
                 key : 'history',
-                protected : true,
-                columns : JSON.stringify([
+                columns : [
                     { name : 'requestId', label : 'Request', list : { width : '160px' }, form : { type : 'select', resource : { key : 'request', label : 'name' } } },
                     { name : 'time', label : 'Time', list : { width : '180px' }, form : { type : 'text' } },
                     { name : 'ok', label : 'OK', list : { width : '60px' }, form : { type : 'text' } },
                     { name : 'body', label : 'Body', list : { width : 'auto' }, form : { type : 'textarea' } },
-                ]),
+                ],
             },
         ];
     };
@@ -1850,13 +1845,6 @@
     };
 
     fn.devtool._.ensureEssential = function() {
-        var existingKeys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
-        fn.devtool._.resourceDefinitions().forEach(function(definition) {
-            if (existingKeys.indexOf(definition.key) === -1) {
-                fn.data.insert({ key : '_resource', data : definition });
-            }
-        });
-
         if (fn.data.select({ key : '_setting' }).length === 0) {
             fn.data.insert({ key : '_setting', data : { scale : '1', opacity : '1' } });
         }
@@ -2001,20 +1989,20 @@
         });
     };
 
+    fn.devtool._.allDataKeys = function() {
+        var keys = fn.devtool._.builtinResources().map(function(def) { return def.key; });
+        fn.data.select({ key : '_resource' }).forEach(function(row) { keys.push(row.data.key); });
+        keys.push('_resource', '_setting');
+        return keys;
+    };
+
     fn.devtool._.seed = function() {
         fn.devtool._.ensureEssential();
         fn.devtool._.generateSampleData();
     };
 
     fn.devtool._.reset = function() {
-        var keys = fn.data.select({ key : '_resource' }).map(function(row) { return row.data.key; });
-        if (keys.indexOf('_resource') === -1) {
-            keys.push('_resource');
-        }
-        if (keys.indexOf('_setting') === -1) {
-            keys.push('_setting');
-        }
-        keys.forEach(function(key) {
+        fn.devtool._.allDataKeys().forEach(function(key) {
             fn.localStorage.remove({ key : key });
         });
         fn.devtool._.seed();
@@ -2026,7 +2014,7 @@
         }
         fn.devtool.data.started = true;
 
-        var isFirstRun = fn.data.select({ key : '_resource' }).length === 0;
+        var isFirstRun = fn.data.select({ key : '_setting' }).length === 0;
         fn.devtool._.ensureEssential();
         if (isFirstRun) {
             fn.devtool._.generateSampleData();
