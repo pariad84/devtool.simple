@@ -1451,6 +1451,87 @@
             });
         }
 
+        function insertRow(at) {
+            sheet.splice(at, 0, new Array(sheet[0].length).fill(''));
+            selection = null;
+            render();
+        }
+
+        function deleteRow(at) {
+            if (sheet.length <= 1) {
+                return;
+            }
+            sheet.splice(at, 1);
+            selection = null;
+            render();
+        }
+
+        function insertColumn(at) {
+            sheet.forEach(function(row) { row.splice(at, 0, ''); });
+            selection = null;
+            render();
+        }
+
+        function deleteColumn(at) {
+            if (sheet[0].length <= 1) {
+                return;
+            }
+            sheet.forEach(function(row) { row.splice(at, 1); });
+            selection = null;
+            render();
+        }
+
+        var gridMenu = null;
+
+        function closeGridMenu() {
+            if (gridMenu) {
+                gridMenu.remove();
+                gridMenu = null;
+            }
+        }
+
+        document.addEventListener('mousedown', function(e) {
+            if (gridMenu && !gridMenu.contains(e.target)) {
+                closeGridMenu();
+            }
+        });
+
+        function openGridMenu(opt) {
+            closeGridMenu();
+            gridMenu = fn.element.create({
+                tagName : 'div',
+                parent : document.body,
+                style : {
+                    position : 'fixed',
+                    top : opt.y + 'px',
+                    left : opt.x + 'px',
+                    minWidth : '140px',
+                    background : '#1e2128',
+                    color : '#e8eaed',
+                    border : '1px solid #3a3f4b',
+                    borderRadius : '4px',
+                    boxShadow : '0 4px 12px rgba(0, 0, 0, 0.45)',
+                    font : "13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                    zIndex : fn.component._.zIndexAbove() + 1,
+                },
+            });
+            [
+                { text : 'Add row', action : function() { insertRow(opt.r + 1); } },
+                { text : 'Delete row', action : function() { deleteRow(opt.r); } },
+                { text : 'Add column', action : function() { insertColumn(opt.c + 1); } },
+                { text : 'Delete column', action : function() { deleteColumn(opt.c); } },
+            ].forEach(function(item) {
+                fn.element.create({
+                    tagName : 'div',
+                    parent : gridMenu,
+                    text : item.text,
+                    style : { padding : '6px 12px', cursor : 'pointer' },
+                    hoverStyle : { background : '#3a3f4b' },
+                    event : { click : function() { item.action(); closeGridMenu(); } },
+                });
+            });
+        }
+
         function render() {
             Array.from(table.children).forEach(function(child) { child.remove(); });
             sheet.forEach(function(row, r) {
@@ -1484,6 +1565,10 @@
                             paintSelection();
                             cellInput.focus();
                         }
+                    });
+                    cellInput.addEventListener('contextmenu', function(e) {
+                        e.preventDefault();
+                        openGridMenu({ x : e.clientX, y : e.clientY, r : r, c : c });
                     });
                 });
             });
