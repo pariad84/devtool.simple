@@ -1748,22 +1748,25 @@
                                             fn.data.delete({ key : 'history', id : historyRows[0].id });
                                         }
                                     };
-                                    var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
-                                    fn.ajax({
-                                        method : data.method,
-                                        url : data.url,
-                                        params : data.params ? JSON.parse(data.params) : undefined,
-                                        auth : auth,
-                                        headers : data.headers ? JSON.parse(data.headers) : undefined,
-                                        data : data.body ? JSON.parse(data.body) : undefined
-                                    }).then(function(result) {
-                                        var text = JSON.stringify(result, null, 2);
-                                        show('Response: ' + data.name, text, false);
-                                        saveHistory(true, text);
-                                    }).catch(function(err) {
-                                        show('Error: ' + data.name, err.message, true);
-                                        saveHistory(false, err.message);
-                                    });
+                                    (async function() {
+                                        try {
+                                            var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
+                                            var result = await fn.ajax({
+                                                method : data.method,
+                                                url : data.url,
+                                                params : data.params ? JSON.parse(data.params) : undefined,
+                                                auth : auth,
+                                                headers : data.headers ? JSON.parse(data.headers) : undefined,
+                                                data : data.body ? JSON.parse(data.body) : undefined
+                                            });
+                                            var text = JSON.stringify(result, null, 2);
+                                            show('Response: ' + data.name, text, false);
+                                            saveHistory(true, text);
+                                        } catch (err) {
+                                            show('Error: ' + data.name, err.message, true);
+                                            saveHistory(false, err.message);
+                                        }
+                                    })();
                                 }
                             }
                         });
