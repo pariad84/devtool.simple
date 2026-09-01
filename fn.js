@@ -355,6 +355,19 @@
     };
 
     fn.component.layout.set({
+        name : 'action-btn',
+        layout : function(opt = {}) {
+            return fn.element.create({
+                tagName : 'button',
+                attribute : { type : 'button' },
+                text : opt.text,
+                style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : opt.padding || '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                event : opt.event,
+            });
+        }
+    });
+
+    fn.component.layout.set({
         name : 'popup-create-btn',
         layout : function(opt = {}) {
             return fn.element.create({
@@ -1274,11 +1287,9 @@
                     { name : 'manageResources', label : 'Resources', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", text: "Manage resources" }); }' } },
                     { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "code", text: "Manage codes" }); }' } },
                     { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Generate sample data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1293,11 +1304,9 @@
                         });
                     }` } },
                     { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Export data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1315,11 +1324,9 @@
                         });
                     }` } },
                     { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Import data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1357,11 +1364,9 @@
                         });
                     }` } },
                     { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Reset all data',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1392,11 +1397,9 @@
     };
 
     fn.devtool._.manageResourceButton = function(opt) {
-        return fn.element.create({
-            tagName : 'button',
-            attribute : { type : 'button' },
+        return fn.component.create({
+            name : 'action-btn',
             text : opt.text,
-            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '6px 14px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
             event : {
                 click : function(e) {
                     e.stopPropagation();
@@ -1662,11 +1665,10 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
                     { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            padding : '4px 10px',
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1716,11 +1718,10 @@
                     { name : 'headers', label : 'Headers (JSON)', form : { type : 'textarea' } },
                     { name : 'body', label : 'Body (JSON)', form : { type : 'textarea' } },
                     { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'Run',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            padding : '4px 10px',
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
@@ -1772,11 +1773,10 @@
                         });
                     }` } },
                     { name : 'history', label : 'History', list : { width : '80px', type : 'render', render : `function(data) {
-                        return fn.element.create({
-                            tagName : 'button',
-                            attribute : { type : 'button' },
+                        return fn.component.create({
+                            name : 'action-btn',
                             text : 'History',
-                            style : Object.assign({}, fn.component.layout._.style.actionButton, { padding : '4px 10px', border : '1px solid #3a3f4b', background : '#2b2f38' }),
+                            padding : '4px 10px',
                             event : {
                                 click : function(e) {
                                     e.stopPropagation();
