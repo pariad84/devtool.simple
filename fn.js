@@ -802,6 +802,80 @@
         };
     };
 
+    fn.component._.jsonToggle = function(opt = {}) {
+        var wrapper = fn.element.create({ tagName : 'div', parent : opt.parent });
+
+        var textarea = fn.element.create({
+            tagName : 'textarea',
+            attribute : opt.name ? { name : opt.name } : {},
+            style : Object.assign({}, fn.component.layout._.style.input, { resize : 'vertical', minHeight : opt.height || '60px' }),
+            parent : wrapper,
+        });
+        textarea.value = opt.value !== undefined ? opt.value : '';
+
+        var toggleText = opt.type === 'jsonarray' ? 'View as List' : 'View as Form';
+        var structured = fn.element.create({ tagName : 'div', style : { display : 'none', marginTop : '6px' }, parent : wrapper });
+
+        fn.component.create({
+            name : 'action-btn',
+            text : toggleText,
+            padding : '4px 10px',
+            parent : wrapper,
+            event : {
+                click : function(e) {
+                    e.stopPropagation();
+                    if (structured.style.display !== 'none') {
+                        structured.style.display = 'none';
+                        textarea.style.display = '';
+                        e.target.textContent = toggleText;
+                        return;
+                    }
+                    var parsed;
+                    try {
+                        parsed = JSON.parse(textarea.value);
+                    } catch (err) {
+                        window.alert('Invalid JSON: ' + err.message);
+                        return;
+                    }
+                    Array.from(structured.children).forEach(function(child) { child.remove(); });
+                    if (Array.isArray(parsed)) {
+                        var preview = fn.component._.jsonPreview(parsed);
+                        fn.component.create({
+                            name : 'list',
+                            resource : { key : '', columns : preview.columns },
+                            datas : preview.datas,
+                            readonly : true,
+                            parent : structured,
+                        });
+                    } else {
+                        var objColumns = Object.keys(parsed).map(function(key) {
+                            return { name : key, label : key, form : { type : 'text' } };
+                        });
+                        var objData = {};
+                        Object.keys(parsed).forEach(function(key) {
+                            var v = parsed[key];
+                            objData[key] = (v && typeof v === 'object') ? JSON.stringify(v) : v;
+                        });
+                        var nestedForm = fn.component.create({
+                            name : 'form',
+                            resource : { key : '', columns : objColumns },
+                            data : objData,
+                            parent : structured,
+                        });
+                        Object.keys(nestedForm._.inputs).forEach(function(key) {
+                            nestedForm._.inputs[key].setAttribute('readonly', 'readonly');
+                        });
+                    }
+                    structured.style.display = '';
+                    textarea.style.display = 'none';
+                    e.target.textContent = 'View as JSON';
+                }
+            },
+        });
+
+        return textarea;
+    };
+
     fn.component.layout.set({
         name : 'form',
         layout : function(opt = {resource : {key : '', columns : []}, data : {}}) {
@@ -883,6 +957,13 @@
                                 parent : input,
                             });
                         });
+                    } else if (column.form.type === 'jsonobject' || column.form.type === 'jsonarray') {
+                        input = fn.component._.jsonToggle({
+                            name : column.name,
+                            type : column.form.type,
+                            height : column.form.height,
+                            parent : valueCell,
+                        });
                     } else {
                         var isTextarea = column.form.type === 'textarea';
                         if (isTextarea) {
@@ -896,25 +977,6 @@
                             style : inputStyle,
                             parent : valueCell,
                         });
-
-                        if (isTextarea) {
-                            var parsed;
-                            try {
-                                parsed = JSON.parse(opt.data[column.name]);
-                            } catch (e) {
-                                parsed = undefined;
-                            }
-                            if (parsed !== undefined && parsed !== null && typeof parsed === 'object') {
-                                var preview = fn.component._.jsonPreview(parsed);
-                                fn.component.create({
-                                    name : 'list',
-                                    resource : { key : '', columns : preview.columns },
-                                    datas : preview.datas,
-                                    readonly : true,
-                                    parent : valueCell,
-                                });
-                            }
-                        }
                     }
                 }
 
@@ -1056,6 +1118,33 @@
                         } else {
                             cell.textContent = rendered;
                         }
+                    } else if (column.list.type === 'jsonobject' || column.list.type === 'jsonarray') {
+                        fn.component.create({
+                            name : 'action-btn',
+                            text : 'View',
+                            padding : '2px 8px',
+                            parent : cell,
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    fn.component.create({
+                                        name : 'popup',
+                                        title : column.label || column.name,
+                                        parent : document.body,
+                                        caller : e.target.closest('.__popup'),
+                                        render : function(popupOpt) {
+                                            fn.component._.jsonToggle({
+                                                name : column.name,
+                                                type : column.list.type,
+                                                value : data[column.name],
+                                                height : '160px',
+                                                parent : popupOpt.el.content,
+                                            });
+                                        },
+                                    });
+                                }
+                            }
+                        });
                     } else if (column.form && column.form.resource && data[column.name] !== undefined) {
                         var referencedRow = fn.data.select({ key : column.form.resource.key, id : data[column.name] });
                         cell.textContent = referencedRow ? referencedRow.data[column.form.resource.label] : data[column.name];
@@ -1693,7 +1782,7 @@
                 key : 'capture',
                 columns : [
                     { name : 'label', label : 'Label', list : { width : '260px' }, form : { type : 'text' } },
-                    { name : 'data', label : 'Data (JSON)', list : { width : 'auto' }, form : { type : 'textarea' } },
+                    { name : 'data', label : 'Data (JSON)', list : { type : 'jsonarray' }, form : { type : 'jsonarray' } },
                 ],
             },
             {
@@ -1712,11 +1801,11 @@
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'method', label : 'Method', list : { width : '90px' }, form : { type : 'select', codeGroup : 'method' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
-                    { name : 'params', label : 'Params (JSON)', form : { type : 'textarea' } },
+                    { name : 'params', label : 'Params (JSON)', form : { type : 'jsonobject' } },
                     { name : 'authType', label : 'Auth Type', list : { width : '110px' }, form : { type : 'select', codeGroup : 'authType' } },
-                    { name : 'auth', label : 'Auth (JSON)', form : { type : 'textarea' } },
-                    { name : 'headers', label : 'Headers (JSON)', form : { type : 'textarea' } },
-                    { name : 'body', label : 'Body (JSON)', form : { type : 'textarea' } },
+                    { name : 'auth', label : 'Auth (JSON)', form : { type : 'jsonobject' } },
+                    { name : 'headers', label : 'Headers (JSON)', form : { type : 'jsonobject' } },
+                    { name : 'body', label : 'Body (JSON)', form : { type : 'jsonobject' } },
                     { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
                         return fn.component.create({
                             name : 'action-btn',
