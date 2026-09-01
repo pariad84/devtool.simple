@@ -39,6 +39,8 @@ Memo, Sheet, Bookmark, Reminder, Capture, Code, Request, History, Resource, and 
 
 The ⚙ button in the DevTool popup's own header opens **Setting**: default popup scale/opacity (popups always size to their content), Resources (define your own data types — a name, storage key, and a JSON column spec; every resource opens as a list, and Columns can supply custom render functions for list cells or form fields, or reference another resource's rows by id) and Codes (lookup values like HTTP methods and auth types that populate select inputs elsewhere) for schema management, Generate sample data (repopulate the sample Memo/Bookmark/Request rows on demand), Export (download all data as JSON) / Import (restore from a JSON file, overwriting everything) for backups, and Reset (wipe all data back to the seeded samples).
 
+A column's `form.type`/`list.type` can be `jsonobject` or `jsonarray` for a field that holds JSON text (like Request's Params or Capture's captured Data): a "View as Form"/"View as List" button next to it (or, in a list cell, a "View" button opening a popup) converts the raw JSON text to a read-only structured form or table and back, without touching the underlying text.
+
 ### Debugging
 
 Ctrl+Click a list row logs that row's underlying data to the console instead of opening it for editing. Ctrl+Click a popup's header logs the options it was created with, instead of bringing it to the front.
