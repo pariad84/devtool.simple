@@ -848,13 +848,16 @@
                             parent : structured,
                         });
                     } else {
+                        var isObjectKey = {};
+                        Object.keys(parsed).forEach(function(key) {
+                            isObjectKey[key] = !!(parsed[key] && typeof parsed[key] === 'object');
+                        });
                         var objColumns = Object.keys(parsed).map(function(key) {
                             return { name : key, label : key, form : { type : 'text' } };
                         });
                         var objData = {};
                         Object.keys(parsed).forEach(function(key) {
-                            var v = parsed[key];
-                            objData[key] = (v && typeof v === 'object') ? JSON.stringify(v) : v;
+                            objData[key] = isObjectKey[key] ? JSON.stringify(parsed[key]) : parsed[key];
                         });
                         var nestedForm = fn.component.create({
                             name : 'form',
@@ -862,9 +865,37 @@
                             data : objData,
                             parent : structured,
                         });
-                        Object.keys(nestedForm._.inputs).forEach(function(key) {
-                            nestedForm._.inputs[key].setAttribute('readonly', 'readonly');
-                        });
+                        if (opt.readonly) {
+                            Object.keys(nestedForm._.inputs).forEach(function(key) {
+                                nestedForm._.inputs[key].setAttribute('readonly', 'readonly');
+                            });
+                        } else {
+                            var sync = function() {
+                                var next = {};
+                                Object.keys(nestedForm._.inputs).forEach(function(key) {
+                                    var raw = nestedForm._.inputs[key].value;
+                                    var original = parsed[key];
+                                    if (isObjectKey[key]) {
+                                        try {
+                                            next[key] = JSON.parse(raw);
+                                        } catch (err) {
+                                            next[key] = original;
+                                        }
+                                    } else if (typeof original === 'number') {
+                                        var num = Number(raw);
+                                        next[key] = isNaN(num) ? raw : num;
+                                    } else if (typeof original === 'boolean') {
+                                        next[key] = raw === 'true' ? true : (raw === 'false' ? false : raw);
+                                    } else {
+                                        next[key] = raw;
+                                    }
+                                });
+                                textarea.value = JSON.stringify(next, null, 2);
+                            };
+                            Object.keys(nestedForm._.inputs).forEach(function(key) {
+                                nestedForm._.inputs[key].addEventListener('input', sync);
+                            });
+                        }
                     }
                     structured.style.display = '';
                     textarea.style.display = 'none';
@@ -1138,6 +1169,7 @@
                                                 type : column.list.type,
                                                 value : data[column.name],
                                                 height : '160px',
+                                                readonly : true,
                                                 parent : popupOpt.el.content,
                                             });
                                         },
