@@ -19,7 +19,7 @@
 
     fn.render = function(opt = {}) {
         var render = new Function('return (' + opt.source + ')')();
-        return render(opt.data);
+        return render.apply(null, opt.args || [ opt.data ]);
     };
 
     fn.element.create = function(opt = {}) {
@@ -995,6 +995,19 @@
                             height : column.form.height,
                             parent : valueCell,
                         });
+                    } else if (column.form.type === 'button') {
+                        input = fn.component.create({
+                            name : 'action-btn',
+                            text : column.form.text,
+                            padding : column.form.padding,
+                            parent : valueCell,
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    fn.render({ source : column.form.click, args : [ opt.data, e ] });
+                                }
+                            },
+                        });
                     } else {
                         var isTextarea = column.form.type === 'textarea';
                         if (isTextarea) {
@@ -1176,6 +1189,19 @@
                                     });
                                 }
                             }
+                        });
+                    } else if (column.list.type === 'button') {
+                        fn.component.create({
+                            name : 'action-btn',
+                            text : column.list.text,
+                            padding : column.list.padding || '4px 10px',
+                            parent : cell,
+                            event : {
+                                click : function(e) {
+                                    e.stopPropagation();
+                                    fn.render({ source : column.list.click, args : [ data, e ] });
+                                }
+                            },
                         });
                     } else if (column.form && column.form.resource && data[column.name] !== undefined) {
                         var referencedRow = fn.data.select({ key : column.form.resource.key, id : data[column.name] });
@@ -1407,103 +1433,67 @@
                     { name : 'opacity', label : 'Default popup opacity', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'manageResources', label : 'Resources', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "_resource", text: "Manage resources" }); }' } },
                     { name : 'manageCodes', label : 'Codes', form : { type : 'render', render : 'function(data) { return fn.devtool._.manageResourceButton({ key: "code", text: "Manage codes" }); }' } },
-                    { name : 'sampleData', label : 'Sample Data', form : { type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Generate sample data',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    fn.devtool._.generateSampleData();
-                                    var popup = e.target.closest('.__popup');
-                                    if (popup._.caller) {
-                                        popup._.caller.refresh();
-                                    }
-                                    popup.close();
-                                }
-                            }
+                    { name : 'sampleData', label : 'Sample Data', form : { type : 'button', text : 'Generate sample data', click : `function(data, e) {
+                        fn.devtool._.generateSampleData();
+                        var popup = e.target.closest('.__popup');
+                        if (popup._.caller) {
+                            popup._.caller.refresh();
+                        }
+                        popup.close();
+                    }` } },
+                    { name : 'export', label : 'Export', form : { type : 'button', text : 'Export data', click : `function(data, e) {
+                        var backup = {};
+                        fn.devtool._.allDataKeys().forEach(function(key) {
+                            backup[key] = fn.data.select({ key : key });
+                        });
+                        fn.util.download({
+                            content : JSON.stringify(backup, null, 2),
+                            type : 'application/json',
+                            filename : 'devtool-backup.json',
                         });
                     }` } },
-                    { name : 'export', label : 'Export', form : { type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Export data',
+                    { name : 'import', label : 'Import', form : { type : 'button', text : 'Import data', click : `function(data, e) {
+                        var popup = e.target.closest('.__popup');
+                        var input = fn.element.create({
+                            tagName : 'input',
+                            attribute : { type : 'file', accept : 'application/json' },
+                            style : { display : 'none' },
                             event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var backup = {};
-                                    fn.devtool._.allDataKeys().forEach(function(key) {
-                                        backup[key] = fn.data.select({ key : key });
-                                    });
-                                    fn.util.download({
-                                        content : JSON.stringify(backup, null, 2),
-                                        type : 'application/json',
-                                        filename : 'devtool-backup.json',
-                                    });
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'import', label : 'Import', form : { type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Import data',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var popup = e.target.closest('.__popup');
-                                    var input = fn.element.create({
-                                        tagName : 'input',
-                                        attribute : { type : 'file', accept : 'application/json' },
-                                        style : { display : 'none' },
-                                        event : {
-                                            change : function(changeEvent) {
-                                                var file = changeEvent.target.files[0];
-                                                if (!file) {
-                                                    return;
-                                                }
-                                                if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
-                                                    return;
-                                                }
-                                                fn.util.readFileAsText({ file : file }).then(function(text) {
-                                                    var backup = JSON.parse(text);
-                                                    Object.keys(backup).forEach(function(key) {
-                                                        fn.data._.write({ key : key, rows : backup[key] });
-                                                    });
-                                                    fn.component._.applySettingAll();
-                                                    if (popup._.caller) {
-                                                        popup._.caller.refresh();
-                                                    }
-                                                    popup.close();
-                                                });
-                                            },
-                                        },
-                                    });
-                                    input.click();
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'reset', label : 'Reset', form : { type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Reset all data',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
+                                change : function(changeEvent) {
+                                    var file = changeEvent.target.files[0];
+                                    if (!file) {
                                         return;
                                     }
-                                    fn.devtool._.reset();
-                                    fn.component._.applySettingAll();
-                                    var popup = e.target.closest('.__popup');
-                                    if (popup._.caller) {
-                                        popup._.caller.refresh();
+                                    if (!window.confirm('Import data? This overwrites every resource with the file\\'s contents.')) {
+                                        return;
                                     }
-                                    popup.close();
-                                }
-                            }
+                                    fn.util.readFileAsText({ file : file }).then(function(text) {
+                                        var backup = JSON.parse(text);
+                                        Object.keys(backup).forEach(function(key) {
+                                            fn.data._.write({ key : key, rows : backup[key] });
+                                        });
+                                        fn.component._.applySettingAll();
+                                        if (popup._.caller) {
+                                            popup._.caller.refresh();
+                                        }
+                                        popup.close();
+                                    });
+                                },
+                            },
                         });
+                        input.click();
+                    }` } },
+                    { name : 'reset', label : 'Reset', form : { type : 'button', text : 'Reset all data', click : `function(data, e) {
+                        if (!window.confirm('Reset all DevTool data? This clears every resource and reloads the sample data.')) {
+                            return;
+                        }
+                        fn.devtool._.reset();
+                        fn.component._.applySettingAll();
+                        var popup = e.target.closest('.__popup');
+                        if (popup._.caller) {
+                            popup._.caller.refresh();
+                        }
+                        popup.close();
                     }` } },
                 ],
             };
@@ -1785,18 +1775,8 @@
                 columns : [
                     { name : 'name', label : 'Name', list : { width : '160px' }, form : { type : 'text' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
-                    { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Run',
-                            padding : '4px 10px',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    window.open(data.url, '_blank');
-                                }
-                            }
-                        });
+                    { name : 'run', label : 'Run', list : { width : '70px', type : 'button', text : 'Run', click : `function(data) {
+                        window.open(data.url, '_blank');
                     }` } },
                 ],
             },
@@ -1838,93 +1818,73 @@
                     { name : 'auth', label : 'Auth (JSON)', form : { type : 'jsonobject' } },
                     { name : 'headers', label : 'Headers (JSON)', form : { type : 'jsonobject' } },
                     { name : 'body', label : 'Body (JSON)', form : { type : 'jsonobject' } },
-                    { name : 'run', label : 'Run', list : { width : '70px', type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'Run',
-                            padding : '4px 10px',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var caller = e.target.closest('.__popup');
-                                    var show = function(title, text, isError) {
-                                        fn.component.create({
-                                            name : 'popup',
-                                            title : title,
-                                            parent : document.body,
-                                            caller : caller,
-                                            render : function(opt) {
-                                                fn.element.create({
-                                                    tagName : 'pre',
-                                                    parent : opt.el.content,
-                                                    style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', margin : '0' }, isError ? { color : '#e57373' } : {}),
-                                                    text : text,
-                                                });
-                                            }
-                                        });
-                                    };
-                                    var saveHistory = function(ok, body) {
-                                        fn.data.insert({ key : 'history', data : { requestId : data.id, time : new Date().toISOString(), ok : ok, body : body } });
-                                        var historyRows = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; });
-                                        if (historyRows.length > 20) {
-                                            fn.data.delete({ key : 'history', id : historyRows[0].id });
-                                        }
-                                    };
-                                    (async function() {
-                                        try {
-                                            var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
-                                            var result = await fn.ajax({
-                                                method : data.method,
-                                                url : data.url,
-                                                params : data.params ? JSON.parse(data.params) : undefined,
-                                                auth : auth,
-                                                headers : data.headers ? JSON.parse(data.headers) : undefined,
-                                                data : data.body ? JSON.parse(data.body) : undefined
-                                            });
-                                            var text = JSON.stringify(result, null, 2);
-                                            show('Response: ' + data.name, text, false);
-                                            saveHistory(true, text);
-                                        } catch (err) {
-                                            show('Error: ' + data.name, err.message, true);
-                                            saveHistory(false, err.message);
-                                        }
-                                    })();
-                                }
-                            }
-                        });
-                    }` } },
-                    { name : 'history', label : 'History', list : { width : '80px', type : 'render', render : `function(data) {
-                        return fn.component.create({
-                            name : 'action-btn',
-                            text : 'History',
-                            padding : '4px 10px',
-                            event : {
-                                click : function(e) {
-                                    e.stopPropagation();
-                                    var caller = e.target.closest('.__popup');
-                                    var history = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; }).map(function(row) { return row.data; });
-                                    fn.component.create({
-                                        name : 'popup',
-                                        title : 'History: ' + data.name,
-                                        parent : document.body,
-                                        caller : caller,
-                                        render : function(opt) {
-                                            if (history.length === 0) {
-                                                fn.element.create({ tagName : 'div', text : 'No runs yet.', parent : opt.el.content });
-                                                return;
-                                            }
-                                            history.slice().reverse().forEach(function(entry) {
-                                                fn.element.create({
-                                                    tagName : 'pre',
-                                                    parent : opt.el.content,
-                                                    style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', borderBottom : '1px solid #3a3f4b', paddingBottom : '8px', marginBottom : '8px' }, entry.ok ? {} : { color : '#e57373' }),
-                                                    text : entry.time + ' - ' + (entry.ok ? 'OK' : 'Error') + '\\n' + entry.body,
-                                                });
-                                            });
-                                        },
+                    { name : 'run', label : 'Run', list : { width : '70px', type : 'button', text : 'Run', click : `function(data, e) {
+                        var caller = e.target.closest('.__popup');
+                        var show = function(title, text, isError) {
+                            fn.component.create({
+                                name : 'popup',
+                                title : title,
+                                parent : document.body,
+                                caller : caller,
+                                render : function(opt) {
+                                    fn.element.create({
+                                        tagName : 'pre',
+                                        parent : opt.el.content,
+                                        style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', margin : '0' }, isError ? { color : '#e57373' } : {}),
+                                        text : text,
                                     });
                                 }
+                            });
+                        };
+                        var saveHistory = function(ok, body) {
+                            fn.data.insert({ key : 'history', data : { requestId : data.id, time : new Date().toISOString(), ok : ok, body : body } });
+                            var historyRows = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; });
+                            if (historyRows.length > 20) {
+                                fn.data.delete({ key : 'history', id : historyRows[0].id });
                             }
+                        };
+                        (async function() {
+                            try {
+                                var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
+                                var result = await fn.ajax({
+                                    method : data.method,
+                                    url : data.url,
+                                    params : data.params ? JSON.parse(data.params) : undefined,
+                                    auth : auth,
+                                    headers : data.headers ? JSON.parse(data.headers) : undefined,
+                                    data : data.body ? JSON.parse(data.body) : undefined
+                                });
+                                var text = JSON.stringify(result, null, 2);
+                                show('Response: ' + data.name, text, false);
+                                saveHistory(true, text);
+                            } catch (err) {
+                                show('Error: ' + data.name, err.message, true);
+                                saveHistory(false, err.message);
+                            }
+                        })();
+                    }` } },
+                    { name : 'history', label : 'History', list : { width : '80px', type : 'button', text : 'History', click : `function(data, e) {
+                        var caller = e.target.closest('.__popup');
+                        var history = fn.data.select({ key : 'history' }).filter(function(row) { return row.data.requestId === data.id; }).map(function(row) { return row.data; });
+                        fn.component.create({
+                            name : 'popup',
+                            title : 'History: ' + data.name,
+                            parent : document.body,
+                            caller : caller,
+                            render : function(opt) {
+                                if (history.length === 0) {
+                                    fn.element.create({ tagName : 'div', text : 'No runs yet.', parent : opt.el.content });
+                                    return;
+                                }
+                                history.slice().reverse().forEach(function(entry) {
+                                    fn.element.create({
+                                        tagName : 'pre',
+                                        parent : opt.el.content,
+                                        style : Object.assign({ whiteSpace : 'pre-wrap', wordBreak : 'break-word', borderBottom : '1px solid #3a3f4b', paddingBottom : '8px', marginBottom : '8px' }, entry.ok ? {} : { color : '#e57373' }),
+                                        text : entry.time + ' - ' + (entry.ok ? 'OK' : 'Error') + '\\n' + entry.body,
+                                    });
+                                });
+                            },
                         });
                     }` } },
                 ],
