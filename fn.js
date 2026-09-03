@@ -232,14 +232,7 @@
             }
         }
 
-        var authHeaders = {};
-        if (opt.auth && opt.auth.type === 'bearer') {
-            authHeaders['Authorization'] = 'Bearer ' + opt.auth.token;
-        } else if (opt.auth && opt.auth.type === 'basic') {
-            authHeaders['Authorization'] = 'Basic ' + btoa(opt.auth.username + ':' + opt.auth.password);
-        }
-
-        var options = { method : method, headers : Object.assign(authHeaders, opt.headers) };
+        var options = { method : method, headers : Object.assign({}, opt.headers) };
         if (method !== 'GET' && method !== 'HEAD') {
             options.headers['Content-Type'] = options.headers['Content-Type'] || opt.contentType || 'application/json; charset=UTF-8';
             options.body = JSON.stringify(opt.data || {});
@@ -1409,7 +1402,6 @@
     fn.devtool._.codeGroups = function() {
         return {
             method : [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].map(function(code) { return { code : code, name : code }; }),
-            authType : [ { code : 'none', name : 'None' }, { code : 'bearer', name : 'Bearer Token' }, { code : 'basic', name : 'Basic Auth' } ],
         };
     };
 
@@ -1814,8 +1806,6 @@
                     { name : 'method', label : 'Method', list : { width : '90px' }, form : { type : 'select', codeGroup : 'method' } },
                     { name : 'url', label : 'URL', list : { width : 'auto' }, form : { type : 'text' } },
                     { name : 'params', label : 'Params (JSON)', form : { type : 'jsonobject' } },
-                    { name : 'authType', label : 'Auth Type', list : { width : '110px' }, form : { type : 'select', codeGroup : 'authType' } },
-                    { name : 'auth', label : 'Auth (JSON)', form : { type : 'jsonobject' } },
                     { name : 'headers', label : 'Headers (JSON)', form : { type : 'jsonobject' } },
                     { name : 'body', label : 'Body (JSON)', form : { type : 'jsonobject' } },
                     { name : 'run', label : 'Run', list : { width : '70px', type : 'button', text : 'Run', click : `function(data, e) {
@@ -1845,12 +1835,10 @@
                         };
                         (async function() {
                             try {
-                                var auth = (data.authType && data.authType !== 'none') ? Object.assign({ type : data.authType }, data.auth ? JSON.parse(data.auth) : {}) : undefined;
                                 var result = await fn.ajax({
                                     method : data.method,
                                     url : data.url,
                                     params : data.params ? JSON.parse(data.params) : undefined,
-                                    auth : auth,
                                     headers : data.headers ? JSON.parse(data.headers) : undefined,
                                     data : data.body ? JSON.parse(data.body) : undefined
                                 });
@@ -1916,15 +1904,15 @@
 
         fn.data.insert({
             key : 'request',
-            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', authType : 'none', auth : '', headers : '', body : '' },
+            data : { name : 'Get todo', method : 'GET', url : 'https://jsonplaceholder.typicode.com/todos/1', params : '', headers : '', body : '' },
         });
         fn.data.insert({
             key : 'request',
-            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', authType : 'none', auth : '', headers : '', body : '' },
+            data : { name : 'List posts', method : 'GET', url : 'https://jsonplaceholder.typicode.com/posts', params : '{"userId": "1"}', headers : '', body : '' },
         });
         fn.data.insert({
             key : 'request',
-            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', authType : 'none', auth : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
+            data : { name : 'Create post', method : 'POST', url : 'https://jsonplaceholder.typicode.com/posts', params : '', headers : '', body : '{"title": "foo", "body": "bar", "userId": 1}' },
         });
     };
 
