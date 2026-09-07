@@ -1526,6 +1526,37 @@
         });
     };
 
+    if (!customElements.get('elframe-sheet-cell')) {
+        customElements.define('elframe-sheet-cell', class extends HTMLElement {
+            connectedCallback() {
+                if (this._input) {
+                    return;
+                }
+                this._input = fn.element.create({
+                    tagName : 'input',
+                    attribute : { type : 'text' },
+                    style : { border : 'none', background : 'transparent', color : '#e8eaed', width : '80px', padding : '4px 6px', outline : 'none' },
+                    parent : this,
+                });
+                this._input.value = this._pendingValue || '';
+            }
+            get value() {
+                return this._input ? this._input.value : (this._pendingValue || '');
+            }
+            set value(v) {
+                this._pendingValue = v;
+                if (this._input) {
+                    this._input.value = v;
+                }
+            }
+            focus() {
+                if (this._input) {
+                    this._input.focus();
+                }
+            }
+        });
+    }
+
     fn.devtool._.sheetEditor = function(rowData) {
         var initial;
         try {
@@ -1661,9 +1692,7 @@
                         style : { border : '1px solid #3a3f4b', padding : '0', background : inSelection(r, c) ? '#2b3f5c' : 'transparent' },
                     });
                     var cellInput = fn.element.create({
-                        tagName : 'input',
-                        attribute : { type : 'text' },
-                        style : { border : 'none', background : 'transparent', color : '#e8eaed', width : '80px', padding : '4px 6px', outline : 'none' },
+                        tagName : 'elframe-sheet-cell',
                         parent : td,
                     });
                     cellInput.value = value;
