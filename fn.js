@@ -253,6 +253,8 @@
 (function frameworkLayouts(global) {
     var fn = global.fn;
 
+    fn.component._.zIndexExclude = [];
+
     fn.component._.maxZIndex = function(opt = {}) {
         var exclude = opt.exclude || [];
         var max = 0;
@@ -270,10 +272,7 @@
 
     fn.component._.zIndexAbove = function() {
         if (fn.component._.zIndex === undefined) {
-            var exclude = (fn.component.data.popup || []).slice();
-            if (fn.devtool.data.button) {
-                exclude.push(fn.devtool.data.button);
-            }
+            var exclude = (fn.component.data.popup || []).concat(fn.component._.zIndexExclude);
             fn.component._.zIndex = fn.component._.maxZIndex({ exclude : exclude }) + 1;
         }
         return fn.component._.zIndex;
@@ -281,25 +280,6 @@
 
     fn.component._.applyZIndex = function(opt) {
         opt.el.style.zIndex = opt.zIndex !== undefined ? opt.zIndex : fn.component._.zIndexAbove();
-    };
-
-    fn.component._.applySetting = function(opt) {
-        var settingRows = fn.data.select({ key : '_setting' });
-        var setting = settingRows[0] ? settingRows[0].data : {};
-        if (setting.scale) {
-            opt.el.style.zoom = setting.scale;
-        }
-        if (setting.opacity) {
-            opt.el.style.opacity = setting.opacity;
-        }
-        fn.component._.applyZIndex({ el : opt.el, zIndex : opt.zIndex });
-    };
-
-    fn.component._.applySettingAll = function() {
-        var zIndex = fn.component._.zIndexAbove();
-        fn.component.data.popup.forEach(function(el) {
-            fn.component._.applySetting({ el : el, zIndex : zIndex });
-        });
     };
 
     fn.component._.refreshRoot = function(opt = {}) {
@@ -433,14 +413,8 @@
                                 data : data,
                             });
                         }
-                        if (form._.resource.key === '_setting') {
-                            fn.component._.applySettingAll();
-                        }
-                        if (form._.resource.key === '_resource') {
-                            fn.component._.refreshRoot({ popup : popup });
-                        }
-                        if (form._.resource.key === 'reminder' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
-                            Notification.requestPermission();
+                        if (fn.component._.onSave) {
+                            fn.component._.onSave({ resource : form._.resource, popup : popup });
                         }
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -642,7 +616,9 @@
                 },
                 caller : opt.caller,
             });
-            fn.component._.applySetting({ el : popup });
+            if (fn.component._.onPopupCreate) {
+                fn.component._.onPopupCreate({ el : popup });
+            }
 
             var header = fn.element.create({
                 parent : popup,
@@ -1218,6 +1194,39 @@
     fn.devtool._ = {};
     fn.devtool.data = {};
 
+    fn.devtool._.applySetting = function(opt) {
+        var settingRows = fn.data.select({ key : '_setting' });
+        var setting = settingRows[0] ? settingRows[0].data : {};
+        if (setting.scale) {
+            opt.el.style.zoom = setting.scale;
+        }
+        if (setting.opacity) {
+            opt.el.style.opacity = setting.opacity;
+        }
+        fn.component._.applyZIndex({ el : opt.el, zIndex : opt.zIndex });
+    };
+
+    fn.devtool._.applySettingAll = function() {
+        var zIndex = fn.component._.zIndexAbove();
+        fn.component.data.popup.forEach(function(el) {
+            fn.devtool._.applySetting({ el : el, zIndex : zIndex });
+        });
+    };
+
+    fn.component._.onPopupCreate = fn.devtool._.applySetting;
+
+    fn.component._.onSave = function(opt) {
+        if (opt.resource.key === '_setting') {
+            fn.devtool._.applySettingAll();
+        }
+        if (opt.resource.key === '_resource') {
+            fn.component._.refreshRoot({ popup : opt.popup });
+        }
+        if (opt.resource.key === 'reminder' && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    };
+
     fn.component.layout.set({
         name : 'popup-setting-btn',
         layout : function(opt = {}) {
@@ -1464,7 +1473,7 @@
                                         Object.keys(backup).forEach(function(key) {
                                             fn.data._.write({ key : key, rows : backup[key] });
                                         });
-                                        fn.component._.applySettingAll();
+                                        fn.devtool._.applySettingAll();
                                         if (popup._.caller) {
                                             popup._.caller.refresh();
                                         }
@@ -1480,7 +1489,7 @@
                             return;
                         }
                         fn.devtool._.reset();
-                        fn.component._.applySettingAll();
+                        fn.devtool._.applySettingAll();
                         var popup = e.target.closest('.__popup');
                         if (popup._.caller) {
                             popup._.caller.refresh();
@@ -2145,7 +2154,7 @@
             },
             parent : document.body,
         });
-        fn.devtool.data.button = button;
+        fn.component._.zIndexExclude.push(button);
         fn.component._.applyZIndex({ el : button });
     };
 })(window);
